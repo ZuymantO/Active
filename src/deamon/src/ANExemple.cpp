@@ -1,12 +1,143 @@
 
-
   //
   //  main.cpp
   //  ANotify
   //
   //  Created by J. Charles N. MBIADA on 27/03/13.
-  //  Copyright (c) 2013 Sylorion. All rights reserved.
+  //  Copyright (c) 2013 Active. All rights reserved.
   //
+/*
+Tentative de spec formelle ; je n'ai pas répercute les modifs apres 
+modification du code source pour des questions techniques
+---
+// Exception pour Linux/Unix 
+
+Domain:
+ANotifyException
+
+Constantes :
+m_msg:String, m_err: Int, m_pSrc: void*
+
+Constructor:
+
+Cons_ANotifyException:  -> ANotifyException
+Cons_ANotifyException: String -> ANotifyException
+Cons_ANotifyException: String x Int  -> ANotifyException
+Cons_ANotifyException: String x Int x void*  -> ANotifyException
+
+Acces methods:
+
+getMessage: ANotifyException -> String
+getError: ANotifyException -> Int
+getSource: ANotifyException -> Void*
+
+Other methods:
+
+
+----
+// Watch selon le system Linux/Unix 
+
+Domain:
+=========
+ANotifyWatch
+link: ANotify -> friend
+Constantes:
+m_path:String, m_uMast: UInt, m_wDescr: Int, m_pANotify: ANotify*, m_wEnable: Boolean
+
+Constructor:
+--------------
+Cons_ANotifyWatch: String x  UInt -> ANotifyWatch
+Cons_ANotifyWatch: String x  UInt x Boolean -> ANotifyWatch
+
+Acces Methods:
+--------------
+inline getDescriptor 	: ANotifyWatch -> Int
+inline getPath 		: ANotifyWatch -> String
+inline getMask		: ANotifyWatch -> UInt
+inline getANotify	: ANotifyWatch -> ANotify*
+inline isEnable		: ANotifyWatch -> Boolean
+inline isRecurssive	: ANotifyWatch -> Boolean
+
+Setter Methods:
+--------------
+inline setMask		: ANotifyWatch -> Boolean
+inline setANotify	: ANotifyWatch -> Boolean
+inline setEnable		: ANotifyWatch -> Boolean
+inline setRecurssive	: ANotifyWatch -> Boolean
+
+Other methods:
+--------------
+
+#########
+
+Domain:
+=========
+ANotifyEvent
+link: ANotify -> friend
+Constantes:
+m_path:String, m_uMast: UInt, m_wDescr: Int, m_pANotify: ANotify*, m_wEnable: Boolean
+
+Constructor:
+--------------
+Cons_ANotifyWatch: String x  UInt -> ANotifyWatch
+Cons_ANotifyWatch: String x  UInt x Boolean -> ANotifyWatch
+
+Acces Methods:
+--------------
+inline getDescriptor 	: ANotifyWatch -> Int
+inline getPath 		: ANotifyWatch -> String
+inline getMask		: ANotifyWatch -> UInt
+inline getANotify	: ANotifyWatch -> ANotify*
+inline isEnable		: ANotifyWatch -> Boolean
+inline isRecurssive	: ANotifyWatch -> Boolean
+
+Setter Methods:
+--------------
+inline setMask		: ANotifyWatch -> Boolean
+inline setANotify	: ANotifyWatch -> Boolean
+inline setEnable		: ANotifyWatch -> Boolean
+inline setRecurssive	: ANotifyWatch -> Boolean
+
+Other methods:
+--------------
+
+#############
+
+Domain:
+======
+ANotify
+link: ANotifyWatch -> friend
+
+Constantes:
+--------------
+m_path:String, m_paths: WatchPathMap, m_fileDescr: Int, m_watches: WatchFDMap, m_buff:UChar array 
+
+Constructor:
+Cons_ANotifyWatch:  -> ANotify
+
+Acces Methods:
+--------------
+inline getWatchCount 	: ANotify -> Int
+inline getWatchEnableCount 	: ANotify -> Int
+PeekEvent:	ANotify x ANotifyEvent* -> Boolean
+GetEvent	: ANotify x InotifyEvent -> Boolean
+FindWatch:	ANotify x Int -> InotifyWatch* 
+
+Setter Methods:
+--------------
+inline setCapability		: ANotify x CAP -> Boolean
+inline setNonBlock		: ANotify -> Boolean
+
+
+Other methods:
+close				: ANotify -> void
+addFile			: ANotify x ANotifyWatch*  -> void
+removeFile		: ANotify x ANotifyWatch*  -> void
+removeAllFile		: ANotify  -> void
+
+---
+
+*/
 
 #include <iostream>
 #include <errno.h>
