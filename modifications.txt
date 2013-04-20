@@ -1,0 +1,13 @@
+--- (20/04/2013) ---
+
+#ANotify.cpp
+[?] macro ANOTIFY_IGNORED inconnue:
+- ajout dans ANotifyMask.h
+- remplacement par une autre macro (ANOTIFY_NONE)
+- renommage en ANOTIFY_REVOKE
+
+#ANotifyMask.h
+[+] transfert de IN_MOVED_FROM (ANOTIFY_RENAME vers ANOTIFY_DELETE)
+[+] suppression de IN_MOVE dans ANOTIFY_RENAME
+
+
