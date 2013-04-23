@@ -55,10 +55,10 @@
   // kqueue intersection capability 10 MASK A UTILISER POUR ETRE COMPATIBLE UNIX/LINUX
    //#define ANOTIFY_DELETE (IN_DELETE | IN_DELETE_SELF | IN_UNMOUNT) // file deleted
    #define ANOTIFY_DELETE (IN_DELETE | IN_DELETE_SELF | IN_UNMOUNT | IN_MOVED_FROM) // file deleted
-   #define ANOTIFY_WRITE (IN_CLOSE_WRITE | IN_MODIFY | IN_CREATE)
+   #define ANOTIFY_WRITE (IN_CLOSE_WRITE | IN_MODIFY | IN_CREATE | IN_MOVED_TO)
    #define ANOTIFY_ATTRIBUT IN_ATTRIB // chmod and chowned on this file
    //#define ANOTIFY_RENAME (IN_MOVE | IN_MOVED_TO | IN_MOVED_FROM) // case of file moving
-   #define ANOTIFY_RENAME IN_MOVED_TO // case of file moving
+   #define ANOTIFY_RENAME 0x00000000 // case of file moving
    #define ANOTIFY_ONESHOT IN_ONESHOT
    #define ANOTIFY_REVOKE (IN_Q_OVERFLOW | IN_IGNORED) // case of file revoking or qeu overflowing
    #define ANOTIFY_NONE 0x00000000
