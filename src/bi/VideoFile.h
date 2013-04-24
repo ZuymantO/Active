@@ -15,7 +15,7 @@ using namespace std;
 typedef enum _vidFormat {
   F4K = 512,  // 4K definition
   FHD = 256,  // Full HD
-  FD  = 128,  // Hight definition
+  HD  = 128,  // Hight definition
   SD = 64,  // standar quality
   LQ = 16,  // low quality
   MQ = 8    // mobile quality
@@ -31,14 +31,54 @@ protected:
   VideoFormat format;
   unsigned int width;
   unsigned  int height;
-  unsigned int fps;
+  unsigned short fps;
   bool  stereoSound;
   unsigned int year;
   unsigned int duration; // en seconde;
 
 public:
-  VideoFile();
-  ~VideoFile();
+  VideoFile(){};
+  ~VideoFile(){};
 
+  bool majField(const string& irname, const string& irvalue){
+    if(!AnyFile::majField(irname, irvalue)){  // Si aucune valeur est modifie chez le pere ...
+      if (irname == "actors") {
+        actors = irvalue;
+        return true;
+      }else if(irname == "title"){
+        title = irvalue;
+        return true;
+      }else if(irname == "realisator"){
+        realisator = irvalue;
+        return true;
+      }else if(irname == "genre"){
+        genre = irvalue;
+        return true;
+      }else if(irname == "format"){
+        format = (VideoFormat) atoi(irvalue.c_str());
+        return true;
+      }else if(irname == "width"){
+        width = atoi(irvalue.c_str());
+        return true;
+      }else if(irname == "height"){
+        height = atoi(irvalue.c_str());
+        return true;
+      }else if(irname == "fps"){
+        fps = atoi(irvalue.c_str());
+        return true;
+      }else if(irname == "stereoSound"){
+        stereoSound = atoi(irvalue.c_str()) == 1;
+        return true;
+      }else if(irname == "year"){
+        year = atoi(irvalue.c_str());
+        return true;
+      }else if(irname == "duration"){
+        duration = atoi(irvalue.c_str()) ;
+        return true;
+      }
+    }
+    return false;
+  };
+  
 };
 #endif /* defined(__BI__VideoFile__) */

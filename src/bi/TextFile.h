@@ -21,7 +21,7 @@ public:
   unsigned int nb_word;
   unsigned int nb_line;
   string keyword;
-  TextFile();
-  ~TextFile();
+  TextFile(){};
+  ~TextFile(){};
 };
 #endif /* defined(__BI__TextFile__) */

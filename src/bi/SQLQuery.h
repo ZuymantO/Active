@@ -29,6 +29,7 @@ private:
   string query;
   sqlite3_stmt* stmt;
   AQueryType aqt;
+  AQueryObject aobj;
   const char*   rTail;
   
   void initSQLQuery(){
@@ -38,6 +39,7 @@ private:
     stmt  = NULL;
     rTail = NULL;
     aqt = UNKNOWT;
+    aobj = ANY;
   };
 
   
@@ -62,8 +64,9 @@ private:
     hasResult = true;
   };
 
+  AnyFile createFile(AQueryObject iAQO);
 public:
-  AQuery* getAQuery();
+  AQuery* getAQuery() throw (SQLite3DBException);
   
   SQLQuery(){
     initSQLQuery();

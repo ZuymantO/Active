@@ -22,7 +22,7 @@ protected:
   string authors;
   unsigned int   nb_pages;
 public:
-  ObjectFile();
-  ~ObjectFile();
+  ObjectFile(){};
+  ~ObjectFile(){};
 };
 #endif /* defined(__BI__ObjectFile__) */

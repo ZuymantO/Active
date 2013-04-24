@@ -28,6 +28,17 @@ typedef enum _aqueryType{
   SELECT // search ou S comme Select
 }AQueryType;
 
+
+typedef enum _aqueryObject{
+  ANY = 0,
+  TEXT, //
+  IMAGE,
+  AUDIO,  //
+  VIDEO,  //
+  OBJECT, //
+  ARCHIVE
+}AQueryObject;
+
   // Un objet de cette classe est genere par le module d'analyse de requete xml
   // Une fois l'AQuery génere on fait appel a getSQLQuery() qui generer la requetes sql correspondante
   // Une fois cette requete recupere, on peut alors interrogere la bdd
@@ -38,14 +49,28 @@ typedef enum _aqueryType{
 class SQLQuery;
 class AQuery {
 private:
-  vector<AnyFile>*               AQResult;  // Si la requete contient des resultats on les stock ici
   bool  hasResult;          // Si la requete contient des resultats on l'indique
   AQueryType aqt;
+  AQueryObject aobj;
 protected:
+  void initAQuery(){
+    AQResult = NULL;
+    hasResult = false;
+    aqt = UNKNOWT;
+    aobj = ANY;
+  };
   
 public:
+  vector<AnyFile>*               AQResult;  // Si la requete contient des resultats on les stock ici
+
+  AQuery(){
+    initAQuery();
+  };
   
-  AQuery();
+  AQuery(AQueryType ietype, AQueryObject ieobj): aqt(ietype), aobj(ieobj){
+    AQResult = NULL;
+    hasResult = NULL;
+  };
   void addFile(AnyFile* ipnewFile);
   void addTextFile(TextFile* ipnewFile);
   void addObjectFile(ObjectFile* ipnewFile);
@@ -53,7 +78,17 @@ public:
   void addImageFile(ImageFile* ipnewFile);
   void addAudioFile(AudioFile* ipnewFile);
   void addArchiveFile(ArchiveFile* ipnewFile);
+    // asc = ascendant
+  void sortByTypeName(bool iasc);
+  void sortBySize(bool iasc);
+  void sortByUser(bool iasc);
+  void sortByName(bool iasc);
+  void sortByCreationDate(bool iasc);
+  void sortByAccesDate(bool iasc);
+  void sortByModificationDate(bool iasc);
+  
   vector<AnyFile>* results();
+  
   SQLQuery* getSQLquery();
   bool hasNewResult(){
     return hasResult;

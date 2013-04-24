@@ -26,7 +26,7 @@ protected:
   unsigned int duration; // en seconde;
   
 public:
-  AudioFile();
-  ~AudioFile();
+  AudioFile(){};
+  ~AudioFile(){};
 };
 #endif /* defined(__BI__AudioFile__) */

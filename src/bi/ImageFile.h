@@ -21,7 +21,7 @@ protected:
   unsigned int color_avg;
   
 public:
-  ImageFile();
-  ~ImageFile();
+  ImageFile(){};
+  ~ImageFile(){};
 };
 #endif /* defined(__BI__ImageFile__) */

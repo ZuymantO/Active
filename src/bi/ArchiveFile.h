@@ -18,7 +18,7 @@ private:
 protected:
   
 public:
-  ArchiveFile();
-  ~ArchiveFile();
+  ArchiveFile(){};
+  ~ArchiveFile(){};
 };
 #endif /* defined(__BI__ArchiveFile__) */
