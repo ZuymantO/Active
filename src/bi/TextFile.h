@@ -11,6 +11,10 @@
 
 #include <iostream>
 #include "AnyFile.h"
+
+namespace acommon {
+
+  
 using namespace std;
 class TextFile : public AnyFile {
 private:
@@ -23,5 +27,24 @@ public:
   string keyword;
   TextFile(){};
   ~TextFile(){};
+  
+  bool majField(const string& irname, const string& irvalue){
+    if(!AnyFile::majField(irname, irvalue)){  // Si aucune valeur est modifie chez le pere ...
+      if (irname == "nb_word") {
+        nb_word = atoi(irvalue.c_str());
+        return true;
+      }else if(irname == "nb_line"){
+        nb_line = atoi(irvalue.c_str());
+        return true;
+      }else if(irname == "keyword"){
+        keyword = irvalue;
+        return true;
+      }
+      
+    }
+    return false;
+  };
+
 };
+}
 #endif /* defined(__BI__TextFile__) */

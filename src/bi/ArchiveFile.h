@@ -11,6 +11,8 @@
 
 #include <iostream>
 #include "AnyFile.h"
+namespace acommon {
+
 using namespace std;
 class ArchiveFile : public AnyFile {
 private:
@@ -21,4 +23,5 @@ public:
   ArchiveFile(){};
   ~ArchiveFile(){};
 };
+}
 #endif /* defined(__BI__ArchiveFile__) */

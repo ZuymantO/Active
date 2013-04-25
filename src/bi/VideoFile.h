@@ -11,7 +11,11 @@
 
 #include <iostream>
 #include "AnyFile.h"
-using namespace std;
+
+namespace acommon {
+
+  using namespace std;
+
 typedef enum _vidFormat {
   F4K = 512,  // 4K definition
   FHD = 256,  // Full HD
@@ -81,4 +85,5 @@ public:
   };
   
 };
+}
 #endif /* defined(__BI__VideoFile__) */

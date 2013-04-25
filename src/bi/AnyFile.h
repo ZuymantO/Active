@@ -14,6 +14,8 @@
 #include <cstdio>
 #include <time.h>
 
+namespace acommon {
+
 using namespace std;
 
 class AnyFile {
@@ -101,4 +103,6 @@ public:
   };
 
 };
+}
+
 #endif /* defined(__BI__AnyFile__) */

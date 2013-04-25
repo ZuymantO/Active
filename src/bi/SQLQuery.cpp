@@ -9,15 +9,20 @@
 #include <vector>
 #include <map>
 #include "SQLQuery.h"
-#include "sharedUtils.h"
+#include "common.h"
 
+
+  
 using namespace std;
-AQuery* SQLQuery::getAQuery() throw(SQLite3DBException){
+using namespace acommon;
+namespace asqlite {
+  
+acommon::AQuery* SQLQuery::getAQuery() throw(asqlite::SQLite3DBException){
   if (SQLResult == NULL) {
     throw SQLite3DBException("Please call SQLQuery::prepare methode \nthen call the fetch methode before looking for an AQuery object");
   }
-  AQuery* rslt = new AQuery(aqt, aobj);
-  rslt->AQResult = new vector<AnyFile>();
+  acommon::AQuery* rslt = new acommon::AQuery(aqt, aobj);
+  rslt->AQResult = new vector<acommon::AnyFile>();
   vector<map<string, string> >::iterator it = SQLResult->begin();
   for (; it != SQLResult->end(); it++) {
     map<string, string> val = *it;
@@ -63,3 +68,5 @@ AnyFile SQLQuery::createFile(AQueryObject iAQO){
   }
   
 };
+}
+

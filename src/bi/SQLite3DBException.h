@@ -10,6 +10,9 @@
 #define __BI__SQLite3DBException__
 
 #include <iostream>
+
+namespace asqlite {
+  
 class SQLite3DBException  : public std::exception {
   
 private:
@@ -38,4 +41,5 @@ public:
   }
 
 };
+}
 #endif /* defined(__BI__SQLite3DBException__) */

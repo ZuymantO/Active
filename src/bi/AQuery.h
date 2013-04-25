@@ -20,6 +20,9 @@
 #include <map>
 #include <vector>
 
+namespace acommon {
+  
+  
 typedef enum _aqueryType{
   UNKNOWT = 0,
   INSERT, // insert  // peut avoir une liste de resultat (qui sont des elements a inserer)
@@ -96,4 +99,5 @@ public:
   ~AQuery(){};
 };
 
+}
 #endif /* defined(__BI__AQuery__) */

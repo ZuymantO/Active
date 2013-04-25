@@ -13,6 +13,8 @@
 #include <sqlite3.h>
 #include "SQLite3DBException.h"
 
+namespace asqlite {
+  
 using namespace std;
 
 class SQLQuery;
@@ -81,4 +83,5 @@ public:
   };
   
 };
+}
 #endif /* defined(__BI__SQLite3DB__) */

@@ -17,8 +17,9 @@
 #include <map>
 #include <vector>
 
+namespace asqlite {
+  
 using namespace std;
-class AQuery;
 
 class SQLQuery {
   
@@ -28,8 +29,8 @@ private:
   SQLite3DB* dataBase;
   string query;
   sqlite3_stmt* stmt;
-  AQueryType aqt;
-  AQueryObject aobj;
+  acommon::AQueryType aqt;
+  acommon::AQueryObject aobj;
   const char*   rTail;
   
   void initSQLQuery(){
@@ -38,8 +39,8 @@ private:
     query = "";
     stmt  = NULL;
     rTail = NULL;
-    aqt = UNKNOWT;
-    aobj = ANY;
+    aqt = acommon::UNKNOWT;
+    aobj = acommon::ANY;
   };
 
   
@@ -64,9 +65,9 @@ private:
     hasResult = true;
   };
 
-  AnyFile createFile(AQueryObject iAQO);
+  acommon::AnyFile createFile(acommon::AQueryObject iAQO);
 public:
-  AQuery* getAQuery() throw (SQLite3DBException);
+  acommon::AQuery* getAQuery() throw (SQLite3DBException);
   
   SQLQuery(){
     initSQLQuery();
@@ -125,7 +126,7 @@ public:
     }
     SQLResult = NULL;
     hasResult = false;
-    if (aqt == SELECT) {
+    if (aqt == acommon::SELECT) {
       sqlite3_reset(stmt);
     }
     
@@ -138,7 +139,7 @@ public:
       str.append("\n========\n").append(query.append("\n\n"));
       throw SQLite3DBException(str);;
     }
-    if(aqt != SELECT){
+    if(aqt != acommon::SELECT){
       
     if(sqlite3_step(stmt) != SQLITE_DONE)
       fprintf(stderr, "Impossible d'effectuer la requete %s : %s \n", query.c_str(), sqlite3_errmsg(dataBase->getSQLDB()));
@@ -155,4 +156,5 @@ public:
   };
   
 };
+}
 #endif /* defined(__BI__SQLQuery__) */

@@ -7,8 +7,8 @@
 //
 
 #include "VideoFile.h"
-
-
+using namespace std;
+using namespace acommon;
 
 static string formatToString(VideoFormat iformat){
   switch (iformat) {

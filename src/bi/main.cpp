@@ -12,12 +12,17 @@
 
 #include <iostream>
 #include <sqlite3.h>
+
 #include "SQLite3DB.h"
 #include "SQLQuery.h"
 #include "AQuery.h"
 #define REF_DATA_BASE_PATH "active.db"  // par defaut on cree la db sur place
 int main(int argc, const char * argv[])
 {
+  
+  using namespace std;
+  using namespace asqlite;
+  using namespace acommon;
   
   std::string rq[10] ;
   rq[0] = "CREATE TABLE AnyFile \
@@ -58,6 +63,7 @@ int main(int argc, const char * argv[])
                                    nd_word INT,\
                                    nd_line INT\
                                    nb_page INT\
+                                   keyword varchar(512)\
                                    );";
 //  rq[5] = "CREATE TABLE Directory (id_dir INT REFERENCES AnyFile (id_file),\
 //                                   nb_file INT\
@@ -72,12 +78,14 @@ int main(int argc, const char * argv[])
   rq[6] = "CREATE TABLE Object (id_object INT REFERENCES AnyFile (id_file),\
                                    title VARCHAR(256),\
                                    subject VARCHAR(64),\
-                                   author VARCHAR(64),\
+                                   authors VARCHAR(64),\
+                                   keyword varchar(512)\
                                    nb_page INT\
                                    ); "; 
+
   SQLite3DB db;
   db.open(REF_DATA_BASE_PATH);
-  SQLQuery q;
+  asqlite::SQLQuery q;
   q.setDataBase(&db);
     for (int i = 0; i < 7; i++) {
       q.setQuery(rq[i]);
