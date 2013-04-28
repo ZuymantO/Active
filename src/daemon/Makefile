@@ -7,7 +7,7 @@ OBJ=active
 
 all: active
 
-active: main.o watch.o exception.o event.o core.o mask.o
+active: daemon.o main.o watch.o exception.o event.o core.o mask.o
 	$(CC) $(FLAGS) -pthread $^ -o $(OBJ)
 
 example: example.o watch.o exception.o event.o core.o mask.o
@@ -18,6 +18,9 @@ example.o: ANotifyExample.cpp
 
 main.o: Main.cpp
 	$(CC) $(FLAGS) -c Main.cpp -o main.o
+
+daemon.o: ANotifyDaemon.h ANotifyDaemon.cpp
+	$(CC) $(FLAGS) -c ANotifyDaemon.cpp -o daemon.o
 
 watch.o: ANotifyWatch.h ANotifyWatch.cpp
 	$(CC) $(FLAGS) -c ANotifyWatch.cpp -o watch.o

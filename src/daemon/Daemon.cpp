@@ -7,52 +7,22 @@
 #include <iostream>
 #include <string>
 
-#include "ANotifyDaemon.h"
+//#include "ANotifyDaemon.h"
+#include "Daemon.h"
 #include "ANotify.h"
 #include "ANotifyException.h"
 
 
 ANotifyDaemon::ANotifyDaemon() throw (ANotifyException) {
-  pid_t pid = fork();
-
-  if(pid > 0){
-    //On ne fait rien ?
-    std::cout << "daemon starting ..." << std::endl;
-  }
-  else if(pid == 0){
-    this->start();
-  }
-  else{
-    std::string msg = "";
-
-    switch(errno){
-    case ENOMEM:  
-      throw ANotifyException("Unable to allocate enough memory for child", errno, this);
-      //break;
-
-    case EAGAIN:
-      throw ANotifyException("No empty space in process table", errno, this);
-      //break;
-    }   
-  }
-}
-
-ANotifyDaemon::~ANotifyDaemon(){
-  
-}
-
-void ANotifyDaemon::configDaemon(){
-
-}
-
-void ANotifyDaemon::start(){
   int fd, port = -1, i, client, length;
   struct sockaddr_in addr;
   std::string str = "";
-  pid_t child_pid, current_pid = getpid();  
+  pid_t current_pid = getpid();  
+  
+  this->running = false;
 
   fd = openPropsFile();
-
+  
   if(fd == -1){
     throw ANotifyException("Unable to open or create daemon properties file", errno, this);
   }
@@ -77,7 +47,7 @@ void ANotifyDaemon::start(){
     addr.sin_port = htons(i);
 
     if(bind(this->sock, (struct sockaddr*)(&addr), sizeof(addr)) != -1
-       && listen(this->sock, 0)){
+       && listen(this->sock, 0) != -1){
       port = i;
       break;
     }
@@ -108,7 +78,25 @@ void ANotifyDaemon::start(){
   }
 
   closePropsFile(fd);
+}
 
+ANotifyDaemon::~ANotifyDaemon(){
+  
+}
+
+void ANotifyDaemon::start(){
+  if(this->running){
+    return;
+  }
+
+
+  this->running = true;
+}
+
+void ANotifyDaemon::waitForClients(){
+  pid_t child_pid;
+  int client;
+ 
   /* Attente de la connexion d'un ou plusieurs clients */
   while(true){
     client = accept(this->sock, (struct sockaddr*)(&addr), &length);
@@ -142,31 +130,37 @@ void ANotifyDaemon::restart(){
 }
 
 void ANotifyDaemon::stop(){
+  if(!this->running){
+    return;
+  }  
+
   if(notify != NULL){
     delete notify;
     notify = NULL;
   }
+
+  this->running = false;
 }
 
 void ANotifyDaemon::kill(){  
   stop();
-  deleteProps();
+  deletePropsFile();
   close(this->sock);
 }
 
 void ANotifyDaemon::communicate(int client_socket){
   int readLength, length;
-  char buffer[100];
+  char c;
 
   while(true){
-    readLength = read(client_socket, buffer, 1, 0);
+    readLength = read(client_socket, &c, 1, 0);
 
     if(readLength == -1){
       /* TODO: voir ce qu'il faut faire dans ce cas la */
       break;
     }
 
-    switch(buffer[0]){
+    switch(c){
     case 'D'://delete (remove watch) 
       break;
 
@@ -177,12 +171,12 @@ void ANotifyDaemon::communicate(int client_socket){
       break;
 
     case 'E'://end (stops daemon)
+      this->stop();
       break;
 
     case 'R'://restart (restarts daemon)
-      break; 
- 
-   
+      this->restart();
+      break;    
     }
   }
 }

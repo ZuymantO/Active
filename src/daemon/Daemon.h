@@ -8,12 +8,9 @@ class ANotifyDaemon {
  private:
   ANotify* notify;
   int sock;
-  int mode;
-  bool running;
 
  public:
   static const std::string propsPath = "daemon.prop";
-  
 
   ANotifyDaemon();
   ~ANotifyDaemon();
@@ -34,7 +31,7 @@ class ANotifyDaemon {
   /* 
      Indique si le processus courant est celui du daemon en execution
      (renvoie true s'il n'y a aucun daemon en cours)
- */
+  */
   bool isActiveDaemon(int fd, pid_t daemon_pid);
   
   /* Retirer la surveillance d'un fichier */
