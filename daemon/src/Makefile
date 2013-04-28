@@ -24,28 +24,28 @@ active: main.o watch.o exception.o event.o core.o mask.o
 #	$(CC) -lpthread main.o anotify.o -o $(OBJ)
 	$(CC) $(FLAGS) -pthread main.o watch.o exception.o event.o core.o mask.o -o $(OBJ)
 
-main.o: 
+main.o: Main.cpp
 	$(CC) $(FLAGS) -c Main.cpp -o main.o
 
-example.o:
+example.o: ANotifyExample.cpp
 	$(CC) $(FLAGS) ${DIR_PATH} ${FILE_PATH} -c ANotifyExample.cpp -o example.o
 
 #anotify.o: watch.o exception.o event.o core.o
 #	$(CC) $(FLAGS) watch.o exception.o event.o core.o -o anotify.o
 
-watch.o: ANotifyWatch.h
+watch.o: ANotifyWatch.h ANotifyWatch.cpp
 	$(CC) $(FLAGS) -c ANotifyWatch.cpp -o watch.o
 
-exception.o: ANotifyException.h
+exception.o: ANotifyException.h ANotifyException.cpp
 	$(CC) $(FLAGS) -c ANotifyException.cpp -o exception.o
 
-event.o: ANotifyEvent.h
+event.o: ANotifyEvent.h ANotifyEvent.cpp
 	$(CC) $(FLAGS) -c ANotifyEvent.cpp -o event.o
 
-core.o: ANotify.h
+core.o: ANotify.h ANotify.cpp
 	$(CC) $(FLAGS) -c ANotify.cpp -o core.o
 
-mask.o: ANotifyMask.h
+mask.o: ANotifyMask.h ANotifyMask.cpp
 	$(CC) $(FLAGS) -c ANotifyMask.cpp -o mask.o
 
 clean:

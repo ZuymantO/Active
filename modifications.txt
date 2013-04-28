@@ -7,6 +7,7 @@
 - renommage en ANOTIFY_REVOKE
 
 #ANotifyMask.h
+[+] transfert de IN_MOVED_TO (ANOTIFY_RENAME vers ANOTIFY_WRITE)
 [+] transfert de IN_MOVED_FROM (ANOTIFY_RENAME vers ANOTIFY_DELETE)
 [+] suppression de IN_MOVE dans ANOTIFY_RENAME
 

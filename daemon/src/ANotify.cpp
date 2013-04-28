@@ -32,7 +32,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 ANotify::ANotify() throw (ANotifyException)
 {
   IN_LOCK_INIT
@@ -98,7 +97,35 @@ void ANotify::add(ANotifyWatch* pWatch) throw (ANotifyException)
       // adding failed - go away
     if (wd == -1) {
       IN_WRITE_END_NOTHROW
+#ifndef __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
+	std::string errMessage = "";
+switch(errno){
+case EACCES:
+	errMessage = "Read access to the given file is not permitted";
+	break;
+case EBADF:
+	errMessage = "The given file descriptor is not valid.";
+	break;
+case EFAULT:
+	errMessage = "Pathname points outside of the process's accessible address space.";
+	break;
+case EINVAL:
+	errMessage = "The given event mask contains no valid events; or fd is not an inotify file descriptor.";
+	break;
+case ENOENT:
+	errMessage = "A directory component in pathname does not exist or is a dangling symbolic link.";
+	break;
+case ENOMEM:
+	errMessage = "Insufficient kernel memory was available.";
+	break;
+case ENOSPC:
+	errMessage = "The user limit on the total number of inotify watches was reached or the kernel failed to allocate a needed resource.";
+	break;
+}
+      throw ANotifyException(IN_EXC_MSG(("adding watch failed: [" + errMessage + "] on " + pWatch->getPath())), errno, this);
+#else
       throw ANotifyException(IN_EXC_MSG("adding watch failed"), errno, this);
+#endif
     }
     
       // this path already watched (but defined another way)

@@ -83,7 +83,7 @@ public:
   inline ANEVENTID getIdent() const{
 #ifndef __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
     //return m_pEvent->ident;
-    return m_pEvent->wd;
+    return (ANEVENTID)m_pEvent->wd;
 #else
     return (ANEVENTID)0;
 #endif
@@ -92,7 +92,7 @@ public:
   inline ANFILTER getFilter() const{
 #ifndef __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
     //return m_pEvent->filter;
-    return m_pEvent->mask;
+    return (ANFILTER)m_pEvent->mask;
 #else
     return (ANFILTER)0;
 #endif
@@ -100,7 +100,7 @@ public:
   
   inline ANMask getFlags() const{
 #ifndef __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
-    return (ANMask) 0;
+    return (ANMASK) 0;
 #else
     return (ANMASK) m_pEvent->flags;
 #endif
@@ -108,7 +108,7 @@ public:
   
   inline ANMask getFFlags() const{
 #ifndef __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
-    return (ANMask)0;
+    return (ANMASK)0;
 #else
     return (ANMASK) m_pEvent->fflags;
 #endif

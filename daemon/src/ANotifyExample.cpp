@@ -46,6 +46,7 @@ void happyEnd(){
 
 void sigint_handler(int signum)
 {
+try{
   if (sharedANotify == NULL) {
     happyEnd();
     exit(EXIT_SUCCESS);
@@ -58,18 +59,29 @@ void sigint_handler(int signum)
   /* Fermeture du descripteur de fichier obtenu lors de l'initialisation d'inotify */
   sharedANotify->AClose();
   happyEnd();
+
   exit(EXIT_SUCCESS);
+}catch(ANotifyException e){
+	cout << e.GetMessage() << endl;
+}
+  
 }
 
 void* eventListener(void* ano){
   sleep(5);
+try{
   ANotify* anotify = (ANotify*) ano;
   anotify->waitForEvents();
+
+}catch(ANotifyException e){
+	cout << e.GetMessage() << endl;
+}
+  
   pthread_exit(0);
 }
 
 void* indexer(void* ano){
-  
+  try{
     //ANotify* anotify = (ANotify*) ano; // ==== an
   ANotifyEvent aevt(&sharedEvent, defaultMask);
   sleep(2);
@@ -77,8 +89,8 @@ void* indexer(void* ano){
   string file = "/Users/JC/Desktop/git/file";*/
   /*string dir = DIR_PATH;
   string file = FILE_PATH;*/
-  string dir = "/home/cuisse/Dossier 1";
-  string file = "/home/cuisse/Dossier 2/vide";
+  string dir = "/home/cuisse/Dossier1";
+  string file = "/home/cuisse/Dossier2/vide";
   ANotifyWatch* anw = new ANotifyWatch(dir,  &aevt, true, true); anw->setAsDir();
   ANotifyWatch* aw1 = new ANotifyWatch(file,  &aevt, false, true);
   anw->setMonitor(sharedANotify);
@@ -86,11 +98,20 @@ void* indexer(void* ano){
   sharedANotify->add(anw);
   sharedANotify->add(aw1);
   sleep(1000);
+
+
+
+}catch(ANotifyException e){
+	cout << e.GetMessage() << endl;
+}
+  
   pthread_exit(0);
 }
 
 int main(int argc, const char * argv[])
 {
+try{
+
   /* Capture de SIGINT (Ctrl + C) */
   signal(SIGINT, sigint_handler);
   pthread_t threads[2] ;
@@ -108,13 +129,16 @@ int main(int argc, const char * argv[])
   ANotifyEvent* pEvt = new ANotifyEvent();
   for (; ; ) {
     std::string str;
-    //if(sharedANotify->getEvent(*pEvt)){
-    if(sharedANotify->getEvent(pEvt)){
+    if(sharedANotify->getEvent(*pEvt)){
       pEvt->dumpTypes(str);
       cout << str << " fd : " <<  pEvt->getDescriptor() << endl;
     }
     sleep(1);
   }
+
+}catch(ANotifyException e){
+	cout << e.GetMessage() << endl;
+}
   
   return 0;
 }

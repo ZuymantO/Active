@@ -17,7 +17,7 @@
 #include <sys/inotify.h>
   /// procfs inotify base path 
 #define PROCFS_ANOTIFY_BASE "/proc/sys/fs/inotify/"
-#endif // __ENVIREONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
+#endif // __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
 #include <sys/event.h>*/
 /** <MOD> **/
 #ifndef __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
@@ -27,7 +27,7 @@
    #define PROCFS_ANOTIFY_BASE "/proc/sys/fs/inotify/"
 #else
    #include <sys/event.h>
-#endif // __ENVIREONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
+#endif // __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
 
 #define IN_EXC_MSG(msg) (std::string(__PRETTY_FUNCTION__) + ": " + msg)
 /** </MOD> **/
@@ -100,7 +100,7 @@
   #define ANOTIFY_INIT() inotify_init()
   #define ANOTIFY_EVENT struct inotify_event
 #else
-  #define ANOTIFY_INIY() (kqueue())
+  #define ANOTIFY_INIT() (kqueue())
   #define ANOTIFY_EVENT struct kevent
 #endif
 /* </MOD> */
