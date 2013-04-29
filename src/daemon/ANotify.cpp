@@ -226,18 +226,18 @@ void ANotify::waitForEvents(bool fNoIntr) throw (ANotifyException)
   ssize_t i = 0;
   while (i < len) {
     ANOTIFY_EVENT* pEvt = (ANOTIFY_EVENT*) &m_buf[i];
-    ANotifyWatch* pW = findWatch(pEvt->wd);
+    ANotifyWatch* pW = findWatch((FD)pEvt->wd);
     if (pW != NULL) {
-      //ANotifyEvent evt(pEvt, pW);
       /* TODO: trouver le bon mask en argument */
-      ANotifyEvent evt(pEvt, pW->getMask(), pW);
+      //ANotifyEvent evt(pEvt, pW->getMask(), pW);
+      //ANotifyEvent* evt = new ANotifyEvent(pEvt, pW->getMask(), pW);
+      ANotifyEvent* evt = new ANotifyEvent(pEvt, (ANMask)pEvt->mask, pW);
       /*if (    ANotifyEvent::isType(pW->getMask(), IN_ANOTIFY_ONESHOT)
           ||  ANotifyEvent::isType(evt.getMask(), IN_ANOTIFY_IGNORED))*/
-      if (    ANotifyMask::isType(pW->getMask(), ANOTIFY_ONESHOT)
+      /*if (    ANotifyMask::isType(pW->getMask(), ANOTIFY_ONESHOT)
           ||  ANotifyMask::isType(evt.getMask(), ANOTIFY_IGNORED))
-        pW->__disable();
-      //m_events.push_back(evt);
-      m_events.push_back(&evt);
+        pW->__disable();*/
+      m_events.push_back(evt);
     }
       i += ANOTIFY_EVENT_SIZE + (ssize_t) pEvt->len;
   }

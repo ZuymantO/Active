@@ -75,17 +75,19 @@ void ANotifyMask::dumpTypes(ANMask iValue, std::string* orStr)
   *orStr = "";
 
     // Lecture d'event
-  if (isType(iValue, ANOTIFY_OTHER)) {
+  /*if (isType(iValue, ANOTIFY_OTHER)) {
     orStr->append("OTHER OR ACCESS OR ISDIR OR OPEN OR NOP");
   }
-  else {
+  else {*/
+
     if (isType(iValue, ANOTIFY_DELETE)) {
       orStr->append(",");
-      orStr->append("DELETE OR DELETE_SELF OR UNMOUNT");
+      orStr->append("DELETE OR DELETE_SELF OR UNMOUNT OR MOVED_FROM");
     }
     if (isType(iValue, ANOTIFY_RENAME)) {
       orStr->append(",");
-      orStr->append("RENAME OR MOVE OR MOVE_TO OR MOVE_FROM");
+      //orStr->append("RENAME OR MOVE OR MOVE_TO OR MOVE_FROM");
+      orStr->append("RENAME");
     }
     if (isType(iValue, ANOTIFY_ATTRIBUT)) {
       orStr->append(",");
@@ -93,9 +95,10 @@ void ANotifyMask::dumpTypes(ANMask iValue, std::string* orStr)
     }
     if (isType(iValue, ANOTIFY_WRITE)) {
       orStr->append(",");
-      orStr->append("WRITE OR MODIFY OR CREATED");
+      //orStr->append("WRITE OR MODIFY OR CREATED");
+      orStr->append("WRITE OR MODIFY OR CREATED OR MOVED_TO");
     }
-  }
+  //}
     // cas d'ecriture et lecture
   if (isType(iValue, ANOTIFY_ONESHOT)) {
     orStr->append(",");

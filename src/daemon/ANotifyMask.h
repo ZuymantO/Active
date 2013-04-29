@@ -111,7 +111,11 @@ public:
   static ANMask getMaskByName(const std::string& irName);
   static void dumpTypes(ANMask iType, std::string* orStr);
   static inline bool isType(ANMask iValue, ANMask iType){
+#ifndef __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
+    return (iValue & iType) != 0;
+#else
     return ((iValue & iType) != 0) && ((~iValue & iType) == 0);
+#endif
   }
 };
 

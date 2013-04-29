@@ -129,7 +129,9 @@ try{
   ANotifyEvent* pEvt = new ANotifyEvent();
   for (; ; ) {
     std::string str;
-    if(sharedANotify->getEvent(*pEvt)){
+    //if(sharedANotify->getEvent(*pEvt)){
+    if(sharedANotify->getEvent(pEvt)){
+      cout << "Event type: " << pEvt->getMask() << endl;
       pEvt->dumpTypes(str);
       cout << str << " fd : " <<  pEvt->getDescriptor() << endl;
     }

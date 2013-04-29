@@ -19,8 +19,10 @@ example.o: ANotifyExample.cpp
 main.o: Main.cpp
 	$(CC) $(FLAGS) -c Main.cpp -o main.o
 
-daemon.o: ANotifyDaemon.h ANotifyDaemon.cpp
-	$(CC) $(FLAGS) -c ANotifyDaemon.cpp -o daemon.o
+#daemon.o: ANotifyDaemon.h ANotifyDaemon.cpp
+daemon.o: ANotifyDaemon.h Daemon.cpp
+#	$(CC) $(FLAGS) -c ANotifyDaemon.cpp -o daemon.o
+	$(CC) $(FLAGS) -c Daemon.cpp -o daemon.o
 
 watch.o: ANotifyWatch.h ANotifyWatch.cpp
 	$(CC) $(FLAGS) -c ANotifyWatch.cpp -o watch.o
