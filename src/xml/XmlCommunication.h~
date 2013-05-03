@@ -1,0 +1,33 @@
+// Gere les communication xml
+
+#ifndef __XmlCommunication__
+#define __XmlCommunication__
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+
+#include "../daemon/ANotifyEvent.h"
+
+#define EN_TETE "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+
+class XmlCommunication {
+ public :
+  /*
+   * Envoie d'informations du moteur d'indexation a la base d'indexation
+   * (donc d'une modification sur l'arborescence surveillee)
+   */
+  std::string MIToBI(ANotifyEvent ane);
+  /*
+   * Envoie d'informations de la base d'indexation au moteur de recherche
+   * (donc, normalement le resultat de la recherche)
+   */
+  std::string BIToMR(ANotifyEvent ane);
+  /*
+   * Envoie d'informations du moteur de recherche vers la base d'indexation
+   * (donc, normalement une recherche)
+   */
+  std::string MRToBI(ANotifyEvent ane);
+};
+
+#endif
