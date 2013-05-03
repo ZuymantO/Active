@@ -16,25 +16,24 @@ string XmlCommunication::MIToBI(ANotifyEvent ane) {
   struct stat fileInfo;
   oss << EN_TETE << "<INDEXATION>";
   if (ane.isRennomage()) {
-    oss << "<RENOMMAGES id=" << id << ">";
-    oss << "<FICHIERRENOMME><PATH>";
+    oss << "<RENOMMAGES id=" << id << "><FICHIERRENOMME>";
     /*
      * TODO : ajouter le nom du oldpath
      * oss << oldpath;
      */
-    oss << "</PATH><NEWPATH>";
+    oss << "<PATH>" << "oldpath" << "</PATH>";
     /* 
      * TODO : ajouter le nom du newpath
      * oss << newpath;
      */
-    oss << "</NEWPATH></FICHIERRENOMME>";
-    oss << "</RENOMMAGES>";
+    oss << "<NEWPATH>" << "new_path" << "</NEWPATH>";
+    oss << "</FICHIERRENOMME></RENOMMAGES>";
     id++;
   }
   else if (ane.isModification()) {
     fileName = ane.getName();
     if (stat(fileName, &fileInfo) == 0) {
-      oss << "<MODIFICATIONS id=" << id << ">";
+      oss << "<MODIFICATIONS id=" << id << "><FICHIERMOFIFIE>";
       oss << "<PATH>" << ane.getName() << "</PATH>";
       oss << "<DATEMODIFICATION" << ctime(&fileInfo.st_mtime) << "</DATEMODIFICATION>";
       oss << "<TAILLE>" << fileInfo.st_size << "</TAILLE>";
@@ -47,7 +46,7 @@ string XmlCommunication::MIToBI(ANotifyEvent ane) {
        */
       oss << "<INDEXAGE>" << "mots_a_indexer(fonction)" <<"</INDEXAGE>";
       oss << "<NEWPATH>" << ane.getName() << "</NEWPATH>";
-      oss << "</MODIFICATIONS>";
+      oss << "</FICHIERMODIFIE></MODIFICATIONS>";
       id++;
     }
     else {
@@ -56,15 +55,15 @@ string XmlCommunication::MIToBI(ANotifyEvent ane) {
     }
   }
   else if (ane.isSuppression()) {
-    oss << "<SUPPRESSIONS id=" << id << ">";
+    oss << "<SUPPRESSIONS id=" << id << "><FICHIERSUPPRIME>";
     oss << "<FICHIERSUPPRIME>" << ane.getName() << "</FICHIERSUPPRIME>";
-    oss << "</SUPPRESSIONS>";
+    oss << "</FICHIERSUPPRIME></SUPPRESSIONS>";
     id++;
   }
   else if (ane.isCreation()) {
     fileName = ane.getName();
     if (stat(fileName, &fileInfo) == 0) {
-      oss << "<CREATIONS id=" << id << ">";
+      oss << "<CREATIONS id=" << id << "><FICHIERCREE>";
       oss << "<PATH>" << fileName << "</PATH>";
       /*
        * TODO : recuperation du format :
@@ -86,7 +85,7 @@ string XmlCommunication::MIToBI(ANotifyEvent ane) {
        *        qui doit renvoyer un string
        */
       oss << "<INDEXAGE>" << "mots_a_indexer(fonction)" << "</INDEXAGE>";
-      oss << "</CREATIONS>";
+      oss << "</FICHIERCREE></CREATIONS>";
       id++;
     }
     else {
