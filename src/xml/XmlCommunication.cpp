@@ -120,16 +120,43 @@ string XmlCommunication::BIToMR(vector<AnyFile>* AQResult, int searchID) {
   return oss.str();
 }
 
-string XmlCommunication::MRToBI() {
-  return "";
-}
-
-int main() {
+/*
+ * TODO : ici il reste encore presque tout a implementer en fonction de la
+ *        structure de recherche (remplacer les phrases)
+ *        SR = structureRecherche
+ */
+string XmlCommunication::MRToBI(int searchID) {
   ostringstream oss;
-  oss << "coucou";
-  oss << endl;
-  oss << "test";
-  oss << endl;
-  cout << oss.str();
-  return 0;
+  oss << "<SEARCH id=" << searchID << ">";
+  oss << "<WORD>" << SR.getMotAChercher() << "</WORD>";
+  /* conformement a la DTD content doit etre un boolean :
+   *    - true : recherche sur du contenu
+   *    - false : recherche sur les nmos de fichier
+   * La DTD donne cette balise facultative, je pense l'inclure pour TOUTES NOS
+   * RECHERCHES, avec par conséquence une valeur par défaut (false me semble
+   * plus judicieux)
+   */
+  oss << "<CONTENT>" << SR.getContent() << "</CONTENT>";
+  if (SR.getPathDir() != NULL) {
+    oss << "<PATHDIR>" << SR.getPathDir() << "</PATHDIR>";
+  }
+  if (SR.getPerm() != NULL) {
+    oss << "<PERM>" << SR.getPerm() << "</PERM>";
+  }
+  if (SR.getExtension() != NULL) {
+    oss << "<EXTENSION>" << SR.getExtension() << "</EXTENSION>";
+  }
+  if (SR.timeSlot()) {
+    oss << "<TIMESLOT><BEGIN>";
+    oss << "<DAY>" << SR.getBeginDay() << "</DAY>";
+    oss << "<MONTH>" << SR.getBeginMonth() << "</MONTH>";
+    oss << "<YEAR>" << SR.getBeginYear() << "</YEAR>";
+    oss << "</BEGIN><END>";
+    oss << "<DAY>" << SR.getEndDay() << "</DAY>";
+    oss << "<MONTH>" << SR.getEndMonth() << "</MONTH>";
+    oss << "<YEAR>" << SR.getEndYear() << "</YEAR>";
+    oss << "</END></TIMESLOT>";
+  }
+  oss << "</SEARCH>";
+  return oss;
 }

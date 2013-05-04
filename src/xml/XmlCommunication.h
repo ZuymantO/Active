@@ -30,7 +30,7 @@ class XmlCommunication {
    * Envoie d'informations du moteur de recherche vers la base d'indexation
    * (donc, normalement une recherche)
    */
-  std::string MRToBI();
+  std::string MRToBI(int searchID);
 };
 
 #endif
