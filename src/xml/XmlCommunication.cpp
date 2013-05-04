@@ -101,13 +101,26 @@ string XmlCommunication::MIToBI(ANotifyEvent ane) {
   return oss.str();
 }
 
-string XmlCommunication::BIToMR(ANotifyEvent ane) {
+string XmlCommunication::BIToMR(vector<AnyFile>* AQResult, int searchID) {
   ostringstream oss;
-  oss << "1";
+  oss << "<RESULT id=" << searchID << ">";
+  for (int i(0); i < AQResult.size(); ++i) {
+    oss << "<FILE>";
+    oss << "<NAME>" << AQResult.getName() << "</NAME>";
+    oss << "<PATH>" << AQResult.getPath() << "</PATH>";
+    oss << "<PERM>" << AQResult.getMime() << "</PERM">;
+    oss << "<SIZE>" << AQResult.getDiskSize() << "</SIZE>";
+    if (AQResult.getLastModif() != NULL) {
+      oss << "<LASTMODIF>" << AQResult.getLastModif() << "</LASTMODIF>";
+    }
+    oss << "<PROPRIO>" << AQResult.getUserID() << "</PROPRIO>";
+    oss << "</FILE>";
+  }
+  oss << "</RESULT>";
   return oss.str();
 }
 
-string XmlCommunication::MRToBI(ANotifyEvent ane) {
+string XmlCommunication::MRToBI() {
   return "";
 }
 
