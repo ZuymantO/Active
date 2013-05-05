@@ -125,36 +125,29 @@ string XmlCommunication::BIToMR(vector<AnyFile>* AQResult, int searchID) {
  *        structure de recherche (remplacer les phrases)
  *        SR = structureRecherche
  */
-string XmlCommunication::MRToBI(int searchID) {
+string XmlCommunication::MRToBI(MR mr, int searchID) {
   ostringstream oss;
   oss << "<SEARCH id=" << searchID << ">";
-  oss << "<WORD>" << SR.getMotAChercher() << "</WORD>";
-  /* conformement a la DTD content doit etre un boolean :
-   *    - true : recherche sur du contenu
-   *    - false : recherche sur les nmos de fichier
-   * La DTD donne cette balise facultative, je pense l'inclure pour TOUTES NOS
-   * RECHERCHES, avec par conséquence une valeur par défaut (false me semble
-   * plus judicieux)
-   */
-  oss << "<CONTENT>" << SR.getContent() << "</CONTENT>";
-  if (SR.getPathDir() != NULL) {
-    oss << "<PATHDIR>" << SR.getPathDir() << "</PATHDIR>";
+  oss << "<WORD>" << mr.getWord() << "</WORD>";
+  oss << "<CONTENT>" << mr.getContent() << "</CONTENT>";
+  if (mr.getPathDir() != NULL) {
+    oss << "<PATHDIR>" << mr.getPathDir() << "</PATHDIR>";
   }
-  if (SR.getPerm() != NULL) {
-    oss << "<PERM>" << SR.getPerm() << "</PERM>";
+  if (mr.getPerm() != NULL) {
+    oss << "<PERM>" << mr.getPerm() << "</PERM>";
   }
-  if (SR.getExtension() != NULL) {
-    oss << "<EXTENSION>" << SR.getExtension() << "</EXTENSION>";
+  if (mr.getExtension() != NULL) {
+    oss << "<EXTENSION>" << mr.getExtension() << "</EXTENSION>";
   }
-  if (SR.timeSlot()) {
+  if (mr.timeSlot()) {
     oss << "<TIMESLOT><BEGIN>";
-    oss << "<DAY>" << SR.getBeginDay() << "</DAY>";
-    oss << "<MONTH>" << SR.getBeginMonth() << "</MONTH>";
-    oss << "<YEAR>" << SR.getBeginYear() << "</YEAR>";
+    oss << "<DAY>" << mr.getBeginDay() << "</DAY>";
+    oss << "<MONTH>" << mr.getBeginMonth() << "</MONTH>";
+    oss << "<YEAR>" << mr.getBeginYear() << "</YEAR>";
     oss << "</BEGIN><END>";
-    oss << "<DAY>" << SR.getEndDay() << "</DAY>";
-    oss << "<MONTH>" << SR.getEndMonth() << "</MONTH>";
-    oss << "<YEAR>" << SR.getEndYear() << "</YEAR>";
+    oss << "<DAY>" << mr.getEndDay() << "</DAY>";
+    oss << "<MONTH>" << mr.getEndMonth() << "</MONTH>";
+    oss << "<YEAR>" << mr.getEndYear() << "</YEAR>";
     oss << "</END></TIMESLOT>";
   }
   oss << "</SEARCH>";

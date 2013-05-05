@@ -10,6 +10,7 @@
 
 #include "../daemon/ANotifyEvent.h"
 #include "../bi/AnyFile.h"
+#include "../mr/mr.h"
 
 const std::string EN_TETE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 int id = 0;
@@ -30,7 +31,7 @@ class XmlCommunication {
    * Envoie d'informations du moteur de recherche vers la base d'indexation
    * (donc, normalement une recherche)
    */
-  std::string MRToBI(int searchID);
+  std::string MRToBI(MR mr, int searchID);
 };
 
 #endif
