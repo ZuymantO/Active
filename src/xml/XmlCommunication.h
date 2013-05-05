@@ -1,7 +1,7 @@
 // Gere les communication xml
 
-#ifndef __XmlCommunication__
-#define __XmlCommunication__
+#ifndef __Xml__Communication__
+#define __Xml__Communication__
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,7 +10,7 @@
 
 #include "../daemon/ANotifyEvent.h"
 #include "../bi/AnyFile.h"
-#include "../mr/mr.h"
+#include "../mr/MR.h"
 
 const std::string EN_TETE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 int id = 0;
