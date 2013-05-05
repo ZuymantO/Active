@@ -21,7 +21,6 @@ void MR::init(string w, bool c, string pd, string p, string ext, Date* b, Date* 
   this->pathDir = pd;
   this->perm = p;
   this->extension = ext;
-  cout << "content " << c << endl;
   this->begin = new Date((*b).getDay(), (*b).getMonth(), (*b).getYear());
   this->end = new Date((*e).getDay(), (*e).getMonth(), (*e).getYear());
 }
