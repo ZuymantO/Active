@@ -3,8 +3,6 @@
 #ifndef __Xml__Communication__
 #define __Xml__Communication__
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <string>
 #include <vector>
 

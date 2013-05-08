@@ -120,11 +120,6 @@ string XmlCommunication::BIToMR(vector<AnyFile>* AQResult, int searchID) {
   return oss.str();
 }
 
-/*
- * TODO : ici il reste encore presque tout a implementer en fonction de la
- *        structure de recherche (remplacer les phrases)
- *        SR = structureRecherche
- */
 string XmlCommunication::MRToBI(MR mr, int searchID) {
   ostringstream oss;
   oss << "<SEARCH id=" << searchID << ">";
