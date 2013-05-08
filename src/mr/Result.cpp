@@ -44,32 +44,6 @@ string Result::getProprio() const {
   return this->proprio;
 }
 
-/*
-void Result::setName(string n) {
-  this->name = n;
-}
-
-void Result::setPath(string p) {
-  this->path = p;
-}
-
-void Result::setPerm(string p) {
-  this->perm = p;
-}
-
-void Result::setSize(unsigned int s) {
-  this->size = s;
-}
-
-void Result::setLastModif(string lm) {
-  this->lastModif = lm;
-}
-
-void Result::setProprio(string p) {
-  this->proprio = p;
-}
-*/
-
 list<Result> SearchResults(string xmlStream) {
 
   Result *tmpResult;

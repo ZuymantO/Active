@@ -29,15 +29,6 @@ class Result {
   string getLastModif() const;
   string getProprio() const;
 
-  /*
-  void setName(string n);
-  void setPath(string p);
-  void setPerm(string p);
-  void setSize(unsigned int s);
-  void setLastModif(string lm);
-  void setProprio(string p);
-  */
-
   list<Result> SearchResults(string xmlStream);
 };
 
