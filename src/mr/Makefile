@@ -1,15 +1,19 @@
-GOALS = MR
+#GOALS=Search
+GOALS=Result
+CC=g++
+CFLAGS=-W -Wall -ansi -pedantic
+LDFLAGS=-ltinyxml
 
 all : $(GOALS)
 
-MR : MR.o MyDate.o
-	g++ -o MR MR.o MyDate.o
+$(GOALS) : $(GOALS).o MyDate.o
+	$(CC) -o $(GOALS) $(GOALS).o MyDate.o $(LDFLAGS)
 
 MyDate.o : MyDate.cpp
-	g++ -o MyDate.o -c MyDate.cpp -W -Wall -ansi -pedantic
+	$(CC) -o MyDate.o -c MyDate.cpp $(CFLAGS)
 
-MR.o : MR.cpp MyDate.cpp
-	g++ -o MR.o -c MR.cpp -W -Wall -ansi -pedantic
+$(GOALS).o : $(GOALS).cpp MyDate.cpp
+	$(CC) -o $(GOALS).o -c $(GOALS).cpp $(CFLAGS)
 
 clean :
-	rm -rf *.o $(GOALS)
+	rm -rf *.o $(GOALS) *~

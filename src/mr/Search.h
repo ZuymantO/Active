@@ -1,14 +1,13 @@
-#ifndef __MR__
-#define __MR__
+#ifndef __Search__
+#define __Search__
 
 #include "MyDate.h"
 
 #include <string>
-#include <time.h>
 
 using namespace std;
 
-class MR {
+class Search {
  private :
   string word;
   bool content;
@@ -19,9 +18,9 @@ class MR {
   Date *end;
 
  public :
-  MR(string w, bool c, string pd, string p, string ext, Date* b, Date* e);
-  MR(string w, string pd, string p, string ext, Date* b, Date* e);
-  ~MR();
+  Search(string w, bool c, string pd, string p, string ext, Date* b, Date* e);
+  Search(string w, string pd, string p, string ext, Date* b, Date* e);
+  ~Search();
 
   void init(string w, bool c, string pd, string p, string ext, Date* b, Date*e);
 

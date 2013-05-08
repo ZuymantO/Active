@@ -1,21 +1,21 @@
-#include "MR.h"
+#include "Search.h"
 
 #include <iostream>
 
-MR::MR(string w, bool c, string pd, string p, string ext, Date* b, Date* e) {
+Search::Search(string w, bool c, string pd, string p, string ext, Date* b, Date* e) {
   this->init(w, c, pd, p, ext, b, e);
 }
 
-MR::MR(string w, string pd, string p, string ext, Date* b, Date* e) {
+Search::Search(string w, string pd, string p, string ext, Date* b, Date* e) {
   this->init(w, false, pd, p, ext, b, e);
 }
 
-MR::~MR() {
+Search::~Search() {
   delete begin;
   delete end;
 }
 
-void MR::init(string w, bool c, string pd, string p, string ext, Date* b, Date* e) {
+void Search::init(string w, bool c, string pd, string p, string ext, Date* b, Date* e) {
   this->word = w;
   this->content = c;
   this->pathDir = pd;
@@ -25,56 +25,56 @@ void MR::init(string w, bool c, string pd, string p, string ext, Date* b, Date* 
   this->end = new Date((*e).getDay(), (*e).getMonth(), (*e).getYear());
 }
 
-string MR::getWord() const {
+string Search::getWord() const {
   return this->word;
 }
 
-bool MR::getContent() const {
+bool Search::getContent() const {
   return this->content;
 }
 
-string MR::getPathDir() const {
+string Search::getPathDir() const {
   return this->pathDir;
 }
 
-string MR::getPerm() const {
+string Search::getPerm() const {
   return this->perm;
 }
 
-string MR::getExtension() const {
+string Search::getExtension() const {
   return this->extension;
 }
 
-unsigned int MR::getBeginDay() const {
+unsigned int Search::getBeginDay() const {
   return (*this->begin).getDay();
 }
 
-unsigned int MR::getBeginMonth() const {
+unsigned int Search::getBeginMonth() const {
   return (*this->begin).getMonth();
 }
 
-unsigned int MR::getBeginYear() const {
+unsigned int Search::getBeginYear() const {
   return (*this->begin).getYear();
 }
 
-unsigned int MR::getEndDay() const {
+unsigned int Search::getEndDay() const {
   return (*this->end).getDay();
 }
 
-unsigned int MR::getEndMonth() const {
+unsigned int Search::getEndMonth() const {
   return (*this->end).getMonth();
 }
 
-unsigned int MR::getEndYear() const {
+unsigned int Search::getEndYear() const {
   return (*this->end).getYear();
 }
 
-bool MR::isValidDate(Date d) const {
+bool Search::isValidDate(Date d) const {
   return (d.getDay() != 0 && d.getMonth() != 0 && d.getYear() != 0) ? true : false;
 }
 
-bool MR::timeSlot() const {
-  return (MR::isValidDate((*this->begin)) && MR::isValidDate((*this->end)));
+bool Search::timeSlot() const {
+  return (Search::isValidDate((*this->begin)) && Search::isValidDate((*this->end)));
 }
 
 int main() {
@@ -82,7 +82,7 @@ int main() {
   d1 = new Date();
   d2 = new Date(4,5,2013);
 
-  MR *m = new MR("mot", "pathdir", "perm", "ext", d1, d2);
+  Search *m = new Search("mot", "pathdir", "perm", "ext", d1, d2);
   cout << "taille : " << (*m).getWord().size() << endl;
   cout << "word : " << (*m).getWord() << endl;
   cout << "content : " << (*m).getContent() << endl;
