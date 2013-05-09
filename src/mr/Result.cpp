@@ -1,5 +1,4 @@
 #include "Result.h"
-#include <tinyxml.h>
 
 Result::Result(string n, string pa, string pe, unsigned int s, string lm, string pr) {
   this->init(n, pa, pe, s, lm, pr);

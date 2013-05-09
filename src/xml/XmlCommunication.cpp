@@ -35,7 +35,7 @@ string XmlCommunication::MIToBI(ANotifyEvent ane) {
     if (stat(fileName, &fileInfo) == 0) {
       oss << "<MODIFICATIONS id=" << id << "><FICHIERMOFIFIE>";
       oss << "<PATH>" << ane.getName() << "</PATH>";
-      oss << "<DATEMODIFICATION" << ctime(&fileInfo.st_mtime) << "</DATEMODIFICATION>";
+      oss << "<DATEMODIFICATION>" << ctime(&fileInfo.st_mtime) << "</DATEMODIFICATION>";
       oss << "<TAILLE>" << fileInfo.st_size << "</TAILLE>";
       oss << "<PROPRIETAIRE>" << fileInfo.st_uid << "</PROPRIETAIRE>";
       oss << "<GROUPE>" << fileInfo.st_gid << "</GROUPE>";

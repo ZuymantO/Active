@@ -30,13 +30,12 @@ class Search {
   string getPerm() const;
   string getExtension() const;
   unsigned int getBeginDay() const;
-  unsigned int getBeginMonth() const;
+  string getBeginMonth() const;
   unsigned int getBeginYear() const;
   unsigned int getEndDay() const;
-  unsigned int getEndMonth() const;
+  string getEndMonth() const;
   unsigned int getEndYear() const;
 
-  bool isValidDate(Date d) const;
   bool timeSlot() const;
 };
 

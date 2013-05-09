@@ -1,19 +1,24 @@
-#GOALS=Search
-GOALS=Result
+MAIN=XMLParser
 CC=g++
 CFLAGS=-W -Wall -ansi -pedantic
-LDFLAGS=-ltinyxml
+LIBS=-ltinyxml
 
-all : $(GOALS)
+all : $(MAIN)
 
-$(GOALS) : $(GOALS).o MyDate.o
-	$(CC) -o $(GOALS) $(GOALS).o MyDate.o $(LDFLAGS)
+$(MAIN) : $(MAIN).o MyDate.o Search.o Utils.o
+	$(CC) -o $(MAIN) $(MAIN).o MyDate.o Search.o Utils.o $(LIBS)
 
-MyDate.o : MyDate.cpp
+Utils.o : Utils.cpp
+	$(CC) -o Utils.o -c Utils.cpp $(CFLAGS)
+
+MyDate.o : MyDate.cpp Utils.cpp
 	$(CC) -o MyDate.o -c MyDate.cpp $(CFLAGS)
 
-$(GOALS).o : $(GOALS).cpp MyDate.cpp
-	$(CC) -o $(GOALS).o -c $(GOALS).cpp $(CFLAGS)
+Search.o : Search.cpp MyDate.cpp Utils.cpp
+	$(CC) -o Search.o -c Search.cpp $(CFLAGS)
+
+$(MAIN).o : $(MAIN).cpp Search.cpp MyDate.cpp Utils.cpp
+	$(CC) -o $(MAIN).o -c $(MAIN).cpp $(CFLAGS)
 
 clean :
-	rm -rf *.o $(GOALS) *~
+	rm -rf *.o $(MAIN) *~

@@ -1,3 +1,4 @@
+
 #include "Search.h"
 
 #include <iostream>
@@ -49,7 +50,7 @@ unsigned int Search::getBeginDay() const {
   return (*this->begin).getDay();
 }
 
-unsigned int Search::getBeginMonth() const {
+string Search::getBeginMonth() const {
   return (*this->begin).getMonth();
 }
 
@@ -61,7 +62,7 @@ unsigned int Search::getEndDay() const {
   return (*this->end).getDay();
 }
 
-unsigned int Search::getEndMonth() const {
+string Search::getEndMonth() const {
   return (*this->end).getMonth();
 }
 
@@ -69,18 +70,16 @@ unsigned int Search::getEndYear() const {
   return (*this->end).getYear();
 }
 
-bool Search::isValidDate(Date d) const {
-  return (d.getDay() != 0 && d.getMonth() != 0 && d.getYear() != 0) ? true : false;
-}
-
 bool Search::timeSlot() const {
-  return (Search::isValidDate((*this->begin)) && Search::isValidDate((*this->end)));
+  //return (Date::isValidDate((*this->begin)) && Date::isValidDate((*this->end)));
+  return ((*this->begin).IsValidDate() && (*this->end).IsValidDate());
 }
 
+/*
 int main() {
   Date *d1, *d2;
   d1 = new Date();
-  d2 = new Date(4,5,2013);
+  d2 = new Date(4,"5",2013);
 
   Search *m = new Search("mot", "pathdir", "perm", "ext", d1, d2);
   cout << "taille : " << (*m).getWord().size() << endl;
@@ -94,3 +93,4 @@ int main() {
 
   return 1;
 }
+*/

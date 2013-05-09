@@ -3,6 +3,7 @@
 
 #include <list>
 #include <string>
+#include <tinyxml.h>
 
 using namespace std;
 
