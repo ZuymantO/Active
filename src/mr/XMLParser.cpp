@@ -305,7 +305,6 @@ list<Renommage> XMLParser::GetRenommages(TiXmlNode *nodeDepth1) {
 
     tagDepth2 = tagDepth2->NextSiblingElement("FICHIERRENOMME");
   }
-
   return renoms;
 }
 
@@ -358,12 +357,13 @@ list<Modification> XMLParser::GetModifications(TiXmlNode *nodeDepth1) {
 	  tagDepth4->QueryIntAttribute("frequence", &freq);
 	  ind = new Indexage(w, freq);
 	  index.push_front(*ind);
-	  tagDepth4->NextSiblingElement("MOT");
+	  tagDepth4 = tagDepth4->NextSiblingElement("MOT");
 	}
       }
       else if (strcmp(tagName, "NEWPATH") == 0) {
 	newpath = tagDepth3->GetText();
       }
+      tagDepth3 = tagDepth3->NextSiblingElement();
     }
     if (path != "" && date != "" && prop != "" && groupe != "" && perm != "" && !index.empty()) {
       tmpm = new Modification(path, date, taille, prop, groupe, perm, index, newpath);
@@ -491,6 +491,26 @@ int main() {
   for (; lit != lend; ++lit) {
     cout << "oldpath : " << lit->GetOldPath() << endl;
     cout << "newpath : " << lit->GetNewPath() << endl;
+  }
+  cout << "-----------------------------" << endl;
+  cout << "-----------------------------" << endl;
+
+  list<Modification> mf = r.GetModif();
+  std::list<Modification>::const_iterator lit2(mf.begin()), lend2(mf.end());
+  for (; lit2 != lend2; ++lit2) {
+    cout << "path : " << lit2->GetPath() << endl;
+    cout << "date : " << lit2->GetDate() << endl;
+    cout << "taille : " << lit2->GetTaille() << endl;
+    cout << "prop : " << lit2->GetProprietaire() << endl;
+    cout << "groupe : " << lit2->GetGroupe() << endl;
+    cout << "perm : " << lit2->GetPerm() << endl;
+    list<Indexage> li = lit2->GetIndex();
+    std::list<Indexage>::const_iterator llit(li.begin()), llend(li.end());
+    for (; llit != llend; ++llit) {
+      cout << "le mot #" << llit->GetWord() << "# apparait : " << llit->GetOccurrence() << endl;
+    }
+    cout << "newpath : " << lit2->GetNewpath() << endl;
+    cout << "-----------------------------" << endl;
   }
   
 
