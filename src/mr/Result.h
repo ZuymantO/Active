@@ -2,6 +2,7 @@
 #define __Result__
 
 #include <string>
+#include <list>
 
 using namespace std;
 
@@ -29,5 +30,17 @@ class Result {
   string getProprio() const;
 };
 
+class Results {
+ private :
+  string id;
+  list<Result> res;
+
+ public :
+  Results(string i, list<Result> r);
+  ~Results();
+
+  string GetID();
+  list<Result> GetRes();
+};
 
 #endif

@@ -1,11 +1,11 @@
 #include "Search.h"
 
-Search::Search(string w, bool c, string pd, string p, string ext, Date* b, Date* e) {
-  this->init(w, c, pd, p, ext, b, e);
+Search::Search(string i, string w, bool c, string pd, string p, string ext, Date* b, Date* e) {
+  this->init(i, w, c, pd, p, ext, b, e);
 }
 
-Search::Search(string w, string pd, string p, string ext, Date* b, Date* e) {
-  this->init(w, false, pd, p, ext, b, e);
+Search::Search(string i, string w, string pd, string p, string ext, Date* b, Date* e) {
+  this->init(i, w, false, pd, p, ext, b, e);
 }
 
 Search::~Search() {
@@ -13,7 +13,8 @@ Search::~Search() {
   delete end;
 }
 
-void Search::init(string w, bool c, string pd, string p, string ext, Date* b, Date* e) {
+void Search::init(string i, string w, bool c, string pd, string p, string ext, Date* b, Date* e) {
+  this->id = i;
   this->word = w;
   this->content = c;
   this->pathDir = pd;
@@ -21,6 +22,10 @@ void Search::init(string w, bool c, string pd, string p, string ext, Date* b, Da
   this->extension = ext;
   this->begin = new Date((*b).getDay(), (*b).getMonth(), (*b).getYear());
   this->end = new Date((*e).getDay(), (*e).getMonth(), (*e).getYear());
+}
+
+string Search::getID() const {
+  return this->id;
 }
 
 string Search::getWord() const {

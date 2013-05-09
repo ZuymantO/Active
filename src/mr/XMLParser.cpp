@@ -33,7 +33,7 @@ Date* XMLParser::GetDate(TiXmlNode *nodeDepth2) {
 Search XMLParser::InterpretSearch(string xmlStream) {
 
   Search *research;
-  string word = "", pathDir = "", perm = "", ext = "";
+  string id ="", word = "", pathDir = "", perm = "", ext = "";
   Date *begin = new Date(), *end = new Date(), *tmp;
   bool content = false;
 
@@ -54,12 +54,15 @@ Search XMLParser::InterpretSearch(string xmlStream) {
     
   TiXmlHandle hdl(&doc);
   // on recupere la balise SEARCH
-  hdl = hdl.FirstChildElement("SEARCH").FirstChildElement();
+  hdl = hdl.FirstChildElement("SEARCH");
+  tagDepth1 = hdl.Element();
+  id = tagDepth1->Attribute("id");
+  hdl = hdl.FirstChildElement();
   // et on regarde ses elements
   tagDepth1 = hdl.Element();
 
   if(!tagDepth1) {
-    return Search(NULL, false, NULL, NULL, NULL, NULL, NULL);
+    return Search(0, NULL, false, NULL, NULL, NULL, NULL, NULL);
   }
 
   while (tagDepth1) {
@@ -115,13 +118,13 @@ Search XMLParser::InterpretSearch(string xmlStream) {
     end = new Date();
   }
 
-  research = new Search(word, content, pathDir, perm, ext, begin, end);
+  research = new Search(id, word, content, pathDir, perm, ext, begin, end);
   return *research;
 }
 
-list<Result> XMLParser::InterpretResult(string xmlStream) {
+Results XMLParser::InterpretResult(string xmlStream) {
   Result *tmpResult;
-  string n, pa, pe, lm, pr, tSize;
+  string id, n, pa, pe, lm, pr, tSize;
   unsigned int s;
   istringstream iss;
   list<Result> results;
@@ -143,14 +146,19 @@ list<Result> XMLParser::InterpretResult(string xmlStream) {
     
   TiXmlHandle hdl(&doc);
   // on recupere la premiere balise FILE dans la premier balise RESULT
-  hdl = hdl.FirstChildElement("RESULT").FirstChildElement("FILE");
+  hdl = hdl.FirstChildElement("RESULT");
+  tagDepth1 = hdl.Element();
+  id = tagDepth1->Attribute("id");
+  hdl = hdl.FirstChildElement("FILE");
   // et on la met dans un TiXmlElement
   tagDepth1 = hdl.Element();
 
   if(!tagDepth1){
     cout << "le noeud a atteindre n'existe pas" << endl;
     //mettre un return null ou liste/vector vide
-    return results;
+    list<Result> rtmp;
+    Results *res = new Results("", rtmp);
+    return *res;
   }
 
   // parcours des balises <FILE></FILE>, 1 iteration par balise
@@ -209,7 +217,119 @@ list<Result> XMLParser::InterpretResult(string xmlStream) {
     tagDepth1 = tagDepth1->NextSiblingElement("FILE");
   }
 
-  return results;
+  Results *res = new Results(id, results);
+  return *res;
+}
+
+Indexation XMLParser::InterpretIndexation(string xmlStream) {
+  Indexation *indexations;
+  list<Renommage> tmpR;
+  list<Modification> tmpM;
+  list<Suppression> tmpS;
+  list<Creation> tmpC;
+
+  TiXmlDocument doc;
+  // current tag file
+  TiXmlElement *tagDepth1;
+  // node of current tag file
+  TiXmlNode *nodeDepth1;
+
+  const char* tagName;
+
+  doc.Parse(xmlStream.c_str(), 0, TIXML_ENCODING_UTF8);
+    
+  TiXmlHandle hdl(&doc);
+  hdl = hdl.FirstChildElement("INDEXATION").FirstChildElement();
+  tagDepth1 = hdl.Element();
+
+  if (!tagDepth1) {
+    indexations = new Indexation(tmpR, tmpM, tmpS, tmpC);
+    return *indexations;
+  }
+
+  while (tagDepth1) {
+    nodeDepth1 = tagDepth1->Clone();
+    tagName = nodeDepth1->Value();
+    cout << tagName << endl;
+    if (strcmp(tagName, "RENOMMAGES") == 0) {
+      tmpR = GetRenommages(nodeDepth1);
+      /*
+      std::list<Renommage>::const_iterator lit(tmpR.begin()), lend(tmpR.end());
+      for (; lit != lend; ++lit) {
+	cout << "oldpath : " << lit->GetOldPath() << endl;
+	cout << "newpath : " << lit->GetNewPath() << endl;
+      }
+      */
+    }
+    else if (strcmp(tagName, "MODIFICATIONS") == 0) {
+      // TODO
+    }
+    else if (strcmp(tagName, "SUPPRESSIONS") == 0) {
+      // TODO
+    }
+    else if (strcmp(tagName, "CREATIONS") == 0) {
+      // TODO
+    }
+
+    tagDepth1 = tagDepth1->NextSiblingElement();
+  }
+
+  indexations = new Indexation(tmpR, tmpM, tmpS, tmpC);
+  return *indexations;
+}
+
+list<Renommage> XMLParser::GetRenommages(TiXmlNode *nodeDepth1) {
+  list<Renommage> renoms;
+  Renommage *tmpr;
+  string oldp, newp;
+  const char *tagName;
+  TiXmlElement *tagDepth2, *tagDepth3;
+  TiXmlNode *nodeDepth2, *nodeDepth3;
+
+  tagDepth2 = nodeDepth1->FirstChildElement("FICHIERRENOMME");
+  while (tagDepth2) {
+    // TODO
+    nodeDepth2 = tagDepth2->Clone();
+    tagDepth3 = nodeDepth2->FirstChildElement();
+    while (tagDepth3) {
+      nodeDepth3 = tagDepth3->Clone();
+      tagName = nodeDepth3->Value();
+
+      if (strcmp(tagName, "PATH") == 0) {
+	oldp = tagDepth3->GetText();
+      }
+      else if (strcmp(tagName, "NEWPATH") == 0) {
+	newp = tagDepth3->GetText();
+      }
+
+      tagDepth3 = tagDepth3->NextSiblingElement();
+    }
+    if (newp != "" && oldp != "") {
+      tmpr = new Renommage(oldp, newp);
+      renoms.push_front(*tmpr);
+    }
+    oldp = "";
+    newp = "";
+
+    tagDepth2 = tagDepth2->NextSiblingElement("FICHIERRENOMME");
+  }
+
+  return renoms;
+}
+
+list<Modification> XMLParser::GetModificatiosn(TiXmlNode *nodeDepth1) {
+  list<Modification> modifs;
+  return modifs;
+}
+
+list<Suppression> XMLParser::GetSuppressions(TiXmlNode *nodeDepth1) {
+  list<Suppression> supps;
+  return supps;
+}
+
+list<Creation> XMLParser::GetCreations(TiXmlNode *nodeDepth1) {
+  list<Creation> creas;
+  return creas;
 }
 
 int main() {
@@ -218,13 +338,14 @@ int main() {
 
   // ----------------------------------------------------
   // Test de Search
-  
+  /*
   oss << "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" << endl;
-  oss << "<SEARCH><WORD>MOT</WORD><CONTENT>true</CONTENT><PATHDIR>/home/matthieu</PATHDIR><PERM>-rw-rw-rw-</PERM><EXTENSION>txt</EXTENSION>";
+  oss << "<SEARCH id=\"34\"><WORD>MOT</WORD><CONTENT>true</CONTENT><PATHDIR>/home/matthieu</PATHDIR><PERM>-rw-rw-rw-</PERM><EXTENSION>txt</EXTENSION>";
   oss << "<TIMESLOT><BEGIN><DAY>17</DAY><MONTH>mars</MONTH><YEAR>2013</YEAR></BEGIN><END><DAY>17</DAY><MONTH>mai</MONTH><YEAR>2013</YEAR></END></TIMESLOT></SEARCH>";
 
   Search research = p.InterpretSearch(oss.str().c_str());
 
+  cout << "id : " << (research).getID() << endl;
   cout << "word : " << (research).getWord() << endl;
   cout << "content : " << (research).getContent() << endl;
   cout << "pathdir : " << (research).getPathDir() << endl;
@@ -232,7 +353,7 @@ int main() {
   cout << "extension : " << (research).getExtension() << endl;
   cout << "date debut : " << (research).getBeginDay() << "/" << (research).getBeginMonth() << "/" << (research).getBeginYear() << endl;
   cout << "date fin : " << (research).getEndDay() << "/" << (research).getEndMonth() << "/" << (research).getEndYear() << endl;
-  
+  */
   // ----------------------------------------------------
 
 
@@ -240,7 +361,7 @@ int main() {
   // Test de Result
   /*
   oss << "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" << endl;
-  oss << "<RESULT>";
+  oss << "<RESULT id=\"34\">";
 
   oss << "<FILE>";
   oss << "<NAME>toto.txt</NAME><PATH>/home/thomas/</PATH><PERM>-rw-rw-r--</PERM><SIZE>756</SIZE><LASTMODIF>mai 8 18:05</LASTMODIF>";
@@ -256,8 +377,9 @@ int main() {
   
   oss << "</RESULT>";
   
-  list<Result> rs = p.InterpretResult(oss.str().c_str());
-  
+  Results r = p.InterpretResult(oss.str().c_str());
+  cout << "id : " << r.GetID() << endl << endl;
+  list<Result> rs = r.GetRes();
   std::list<Result>::const_iterator lit(rs.begin()), lend(rs.end());
   for (; lit != lend; ++lit) {
     cout << "name : " << lit->getName() << endl;
@@ -282,6 +404,22 @@ int main() {
   }
   */
   // ----------------------------------------------------
+
+  // ----------------------------------------------------
+  // Test de Indexation
+  
+  oss << "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" << endl;
+
+  oss << "<INDEXATION>";
+
+  oss << "<RENOMMAGES>";
+  oss << "<FICHIERRENOMME><PATH>TOTO</PATH><NEWPATH>TITI</NEWPATH></FICHIERRENOMME>";
+  oss << "<FICHIERRENOMME><PATH>vlad</PATH><NEWPATH>geor</NEWPATH></FICHIERRENOMME>";
+  oss << "</RENOMMAGES>";
+
+  oss << "</INDEXATION>";
+
+  Indexation r = p.InterpretIndexation(oss.str().c_str());
 
   return 0;
 }

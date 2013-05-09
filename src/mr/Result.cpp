@@ -1,5 +1,9 @@
 #include "Result.h"
 
+// ----------------------------------------------------------------------------
+// Class Result
+// ----------------------------------------------------------------------------
+
 Result::Result(string n, string pa, string pe, unsigned int s, string lm, string pr) {
   this->init(n, pa, pe, s, lm, pr);
 }
@@ -41,4 +45,23 @@ string Result::getLastModif() const {
 
 string Result::getProprio() const {
   return this->proprio;
+}
+
+// ----------------------------------------------------------------------------
+// Class Results
+// ----------------------------------------------------------------------------
+
+Results::Results(string i, list<Result> r) {
+  this->id = i;
+  this->res = r;
+}
+
+Results::~Results() {}
+
+string Results::GetID() {
+  return this->id;
+}
+
+list<Result> Results::GetRes() {
+  return this->res;
 }

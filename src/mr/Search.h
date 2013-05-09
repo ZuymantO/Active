@@ -9,6 +9,7 @@ using namespace std;
 
 class Search {
  private :
+  string id;
   string word;
   bool content;
   string pathDir;
@@ -18,12 +19,13 @@ class Search {
   Date *end;
 
  public :
-  Search(string w, bool c, string pd, string p, string ext, Date* b, Date* e);
-  Search(string w, string pd, string p, string ext, Date* b, Date* e);
+  Search(string i, string w, bool c, string pd, string p, string ext, Date* b, Date* e);
+  Search(string i, string w, string pd, string p, string ext, Date* b, Date* e);
   ~Search();
 
-  void init(string w, bool c, string pd, string p, string ext, Date* b, Date*e);
+  void init(string i, string w, bool c, string pd, string p, string ext, Date* b, Date*e);
 
+  string getID() const;
   string getWord() const;
   bool getContent() const;
   string getPathDir() const;
