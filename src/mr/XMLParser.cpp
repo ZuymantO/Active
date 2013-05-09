@@ -257,7 +257,7 @@ Indexation XMLParser::InterpretIndexation(string xmlStream) {
       tmpM = GetModifications(nodeDepth1);
     }
     else if (strcmp(tagName, "SUPPRESSIONS") == 0) {
-      // TODO
+      tmpS = GetSuppressions(nodeDepth1);
     }
     else if (strcmp(tagName, "CREATIONS") == 0) {
       // TODO
@@ -348,7 +348,6 @@ list<Modification> XMLParser::GetModifications(TiXmlNode *nodeDepth1) {
 	perm = tagDepth3->GetText();
       }
       else if (strcmp(tagName, "INDEXAGE") == 0) {
-	// TODO
 	tagDepth4 = nodeDepth3->FirstChildElement("MOT");
 	while (tagDepth4) {
 	  nodeDepth4 = tagDepth4->Clone();
@@ -384,6 +383,36 @@ list<Modification> XMLParser::GetModifications(TiXmlNode *nodeDepth1) {
 
 list<Suppression> XMLParser::GetSuppressions(TiXmlNode *nodeDepth1) {
   list<Suppression> supps;
+  Suppression *tmpr;
+  string path;
+  const char *tagName;
+  TiXmlElement *tagDepth2, *tagDepth3;
+  TiXmlNode *nodeDepth2, *nodeDepth3;
+
+  tagDepth2 = nodeDepth1->FirstChildElement("FICHIERSUPPRIME");
+  while (tagDepth2) {
+
+    nodeDepth2 = tagDepth2->Clone();
+    tagDepth3 = nodeDepth2->FirstChildElement();
+    while (tagDepth3) {
+      nodeDepth3 = tagDepth3->Clone();
+      tagName = nodeDepth3->Value();
+
+      if (strcmp(tagName, "PATH") == 0) {
+	path = tagDepth3->GetText();
+	break;
+      }
+      tagDepth3 = tagDepth3->NextSiblingElement();
+    }
+    if (path != "") {
+      tmpr = new Suppression(path);
+      supps.push_front(*tmpr);
+    }
+    path = "";
+
+    tagDepth2 = tagDepth2->NextSiblingElement("FICHIERSUPPRIME");
+  }
+
   return supps;
 }
 
@@ -482,6 +511,11 @@ int main() {
   oss << "<FICHIERMODIFIE><PATH>TATA</PATH><DATEMODIFICATION>08-08-13</DATEMODIFICATION><TAILLE>463</TAILLE><PROPRIETAIRE>MAT</PROPRIETAIRE><GROUPE>ROOT</GROUPE><PERMISSIONS>-r--r--r--</PERMISSIONS><INDEXAGE><MOT frequence=\"3\">coucou</MOT><MOT frequence=\"45\">SALUT</MOT><MOT frequence=\"45\">bouh</MOT></INDEXAGE></FICHIERMODIFIE>";
   oss << "</MODIFICATIONS>";
 
+  oss << "<SUPPRESSIONS>";
+  oss << "<FICHIERSUPPRIME><PATH>TOTO</PATH></FICHIERSUPPRIME>";
+  oss << "<FICHIERSUPPRIME><PATH>TITI</PATH></FICHIERSUPPRIME>";
+  oss << "<SUPPRESSIONS>";
+
   oss << "</INDEXATION>";
 
   Indexation r = p.InterpretIndexation(oss.str().c_str());
@@ -512,7 +546,15 @@ int main() {
     cout << "newpath : " << lit2->GetNewpath() << endl;
     cout << "-----------------------------" << endl;
   }
-  
+
+  cout << "-----------------------------" << endl;
+  list<Suppression> ss = r.GetSupp();
+  std::list<Suppression>::const_iterator lit3(ss.begin()), lend3(ss.end());
+  for (; lit3 != lend3; ++lit3) {
+    cout << "path : " << lit3->GetPath() << endl;
+  }
+  cout << "-----------------------------" << endl;
+  cout << "-----------------------------" << endl;
 
   return 0;
 }
