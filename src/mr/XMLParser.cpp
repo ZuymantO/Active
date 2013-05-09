@@ -33,8 +33,8 @@ Date* XMLParser::GetDate(TiXmlNode *nodeDepth2) {
 Search XMLParser::InterpretRequest(string xmlStream) {
 
   Search *research;
-  string word, pathDir, perm, ext;
-  Date *begin, *end, *tmp;
+  string word = "", pathDir = "", perm = "", ext = "";
+  Date *begin = new Date(), *end = new Date(), *tmp;
   bool content = false;
 
   TiXmlDocument doc;
@@ -107,15 +107,13 @@ Search XMLParser::InterpretRequest(string xmlStream) {
     tagDepth1 = tagDepth1->NextSiblingElement();
   }
 
+  if (!(*begin).IsValidDate()) {
+    begin = new Date();
+  }
+  if (!(*end).IsValidDate()) {
+    end = new Date();
+  }
   research = new Search(word, content, pathDir, perm, ext, begin, end);
-  cout << "word : " << (*research).getWord() << endl;
-  cout << "content : " << (*research).getContent() << endl;
-  cout << "pathdir : " << (*research).getPathDir() << endl;
-  cout << "perm : " << (*research).getPerm() << endl;
-  cout << "extension : " << (*research).getExtension() << endl;
-  cout << "date debut : " << (*research).getBeginDay() << "/" << (*research).getBeginMonth() << "/" << (*research).getBeginYear() << endl;
-  cout << "date fin : " << (*research).getEndDay() << "/" << (*research).getEndMonth() << "/" << (*research).getEndYear() << endl;
-
   return *research;
 }
 
@@ -127,7 +125,14 @@ int main() {
   oss << "<TIMESLOT><BEGIN><DAY>17</DAY><MONTH>mars</MONTH><YEAR>2013</YEAR></BEGIN><END><DAY>17</DAY><MONTH>mai</MONTH><YEAR>2013</YEAR></END></TIMESLOT></SEARCH>";
 
   XMLParser p;
-  p.InterpretRequest(oss.str().c_str());
+  Search research = p.InterpretRequest(oss.str().c_str());
+  cout << "word : " << (research).getWord() << endl;
+  cout << "content : " << (research).getContent() << endl;
+  cout << "pathdir : " << (research).getPathDir() << endl;
+  cout << "perm : " << (research).getPerm() << endl;
+  cout << "extension : " << (research).getExtension() << endl;
+  cout << "date debut : " << (research).getBeginDay() << "/" << (research).getBeginMonth() << "/" << (research).getBeginYear() << endl;
+  cout << "date fin : " << (research).getEndDay() << "/" << (research).getEndMonth() << "/" << (research).getEndYear() << endl;
   return 0;
 }
 
