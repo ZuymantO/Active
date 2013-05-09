@@ -260,7 +260,7 @@ Indexation XMLParser::InterpretIndexation(string xmlStream) {
       tmpS = GetSuppressions(nodeDepth1);
     }
     else if (strcmp(tagName, "CREATIONS") == 0) {
-      // TODO
+      tmpC = GetCreations(nodeDepth1);
     }
 
     tagDepth1 = tagDepth1->NextSiblingElement();
@@ -357,6 +357,8 @@ list<Modification> XMLParser::GetModifications(TiXmlNode *nodeDepth1) {
 	  ind = new Indexage(w, freq);
 	  index.push_front(*ind);
 	  tagDepth4 = tagDepth4->NextSiblingElement("MOT");
+	  w = "";
+	  freq = 0;
 	}
       }
       else if (strcmp(tagName, "NEWPATH") == 0) {
@@ -383,7 +385,7 @@ list<Modification> XMLParser::GetModifications(TiXmlNode *nodeDepth1) {
 
 list<Suppression> XMLParser::GetSuppressions(TiXmlNode *nodeDepth1) {
   list<Suppression> supps;
-  Suppression *tmpr;
+  Suppression *tmps;
   string path;
   const char *tagName;
   TiXmlElement *tagDepth2, *tagDepth3;
@@ -405,8 +407,8 @@ list<Suppression> XMLParser::GetSuppressions(TiXmlNode *nodeDepth1) {
       tagDepth3 = tagDepth3->NextSiblingElement();
     }
     if (path != "") {
-      tmpr = new Suppression(path);
-      supps.push_front(*tmpr);
+      tmps = new Suppression(path);
+      supps.push_front(*tmps);
     }
     path = "";
 
@@ -418,6 +420,75 @@ list<Suppression> XMLParser::GetSuppressions(TiXmlNode *nodeDepth1) {
 
 list<Creation> XMLParser::GetCreations(TiXmlNode *nodeDepth1) {
   list<Creation> creas;
+  Creation *tmpc;
+  string path, date, prop, groupe, perm, format, w;
+  unsigned int taille;
+  int freq;
+  Indexage *ind;
+  list<Indexage> index;
+  const char* tagName;
+  TiXmlElement *tagDepth2, *tagDepth3, *tagDepth4;
+  TiXmlNode *nodeDepth2, *nodeDepth3, *nodeDepth4;
+
+  tagDepth2 = nodeDepth1->FirstChildElement("FICHIERCREE");
+  while(tagDepth2) {
+    nodeDepth2 = tagDepth2->Clone();
+    tagDepth3 = nodeDepth2->FirstChildElement();
+    while (tagDepth3) {
+      nodeDepth3 = tagDepth3->Clone();
+      tagName = nodeDepth3->Value();
+
+      if (strcmp(tagName, "PATH") == 0) {
+	path = tagDepth3->GetText();
+      }
+      else if (strcmp(tagName, "DATECREATION") == 0) {
+	date = tagDepth3->GetText();
+      }
+      else if (strcmp(tagName, "TAILLE") == 0) {
+	taille = u.StringToInt(tagDepth3->GetText());
+      }
+      else if (strcmp(tagName, "PROPRIETAIRE") == 0) {
+	prop = tagDepth3->GetText();
+      }
+      else if (strcmp(tagName, "GROUPE") == 0) {
+	groupe = tagDepth3->GetText();
+      }
+      else if (strcmp(tagName, "PERMISSIONS") == 0) {
+	perm = tagDepth3->GetText();
+      }
+      else if (strcmp(tagName, "INDEXAGE") == 0) {
+	tagDepth4 = nodeDepth3->FirstChildElement("MOT");
+	while (tagDepth4) {
+	  nodeDepth4 = tagDepth4->Clone();
+	  tagName = nodeDepth4->Value();
+	  w = tagDepth4->GetText();
+	  tagDepth4->QueryIntAttribute("frequence", &freq);
+	  ind = new Indexage(w, freq);
+	  index.push_front(*ind);
+	  tagDepth4 = tagDepth4->NextSiblingElement("MOT");
+	  w = "";
+	  freq = 0;
+	}
+      }
+      else if (strcmp(tagName, "format") == 0) {
+	format = tagDepth3->GetText();
+      }
+      tagDepth3 = tagDepth3->NextSiblingElement();
+    }
+    if (path != "" && date != "" && prop != "" && groupe != "" && perm != ""  && format != "" && !index.empty()) {
+      tmpc = new Creation(path, date, taille, prop, groupe, perm, index, format);
+      creas.push_front(*tmpc);
+    }
+    path ="";
+    date = "";
+    prop = "";
+    perm = "";
+    format = "";
+    index.clear();
+
+    tagDepth2 = tagDepth2->NextSiblingElement("FICHIERCREE");
+  }
+
   return creas;
 }
 
@@ -496,7 +567,7 @@ int main() {
 
   // ----------------------------------------------------
   // Test de Indexation
-  
+  /*
   oss << "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" << endl;
 
   oss << "<INDEXATION>";
@@ -514,7 +585,12 @@ int main() {
   oss << "<SUPPRESSIONS>";
   oss << "<FICHIERSUPPRIME><PATH>TOTO</PATH></FICHIERSUPPRIME>";
   oss << "<FICHIERSUPPRIME><PATH>TITI</PATH></FICHIERSUPPRIME>";
-  oss << "<SUPPRESSIONS>";
+  oss << "</SUPPRESSIONS>";
+
+  oss << "<CREATIONS>";
+  oss << "<FICHIERCREE><PATH>TOTO</PATH><DATECREATION>08-08-13</DATECREATION><TAILLE>463</TAILLE><PROPRIETAIRE>MAT</PROPRIETAIRE><GROUPE>ROOT</GROUPE><PERMISSIONS>-r--r--r--</PERMISSIONS><INDEXAGE><MOT frequence=\"3\">coucou</MOT><MOT frequence=\"45\">SALUT</MOT></INDEXAGE><format>TITI</format></FICHIERCREE>";
+  oss << "<FICHIERCREE><PATH>TATA</PATH><DATECREATION>08-08-13</DATECREATION><TAILLE>463</TAILLE><PROPRIETAIRE>MAT</PROPRIETAIRE><GROUPE>ROOT</GROUPE><PERMISSIONS>-r--r--r--</PERMISSIONS><INDEXAGE><MOT frequence=\"3\">coucou</MOT><MOT frequence=\"45\">SALUT</MOT><MOT frequence=\"45\">bouh</MOT></INDEXAGE></FICHIERCREE>";
+  oss << "</CREATIONS>";
 
   oss << "</INDEXATION>";
 
@@ -556,6 +632,25 @@ int main() {
   cout << "-----------------------------" << endl;
   cout << "-----------------------------" << endl;
 
+  list<Creation> cr = r.GetCrea();
+  cout << cr.size() << endl;
+  std::list<Creation>::const_iterator lit4(cr.begin()), lend4(cr.end());
+  for (; lit4 != lend4; ++lit4) {
+    cout << "path : " << lit4->GetPath() << endl;
+    cout << "date : " << lit4->GetDate() << endl;
+    cout << "taille : " << lit4->GetTaille() << endl;
+    cout << "prop : " << lit4->GetProprietaire() << endl;
+    cout << "groupe : " << lit4->GetGroupe() << endl;
+    cout << "perm : " << lit4->GetPerm() << endl;
+    list<Indexage> li2 = lit4->GetIndex();
+    std::list<Indexage>::const_iterator llit2(li2.begin()), llend2(li2.end());
+    for (; llit2 != llend2; ++llit2) {
+      cout << "le mot #" << llit2->GetWord() << "# apparait : " << llit2->GetOccurrence() << endl;
+    }
+    cout << "format : " << lit4->GetFormat() << endl;
+    cout << "-----------------------------" << endl;
+  }
+  */
   return 0;
 }
 
