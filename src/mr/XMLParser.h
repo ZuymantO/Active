@@ -20,7 +20,7 @@ class XMLParser {
   // permet d'extraire une date a partir d'un noeud
   Date* GetDate(TiXmlNode *nodeDepth2);
   list<Renommage> GetRenommages(TiXmlNode *nodeDepth1);
-  list<Modification> GetModificatiosn(TiXmlNode *nodeDepth1);
+  list<Modification> GetModifications(TiXmlNode *nodeDepth1);
   list<Suppression> GetSuppressions(TiXmlNode *nodeDepth1);
   list<Creation> GetCreations(TiXmlNode *nodeDepth1);
 };

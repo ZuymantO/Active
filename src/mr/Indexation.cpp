@@ -105,14 +105,14 @@ void File::AddIndex(Indexage i) {
 // Class Modification
 // ----------------------------------------------------------------------------
 
-Modification::Modification(string pa, string d, int t, string pr, string g, string p, list<Indexage> i, string o) : File(pa, d, t, pr, g, p, i) {
-  this->oldpath = o;
+Modification::Modification(string pa, string d, int t, string pr, string g, string p, list<Indexage> i, string n) : File(pa, d, t, pr, g, p, i) {
+  this->newpath = n;
 }
 
 Modification::~Modification() {}
 
-string Modification::GetOldpath() const {
-  return this->oldpath;
+string Modification::GetNewpath() const {
+  return this->newpath;
 }
 
 // ----------------------------------------------------------------------------

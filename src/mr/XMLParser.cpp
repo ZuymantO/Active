@@ -250,19 +250,11 @@ Indexation XMLParser::InterpretIndexation(string xmlStream) {
   while (tagDepth1) {
     nodeDepth1 = tagDepth1->Clone();
     tagName = nodeDepth1->Value();
-    cout << tagName << endl;
     if (strcmp(tagName, "RENOMMAGES") == 0) {
       tmpR = GetRenommages(nodeDepth1);
-      /*
-      std::list<Renommage>::const_iterator lit(tmpR.begin()), lend(tmpR.end());
-      for (; lit != lend; ++lit) {
-	cout << "oldpath : " << lit->GetOldPath() << endl;
-	cout << "newpath : " << lit->GetNewPath() << endl;
-      }
-      */
     }
     else if (strcmp(tagName, "MODIFICATIONS") == 0) {
-      // TODO
+      tmpM = GetModifications(nodeDepth1);
     }
     else if (strcmp(tagName, "SUPPRESSIONS") == 0) {
       // TODO
@@ -288,7 +280,7 @@ list<Renommage> XMLParser::GetRenommages(TiXmlNode *nodeDepth1) {
 
   tagDepth2 = nodeDepth1->FirstChildElement("FICHIERRENOMME");
   while (tagDepth2) {
-    // TODO
+
     nodeDepth2 = tagDepth2->Clone();
     tagDepth3 = nodeDepth2->FirstChildElement();
     while (tagDepth3) {
@@ -317,8 +309,76 @@ list<Renommage> XMLParser::GetRenommages(TiXmlNode *nodeDepth1) {
   return renoms;
 }
 
-list<Modification> XMLParser::GetModificatiosn(TiXmlNode *nodeDepth1) {
+list<Modification> XMLParser::GetModifications(TiXmlNode *nodeDepth1) {
+
   list<Modification> modifs;
+  Modification *tmpm;
+  string path, date, prop, groupe, perm, newpath, w;
+  unsigned int taille;
+  int freq;
+  Indexage *ind;
+  list<Indexage> index;
+  const char* tagName;
+  TiXmlElement *tagDepth2, *tagDepth3, *tagDepth4;
+  TiXmlNode *nodeDepth2, *nodeDepth3, *nodeDepth4;
+
+  tagDepth2 = nodeDepth1->FirstChildElement("FICHIERMODIFIE");
+  while(tagDepth2) {
+    nodeDepth2 = tagDepth2->Clone();
+    tagDepth3 = nodeDepth2->FirstChildElement();
+    while (tagDepth3) {
+      nodeDepth3 = tagDepth3->Clone();
+      tagName = nodeDepth3->Value();
+
+      if (strcmp(tagName, "PATH") == 0) {
+	path = tagDepth3->GetText();
+      }
+      else if (strcmp(tagName, "DATEMODIFICATION") == 0) {
+	date = tagDepth3->GetText();
+      }
+      else if (strcmp(tagName, "TAILLE") == 0) {
+	taille = u.StringToInt(tagDepth3->GetText());
+      }
+      else if (strcmp(tagName, "PROPRIETAIRE") == 0) {
+	prop = tagDepth3->GetText();
+      }
+      else if (strcmp(tagName, "GROUPE") == 0) {
+	groupe = tagDepth3->GetText();
+      }
+      else if (strcmp(tagName, "PERMISSIONS") == 0) {
+	perm = tagDepth3->GetText();
+      }
+      else if (strcmp(tagName, "INDEXAGE") == 0) {
+	// TODO
+	tagDepth4 = nodeDepth3->FirstChildElement("MOT");
+	while (tagDepth4) {
+	  nodeDepth4 = tagDepth4->Clone();
+	  tagName = nodeDepth4->Value();
+	  w = tagDepth4->GetText();
+	  tagDepth4->QueryIntAttribute("frequence", &freq);
+	  ind = new Indexage(w, freq);
+	  index.push_front(*ind);
+	  tagDepth4->NextSiblingElement("MOT");
+	}
+      }
+      else if (strcmp(tagName, "NEWPATH") == 0) {
+	newpath = tagDepth3->GetText();
+      }
+    }
+    if (path != "" && date != "" && prop != "" && groupe != "" && perm != "" && !index.empty()) {
+      tmpm = new Modification(path, date, taille, prop, groupe, perm, index, newpath);
+      modifs.push_front(*tmpm);
+    }
+    path ="";
+    date = "";
+    prop = "";
+    perm = "";
+    newpath = "";
+    index.clear();
+
+    tagDepth2 = tagDepth2->NextSiblingElement("FICHIERMODIFIE");
+  }
+
   return modifs;
 }
 
@@ -339,20 +399,20 @@ int main() {
   // ----------------------------------------------------
   // Test de Search
   /*
-  oss << "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" << endl;
-  oss << "<SEARCH id=\"34\"><WORD>MOT</WORD><CONTENT>true</CONTENT><PATHDIR>/home/matthieu</PATHDIR><PERM>-rw-rw-rw-</PERM><EXTENSION>txt</EXTENSION>";
-  oss << "<TIMESLOT><BEGIN><DAY>17</DAY><MONTH>mars</MONTH><YEAR>2013</YEAR></BEGIN><END><DAY>17</DAY><MONTH>mai</MONTH><YEAR>2013</YEAR></END></TIMESLOT></SEARCH>";
+    oss << "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" << endl;
+    oss << "<SEARCH id=\"34\"><WORD>MOT</WORD><CONTENT>true</CONTENT><PATHDIR>/home/matthieu</PATHDIR><PERM>-rw-rw-rw-</PERM><EXTENSION>txt</EXTENSION>";
+    oss << "<TIMESLOT><BEGIN><DAY>17</DAY><MONTH>mars</MONTH><YEAR>2013</YEAR></BEGIN><END><DAY>17</DAY><MONTH>mai</MONTH><YEAR>2013</YEAR></END></TIMESLOT></SEARCH>";
 
-  Search research = p.InterpretSearch(oss.str().c_str());
+    Search research = p.InterpretSearch(oss.str().c_str());
 
-  cout << "id : " << (research).getID() << endl;
-  cout << "word : " << (research).getWord() << endl;
-  cout << "content : " << (research).getContent() << endl;
-  cout << "pathdir : " << (research).getPathDir() << endl;
-  cout << "perm : " << (research).getPerm() << endl;
-  cout << "extension : " << (research).getExtension() << endl;
-  cout << "date debut : " << (research).getBeginDay() << "/" << (research).getBeginMonth() << "/" << (research).getBeginYear() << endl;
-  cout << "date fin : " << (research).getEndDay() << "/" << (research).getEndMonth() << "/" << (research).getEndYear() << endl;
+    cout << "id : " << (research).getID() << endl;
+    cout << "word : " << (research).getWord() << endl;
+    cout << "content : " << (research).getContent() << endl;
+    cout << "pathdir : " << (research).getPathDir() << endl;
+    cout << "perm : " << (research).getPerm() << endl;
+    cout << "extension : " << (research).getExtension() << endl;
+    cout << "date debut : " << (research).getBeginDay() << "/" << (research).getBeginMonth() << "/" << (research).getBeginYear() << endl;
+    cout << "date fin : " << (research).getEndDay() << "/" << (research).getEndMonth() << "/" << (research).getEndYear() << endl;
   */
   // ----------------------------------------------------
 
@@ -360,48 +420,48 @@ int main() {
   // ----------------------------------------------------
   // Test de Result
   /*
-  oss << "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" << endl;
-  oss << "<RESULT id=\"34\">";
+    oss << "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" << endl;
+    oss << "<RESULT id=\"34\">";
 
-  oss << "<FILE>";
-  oss << "<NAME>toto.txt</NAME><PATH>/home/thomas/</PATH><PERM>-rw-rw-r--</PERM><SIZE>756</SIZE><LASTMODIF>mai 8 18:05</LASTMODIF>";
-  oss << "</FILE>";
+    oss << "<FILE>";
+    oss << "<NAME>toto.txt</NAME><PATH>/home/thomas/</PATH><PERM>-rw-rw-r--</PERM><SIZE>756</SIZE><LASTMODIF>mai 8 18:05</LASTMODIF>";
+    oss << "</FILE>";
   
-  oss << "<FILE>";
-  oss << "<NAME>titi.txt</NAME><PATH>/home/matthieu/</PATH><PERM>-rw-rw-rw-</PERM><SIZE>3092</SIZE><LASTMODIF>mai 8 18:05</LASTMODIF><PROPRIO>matthieu</PROPRIO>";
-  oss << "</FILE>";
+    oss << "<FILE>";
+    oss << "<NAME>titi.txt</NAME><PATH>/home/matthieu/</PATH><PERM>-rw-rw-rw-</PERM><SIZE>3092</SIZE><LASTMODIF>mai 8 18:05</LASTMODIF><PROPRIO>matthieu</PROPRIO>";
+    oss << "</FILE>";
 
-  oss << "<FILE>";
-  oss << "<NAME>titi.txt</NAME><PATH>/home/matthieu/</PATH><PERM>-rw-rw-rw-</PERM><SIZE>756</SIZE><PROPRIO>matthieu</PROPRIO>";
-  oss << "</FILE>";
+    oss << "<FILE>";
+    oss << "<NAME>titi.txt</NAME><PATH>/home/matthieu/</PATH><PERM>-rw-rw-rw-</PERM><SIZE>756</SIZE><PROPRIO>matthieu</PROPRIO>";
+    oss << "</FILE>";
   
-  oss << "</RESULT>";
+    oss << "</RESULT>";
   
-  Results r = p.InterpretResult(oss.str().c_str());
-  cout << "id : " << r.GetID() << endl << endl;
-  list<Result> rs = r.GetRes();
-  std::list<Result>::const_iterator lit(rs.begin()), lend(rs.end());
-  for (; lit != lend; ++lit) {
+    Results r = p.InterpretResult(oss.str().c_str());
+    cout << "id : " << r.GetID() << endl << endl;
+    list<Result> rs = r.GetRes();
+    std::list<Result>::const_iterator lit(rs.begin()), lend(rs.end());
+    for (; lit != lend; ++lit) {
     cout << "name : " << lit->getName() << endl;
     cout << "path : " << lit->getPath() << endl;
     cout << "perm : " << lit->getPerm() << endl;
     cout << "size : " << lit->getSize() << endl;
     cout << "lastmodif : ";
     if (lit->getLastModif() != "") {
-      cout << lit->getLastModif();
+    cout << lit->getLastModif();
     } else {
-      cout << "NULL";
+    cout << "NULL";
     }
     cout << endl;
     cout << "proprio : ";
     if (lit->getProprio() != "") {
-      cout << lit->getProprio();
+    cout << lit->getProprio();
     } else {
-      cout << "NULL";
+    cout << "NULL";
     }
     cout << endl;
     cout << endl;
-  }
+    }
   */
   // ----------------------------------------------------
 
@@ -417,9 +477,22 @@ int main() {
   oss << "<FICHIERRENOMME><PATH>vlad</PATH><NEWPATH>geor</NEWPATH></FICHIERRENOMME>";
   oss << "</RENOMMAGES>";
 
+  oss << "<MODIFICATIONS>";
+  oss << "<FICHIERMODIFIE><PATH>TOTO</PATH><DATEMODIFICATION>08-08-13</DATEMODIFICATION><TAILLE>463</TAILLE><PROPRIETAIRE>MAT</PROPRIETAIRE><GROUPE>ROOT</GROUPE><PERMISSIONS>-r--r--r--</PERMISSIONS><INDEXAGE><MOT frequence=\"3\">coucou</MOT><MOT frequence=\"45\">SALUT</MOT></INDEXAGE><NEWPATH>TITI</NEWPATH></FICHIERMODIFIE>";
+  oss << "<FICHIERMODIFIE><PATH>TATA</PATH><DATEMODIFICATION>08-08-13</DATEMODIFICATION><TAILLE>463</TAILLE><PROPRIETAIRE>MAT</PROPRIETAIRE><GROUPE>ROOT</GROUPE><PERMISSIONS>-r--r--r--</PERMISSIONS><INDEXAGE><MOT frequence=\"3\">coucou</MOT><MOT frequence=\"45\">SALUT</MOT><MOT frequence=\"45\">bouh</MOT></INDEXAGE></FICHIERMODIFIE>";
+  oss << "</MODIFICATIONS>";
+
   oss << "</INDEXATION>";
 
   Indexation r = p.InterpretIndexation(oss.str().c_str());
+  
+  list<Renommage> rs = r.GetRenom();
+  std::list<Renommage>::const_iterator lit(rs.begin()), lend(rs.end());
+  for (; lit != lend; ++lit) {
+    cout << "oldpath : " << lit->GetOldPath() << endl;
+    cout << "newpath : " << lit->GetNewPath() << endl;
+  }
+  
 
   return 0;
 }

@@ -35,7 +35,7 @@ class Renommage {
 
 // Classe representant un fichier pour la modification et la creation
 class File {
- private :
+ protected :
   string path;
   string date;
   unsigned int taille;
@@ -64,12 +64,12 @@ class File {
 // Classe representant la modification
 class Modification : public File {
  private :
-  string oldpath;
+  string newpath;
  public :
-  Modification(string pa, string d, int t, string pr, string g, string p, list<Indexage> i, string o);
+  Modification(string pa, string d, int t, string pr, string g, string p, list<Indexage> i, string n);
   ~Modification();
 
-  string GetOldpath() const;
+  string GetNewpath() const;
 };
 
 // Classe representant la creation
