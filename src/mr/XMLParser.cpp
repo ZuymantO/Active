@@ -218,7 +218,7 @@ int main() {
 
   // ----------------------------------------------------
   // Test de Search
-  /*
+  
   oss << "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" << endl;
   oss << "<SEARCH><WORD>MOT</WORD><CONTENT>true</CONTENT><PATHDIR>/home/matthieu</PATHDIR><PERM>-rw-rw-rw-</PERM><EXTENSION>txt</EXTENSION>";
   oss << "<TIMESLOT><BEGIN><DAY>17</DAY><MONTH>mars</MONTH><YEAR>2013</YEAR></BEGIN><END><DAY>17</DAY><MONTH>mai</MONTH><YEAR>2013</YEAR></END></TIMESLOT></SEARCH>";
@@ -232,12 +232,13 @@ int main() {
   cout << "extension : " << (research).getExtension() << endl;
   cout << "date debut : " << (research).getBeginDay() << "/" << (research).getBeginMonth() << "/" << (research).getBeginYear() << endl;
   cout << "date fin : " << (research).getEndDay() << "/" << (research).getEndMonth() << "/" << (research).getEndYear() << endl;
-  */
+  
   // ----------------------------------------------------
 
 
   // ----------------------------------------------------
   // Test de Result
+  /*
   oss << "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>" << endl;
   oss << "<RESULT>";
 
@@ -256,6 +257,7 @@ int main() {
   oss << "</RESULT>";
   
   list<Result> rs = p.InterpretResult(oss.str().c_str());
+  
   std::list<Result>::const_iterator lit(rs.begin()), lend(rs.end());
   for (; lit != lend; ++lit) {
     cout << "name : " << lit->getName() << endl;
@@ -278,6 +280,7 @@ int main() {
     cout << endl;
     cout << endl;
   }
+  */
   // ----------------------------------------------------
 
   return 0;

@@ -1,7 +1,4 @@
-
 #include "Search.h"
-
-#include <iostream>
 
 Search::Search(string w, bool c, string pd, string p, string ext, Date* b, Date* e) {
   this->init(w, c, pd, p, ext, b, e);
@@ -71,26 +68,5 @@ unsigned int Search::getEndYear() const {
 }
 
 bool Search::timeSlot() const {
-  //return (Date::isValidDate((*this->begin)) && Date::isValidDate((*this->end)));
   return ((*this->begin).IsValidDate() && (*this->end).IsValidDate());
 }
-
-/*
-int main() {
-  Date *d1, *d2;
-  d1 = new Date();
-  d2 = new Date(4,"5",2013);
-
-  Search *m = new Search("mot", "pathdir", "perm", "ext", d1, d2);
-  cout << "taille : " << (*m).getWord().size() << endl;
-  cout << "word : " << (*m).getWord() << endl;
-  cout << "content : " << (*m).getContent() << endl;
-  cout << "pathdir : " << (*m).getPathDir() << endl;
-  cout << "perm : " << (*m).getPerm() << endl;
-  cout << "extension : " << (*m).getExtension() << endl;
-  cout << "date debut : " << (*m).getBeginDay() << "/" << (*m).getBeginMonth() << "/" << (*m).getBeginYear() << endl;
-  cout << "date fin : " << (*m).getEndDay() << "/" << (*m).getEndMonth() << "/" << (*m).getEndYear() << endl;
-
-  return 1;
-}
-*/
