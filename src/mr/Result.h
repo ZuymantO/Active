@@ -1,9 +1,7 @@
 #ifndef __Result__
 #define __Result__
 
-#include <list>
 #include <string>
-#include <tinyxml.h>
 
 using namespace std;
 
@@ -29,8 +27,6 @@ class Result {
   unsigned int getSize() const;
   string getLastModif() const;
   string getProprio() const;
-
-  list<Result> SearchResults(string xmlStream);
 };
 
 
