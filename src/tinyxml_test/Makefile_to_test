@@ -1,0 +1,15 @@
+MAIN=XMLParser
+CC=g++
+CFLAGS=-W -Wall -ansi -pedantic
+LIBS=
+
+all : $(MAIN)
+
+$(MAIN) : $(MAIN).o MyDate.o Result.o Search.o Indexation.o Utils.o tinyxml.o tinystr.o tinyxmlparser.o tinyxmlerror.o
+	$(CC) -static -o $@ $^ $(LIBS)
+
+%.o: %.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+clean :
+	rm -rf *.o $(MAIN) *~
