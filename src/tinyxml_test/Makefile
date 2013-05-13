@@ -6,7 +6,7 @@ LIBS=-ltinyxml
 all : $(MAIN)
 
 $(MAIN) : $(MAIN).o MyDate.o Result.o Search.o Indexation.o Utils.o tinyxml.o tinystr.o tinyxmlparser.o
-	$(CC) -o $(MAIN) $(MAIN).o MyDate.o Result.o Search.o Indexation.o Utils.o tinyxml.o tinystr.o tinyxmlparser.o $(LIBS)
+	$(CC) -static -o $(MAIN) $(MAIN).o MyDate.o Result.o Search.o Indexation.o Utils.o tinyxml.o tinystr.o tinyxmlparser.o $(LIBS)
 
 #$(MAIN) : $(MAIN).o MyDate.o Result.o Search.o Indexation.o Utils.o
 #	$(CC) -o $(MAIN) $(MAIN).o MyDate.o Result.o Search.o Indexation.o Utils.o $(LIBS)
