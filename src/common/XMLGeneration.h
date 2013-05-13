@@ -1,7 +1,7 @@
-// Gere les communication xml
+// Gere les communication XML
 
-#ifndef __Xml__Communication__
-#define __Xml__Communication__
+#ifndef __XML__Generation__
+#define __XML__Generation__
 
 #include <string>
 #include <vector>
@@ -9,10 +9,10 @@
 #include "../daemon/ANotifyEvent.h"
 #include "../bi/AnyFile.h"
 
-const std::string EN_TETE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+const std::string EN_TETE = "<?XML version=\"1.0\" encoding=\"UTF-8\"?>";
 int id = 0;
 
-class XmlCommunication {
+class XMLGeneration {
  public :
   /*
    * Envoie d'informations du moteur d'indexation a la base d'indexation

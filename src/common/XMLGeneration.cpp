@@ -6,11 +6,11 @@
 #include <unistd.h>
 #include <time.h>
 
-#include "XmlCommunication.h"
+#include "XMLGeneration.h"
 
 using namespace std;
 
-string XmlCommunication::MIToBI(ANotifyEvent ane) {
+string XMLGeneration::MIToBI(ANotifyEvent ane) {
   ostringstream oss;
   string fileName;
   struct stat fileInfo;
@@ -101,7 +101,7 @@ string XmlCommunication::MIToBI(ANotifyEvent ane) {
   return oss.str();
 }
 
-string XmlCommunication::BIToMR(vector<AnyFile>* AQResult, int searchID) {
+string XMLGeneration::BIToMR(vector<AnyFile>* AQResult, int searchID) {
   ostringstream oss;
   oss << "<RESULT id=" << searchID << ">";
   for (int i(0); i < AQResult.size(); ++i) {
@@ -120,7 +120,7 @@ string XmlCommunication::BIToMR(vector<AnyFile>* AQResult, int searchID) {
   return oss.str();
 }
 
-string XmlCommunication::MRToBI(MR mr, int searchID) {
+string XMLGeneration::MRToBI(MR mr, int searchID) {
   ostringstream oss;
   oss << "<SEARCH id=" << searchID << ">";
   oss << "<WORD>" << mr.getWord() << "</WORD>";
