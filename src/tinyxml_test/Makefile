@@ -1,12 +1,13 @@
 MAIN=XMLParser
 CC=g++
 CFLAGS=-W -Wall -ansi -pedantic
-LIBS=-ltinyxml
+LIBS=
+#-ltinyxml
 
 all : $(MAIN)
 
-$(MAIN) : $(MAIN).o MyDate.o Result.o Search.o Indexation.o Utils.o tinyxml.o tinystr.o tinyxmlparser.o
-	$(CC) -static -o $(MAIN) $(MAIN).o MyDate.o Result.o Search.o Indexation.o Utils.o tinyxml.o tinystr.o tinyxmlparser.o $(LIBS)
+$(MAIN) : $(MAIN).o MyDate.o Result.o Search.o Indexation.o Utils.o tinyxml.o tinystr.o tinyxmlparser.o tinyxmlerror.o
+	$(CC) -static -o $(MAIN) $(MAIN).o MyDate.o Result.o Search.o Indexation.o Utils.o tinyxml.o tinystr.o tinyxmlparser.o tinyxmlerror.o $(LIBS)
 
 #$(MAIN) : $(MAIN).o MyDate.o Result.o Search.o Indexation.o Utils.o
 #	$(CC) -o $(MAIN) $(MAIN).o MyDate.o Result.o Search.o Indexation.o Utils.o $(LIBS)
@@ -34,6 +35,9 @@ tinystr.o : tinystr.cpp
 
 tinyxmlparser.o : tinyxmlparser.cpp
 	$(CC) -o tinyxmlparser.o -c tinyxmlparser.cpp $(CFLAGS)
+
+tinyxmlerror.o : tinyxmlerror.cpp
+	$(CC) -o tinyxmlerror.o -c tinyxmlerror.cpp $(CFLAGS)
 
 $(MAIN).o : $(MAIN).cpp Result.cpp Search.cpp Indexation.cpp MyDate.cpp Utils.cpp
 	$(CC) -o $(MAIN).o -c $(MAIN).cpp $(CFLAGS)
