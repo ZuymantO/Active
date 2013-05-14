@@ -12,7 +12,7 @@ class ANotifyDaemon {
  private:
   ANotify* notify;
   int sock;
-  struct sockaddr_in* addr;
+  struct sockaddr_in* sock_infos;
   int propsFd;
   bool running;
   pthread_mutex_t runningAccess;

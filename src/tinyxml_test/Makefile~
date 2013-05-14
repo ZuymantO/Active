@@ -2,7 +2,7 @@ MAIN=XMLParser
 CC=g++
 CFLAGS=-W -Wall -ansi -pedantic
 #LIBS=-ltinyxml
-LIBS=-l tinyxml
+LIBS=-tinyxml
 
 all : $(MAIN)
 

@@ -10,31 +10,29 @@
 #include <string.h>
 #include <sys/file.h>
 
-//#include "ANotifyDaemon.h"
 #include "ANotifyDaemon.h"
 #include "ANotify.h"
 #include "ANotifyException.h"
 
 const std::string ANotifyDaemon::propsPath = "daemon.prop";
+const std::string ANotifyDaemon::logPath = "daemon.log";
 
-ANotifyDaemon::ANotifyDaemon() throw (ANotifyException) {
-  int fd, port = -1, i, client, length;
+ANotifyDaemon::ANotifyDaemon() throw (ANotifyException) :
+  sock(-1), running(false), notify(NULL), watchPath("/")
+{
+  int port = -1, i, client, length;
   struct sockaddr_in addr;
   std::string str = "";
   pid_t current_pid = getpid(), pid;  
-  
-  this->sock = -1;
-  this->running = false;
-  this->notify = NULL;
 
-  fd = openPropsFile();
+  this->propsFd = openPropsFile();
   
-  if(fd == -1){
+  if(this->propsFd == -1){
     throw ANotifyException("Unable to open or create daemon properties file", errno, this);
   }
 
-  if(!isActiveDaemon(fd, current_pid)){
-    closePropsFile(fd);
+  if(!isActiveDaemon(current_pid)){
+    closePropsFile();
     throw ANotifyException("A daemon is already running");
   }
 
@@ -61,7 +59,7 @@ ANotifyDaemon::ANotifyDaemon() throw (ANotifyException) {
 
   /* Si aucun port libre n'a ete trouve */
   if(port == -1){
-    closePropsFile(fd);
+    closePropsFile();
     close(this->sock);
     throw ANotifyException("No port available");
   }
@@ -79,14 +77,14 @@ ANotifyDaemon::ANotifyDaemon() throw (ANotifyException) {
   str.append("port:");
   str += port;
 
-  if(write(fd, str.c_str(), str.length()) < 0){
-    closePropsFile(fd);
+  if(write(this->propsFd, str.c_str(), str.length()) < 0){
+    closePropsFile();
     close(this->sock);
     
     throw ANotifyException("Cannot write into properties file", errno, this);
   }
 
-  closePropsFile(fd);
+  closePropsFile();
 
   notify = new ANotify();
   pthread_mutex_init(&runningAccess, NULL);
@@ -100,27 +98,38 @@ ANotifyDaemon::ANotifyDaemon() throw (ANotifyException) {
   else if(pid == 0){
     std::cout << "daemon started successfully" << std::endl;
     this->start();
+    exit(EXIT_SUCCESS);
   }
   else{
     /* TODO */
+    throw ANotifyException("Fork failed", errno, this);
   }
 }
 
-ANotifyDaemon::~ANotifyDaemon(){}
+ANotifyDaemon::~ANotifyDaemon(){
+  this->stop();
+  delete this->notify;
+}
 
 bool ANotifyDaemon::start(){
+  return start(this->watchPath);
+}
+
+bool ANotifyDaemon::start(std::string& path){
   pid_t pid;
 
-  if(this->running){
+  if(this->isRunning()){
     return false;
   }  
 
-  this->running = true;
+  this->setRunning(true);
+
+  /* TODO: lancer la surveillance sur Path */
 
   pid = fork();
   
   if(pid > 0){
-    
+    this->waitForEvents();
   }
   else if(pid == 0){
     this->run();
@@ -128,6 +137,7 @@ bool ANotifyDaemon::start(){
   }
   else{
     /* TODO */
+    return false;
   }
 
   return true;
@@ -142,6 +152,17 @@ void ANotifyDaemon::run(){
     }
 
     sleep(1);
+  }
+}
+
+void ANotifyDaemon::waitForEvents(){
+  while(this->isRunning()){
+    try{
+      this->notify->waitForEvents();
+    }catch(ANotifyException e){
+      //continue;
+      break;
+    }
   }
 }
 
@@ -179,8 +200,55 @@ void ANotifyDaemon::waitForClients(struct sockaddr_in* addr){
 }
 
 bool ANotifyDaemon::restart(){
-  this->stop();
-  return this->start();
+  return restart(this->watchPath);
+}
+
+bool ANotifyDaemon::list(int client){
+  int len;
+  std::string path;
+  int pathLength;
+  WatchPathMap::iterator it;
+  WatchPathMap paths;
+
+  if(this->notify != NULL){
+    paths = this->notify->getWatchesPathMap();
+    it = paths.begin();
+
+    while (it != paths.end()) {
+      path = it->first;
+      pathLength = path.length();
+
+      //Envoi de la longueur du chemin
+      len = send(client, &pathLength, sizeof(int));
+
+      if(len <= 0){
+	return false;
+      }
+ 
+      //Envoi du chemin
+      len = send(client, path.c_str(), path.length(), 0);
+      
+      if(len <= 0){
+	return false;
+      }
+      
+      it++;
+    }
+  }
+  else{
+    return false;
+  }
+
+  return true;
+}
+
+bool ANotifyDaemon::restart(std::string& path){
+  bool startRes, stopRes;
+
+  stopRes = this->stop();
+  startRes = this->start(path);
+
+  return startRes && stopRes;
 }
 
 bool ANotifyDaemon::stop(){
@@ -192,9 +260,10 @@ bool ANotifyDaemon::stop(){
     delete notify;
     notify = NULL;
     }*/
-  notify->AClose();
 
   this->setRunning(false);
+  this->notify->AClose();
+
   return true;
 }
 
@@ -280,6 +349,10 @@ void ANotifyDaemon::communicate(int client_socket){
       res = this->restart();
       break; 
 
+    case 'L':
+      res = this->list(client_socket);
+      break;
+
     default:
       continue;
     }
@@ -291,28 +364,28 @@ void ANotifyDaemon::communicate(int client_socket){
 
 int ANotifyDaemon::openPropsFile(){
   /* TODO: Modifier le chemin si besoin est + poser un verrou sur le fichier */
-  int ret, fd;  
+  int ret;  
   
-  //fd = open(propsPath, O_RDWR | O_CREAT, 0777);  
-  fd = open(propsPath.c_str(), O_RDWR | O_CREAT);
+  //this->propsFd = open(propsPath, O_RDWR | O_CREAT, 0777);  
+  this->propsFd = open(propsPath.c_str(), O_RDWR | O_CREAT);
 
-  if(fd == -1){
+  if(this->propsFd == -1){
     return -1;
   }
 
-  ret = flock(fd, LOCK_EX | LOCK_NB);
+  ret = flock(this->propsFd, LOCK_EX | LOCK_NB);
 
   if(ret == -1){
     return -1;
   }
 
-  return fd;
+  return this->propsFd;
 }
 
-int ANotifyDaemon::closePropsFile(int fd){
-  close(fd);  
+int ANotifyDaemon::closePropsFile(){   
   /* TODO: Liberer le verrou sur le fichier de proprietes */
-  return flock(fd, LOCK_UN);
+  flock(this->propsFd, LOCK_UN);
+  return close(this->propsFd);  
 }
 
 int ANotifyDaemon::deletePropsFile(){
@@ -339,13 +412,17 @@ void ANotifyDaemon::setRunning(bool run){
   pthread_mutex_unlock(&runningAccess);
 }
 
-bool ANotifyDaemon::isActiveDaemon(int props_fd, pid_t pid){
+bool ANotifyDaemon::isActiveDaemon(pid_t pid){
   char buffer[50];
   int length; 
   int newlinePos;
   pid_t pid_read;
 
-  length = read(props_fd, buffer, 50);
+  if(this->propsFd == -1){
+    return false;
+  }
+
+  length = read(this->propsFd, buffer, 50);
 
   if(length == 0){
     return true;
@@ -381,9 +458,45 @@ bool ANotifyDaemon::removeWatch(std::string& path, bool rec){
 }
 
 bool ANotifyDaemon::removeOneWatch(std::string& path){
-  return true;
+  if(this->notify == NULL){
+    return false;
+  }
+
+  ANotifyWatch* watch = this->notify->findWatch(path);
+
+  if(watch == NULL){
+    return false;
+  } 
+
+  return this->notify->remove(watch);
 }
 
 bool ANotifyDaemon::recRemoveWatch(std::string& path){
+  bool res = true;
+  WatchPathMap::iterator it;
+  WatchPathMap paths;
+  std::string filepath;
+  int filepathLength;
+
+  if(this->notify != NULL){
+    paths = this->notify->getWatchesPathMap();
+    it = paths.begin();
+
+    while (it != paths.end()) {
+      filepath = it->first;
+      filepathLength = filepath.length();
+
+      /* Trouver la bonne fonction */
+      if(filepath.startsWith(path)){
+	paths.erase(path);
+      }
+      
+      it++;
+    }
+  }
+  else{
+    return false;
+  }
+
   return true;
 }

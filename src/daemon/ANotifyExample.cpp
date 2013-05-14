@@ -126,12 +126,13 @@ try{
     cout << "Erreur de lancement du thread d'Indexation" << endl;
   }
 
-  ANotifyEvent* pEvt = new ANotifyEvent();
+  //ANotifyEvent* pEvt = new ANotifyEvent();
+  ANotifyEvent pEvt;
   for (; ; ) {
     std::string str;
-    //if(sharedANotify->getEvent(*pEvt)){
-    if(sharedANotify->getEvent(pEvt)){
-      cout << "Event type: " << pEvt->getMask() << endl;
+    //if(sharedANotify->getEvent(pEvt)){
+    if(sharedANotify->getEvent(&pEvt)){
+      //cout << "Event type: " << pEvt->getMask() << endl;
       pEvt->dumpTypes(str);
       cout << str << " fd : " <<  pEvt->getDescriptor() << endl;
     }
