@@ -9,6 +9,9 @@
 #include <cstdlib>
 #include <string.h>
 #include <sys/file.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <dirent.h>
 
 #include "ANotifyDaemon.h"
 #include "ANotify.h"
@@ -86,8 +89,11 @@ ANotifyDaemon::ANotifyDaemon() throw (ANotifyException) :
 
   closePropsFile();
 
-  notify = new ANotify();
-  pthread_mutex_init(&runningAccess, NULL);
+  this->notify = new ANotify();
+  this->mask = ANOTIFY_RENAME | ANOTIFY_WRITE | ANOTIFY_DELETE | ANOTIFY_ATTRIBUT;
+  this->notifyEvent = new ANotifyEvent(&this->sharedEvent, this->mask);
+  
+  pthread_mutex_init(&this->runningAccess, NULL);
 
   pid = fork();
 
@@ -108,7 +114,12 @@ ANotifyDaemon::ANotifyDaemon() throw (ANotifyException) :
 
 ANotifyDaemon::~ANotifyDaemon(){
   this->stop();
-  delete this->notify;
+  if(this->notifyEvent != NULL){
+    delete this->notifyEvent;
+  }
+  if(this->notify != NULL){
+    delete this->notify;
+  }
 }
 
 bool ANotifyDaemon::start(){
@@ -117,6 +128,7 @@ bool ANotifyDaemon::start(){
 
 bool ANotifyDaemon::start(std::string& path){
   pid_t pid;
+  bool res;
 
   if(this->isRunning()){
     return false;
@@ -125,6 +137,11 @@ bool ANotifyDaemon::start(std::string& path){
   this->setRunning(true);
 
   /* TODO: lancer la surveillance sur Path */
+  res = this->addWatch(path);
+
+  if(!res){
+    return false;
+  }
 
   pid = fork();
   
@@ -141,6 +158,60 @@ bool ANotifyDaemon::start(std::string& path){
   }
 
   return true;
+}
+
+bool ANotifyDaemon::addWatch(std::string& path){
+  struct stat st;
+  DIR* dir = NULL;
+  struct dirent* entry = NULL;
+  std::string filepath;
+
+  if(stat(path.c_str(), &st) != 0){
+    return false;
+  }
+
+  if(S_ISDIR(st.st_mode)){
+    ANotifyWatch dirWatch(path, this->notifyEvent, true, true);
+
+    dirWatch.setMonitor(this->notify);
+
+    try{
+      this->notify->add(dirWatch);
+    }catch(ANotifyException e){
+      return false;
+    }
+
+    dir = opendir(path.c_str());
+
+    if(dir == NULL){
+      return false;
+    }
+
+    while((entry = readdir(dir)) != NULL){
+      if(strcmp(entry->d_name, ".") == 0
+	 || strcmp(entry->d_name, "..") == 0){
+	continue;
+      }
+
+      filepath = path + entry->d_name;
+      this->addWatch(filepath);
+    }
+  }
+#ifndef __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
+  
+#else
+  else if(S_ISREG(st.st_mode)){
+    ANotifyWatch fileWatch(path, this->notifyEvent, false, true);
+    
+    fileWatch.setMonitor(this->notify);
+
+    try{
+      this->notify->add(fileWatch);
+    }catch(ANotifyException e){
+      return false;
+    }
+  }
+#endif  
 }
 
 void ANotifyDaemon::run(){
@@ -210,6 +281,8 @@ bool ANotifyDaemon::list(int client){
   WatchPathMap::iterator it;
   WatchPathMap paths;
 
+  /* Obtenir un verrou sur la map */
+
   if(this->notify != NULL){
     paths = this->notify->getWatchesPathMap();
     it = paths.begin();
@@ -219,9 +292,10 @@ bool ANotifyDaemon::list(int client){
       pathLength = path.length();
 
       //Envoi de la longueur du chemin
-      len = send(client, &pathLength, sizeof(int));
+      len = send(client, &pathLength, sizeof(int), 0);
 
       if(len <= 0){
+	/* Liberer le verrou sur la map */
 	return false;
       }
  
@@ -229,6 +303,7 @@ bool ANotifyDaemon::list(int client){
       len = send(client, path.c_str(), path.length(), 0);
       
       if(len <= 0){
+	/* Liberer le verrou sur la map */
 	return false;
       }
       
@@ -236,9 +311,11 @@ bool ANotifyDaemon::list(int client){
     }
   }
   else{
+    /* Liberer le verrou sur la map */
     return false;
   }
 
+  /* Liberer le verrou sur la map*/
   return true;
 }
 
@@ -274,8 +351,14 @@ bool ANotifyDaemon::kill(){
   close(this->sock);
   pthread_mutex_destroy(&runningAccess);
 
-  if(notify != NULL){
-    delete notify;
+  if(this->notifyEvent != NULL){
+    delete this->notifyEvent;
+    this->notifyEvent = NULL;
+  }
+
+  if(this->notify != NULL){
+    delete this->notify;
+    this->notify = NULL;
   }
 
   return true;
@@ -478,6 +561,8 @@ bool ANotifyDaemon::recRemoveWatch(std::string& path){
   std::string filepath;
   int filepathLength;
 
+  /* Obtenir un verrou sur la map */
+
   if(this->notify != NULL){
     paths = this->notify->getWatchesPathMap();
     it = paths.begin();
@@ -487,7 +572,8 @@ bool ANotifyDaemon::recRemoveWatch(std::string& path){
       filepathLength = filepath.length();
 
       /* Trouver la bonne fonction */
-      if(filepath.startsWith(path)){
+      //if(filepath.startsWith(path)){
+      if(strncmp(filepath.c_str(), path.c_str(), path.length()) == 0){
 	paths.erase(path);
       }
       
@@ -495,8 +581,11 @@ bool ANotifyDaemon::recRemoveWatch(std::string& path){
     }
   }
   else{
+    /* Liberer le verrou sur la map */
     return false;
   }
+
+  /* Liberer le verrou sur la map */
 
   return true;
 }
