@@ -1,10 +1,10 @@
 
 #Les regles de construction pour chaque executable
 all:
+	cd tinyxml_test && make all
 	cd daemon && make all && cd ..
 	cd bdd && make all && cd ..
 	cd ui && make all && cd ..
-	cd tinyxml_test && make all
 	cd ../
 #Mettre ici toutes les regles de clean pour chaque module
 clean:

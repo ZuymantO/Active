@@ -2,13 +2,14 @@
 CC=g++
 #FLAGS=-Wall
 FLAGS=
-OBJ=active
-
+OBJ=../../obj
+EXE=active
 
 all: active
 
 active: daemon.o main.o watch.o exception.o event.o core.o mask.o
-	$(CC) $(FLAGS) -pthread $^ -o $(OBJ)
+	$(CC) $(FLAGS) -pthread $^ -o $(EXE)
+	cp $(EXE) ../../bin
 
 example: example.o watch.o exception.o event.o core.o mask.o
 	$(CC) $(FLAGS) -pthread $^ -o example
@@ -41,4 +42,4 @@ core.o: ANotify.h ANotify.cpp
 	$(CC) $(FLAGS) -c ANotify.cpp -o core.o
 
 clean:
-	rm -rf *.o *~ *# $(OBJ) example
+	rm -rf *.o *~ *# $(EXE) example
