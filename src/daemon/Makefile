@@ -5,11 +5,20 @@ FLAGS=
 OBJ=../../obj
 EXE=active
 
-all: active
+OBJ=active
+GOALS=active example client
+
+all: active client
 
 active: daemon.o main.o watch.o exception.o event.o core.o mask.o
 	$(CC) $(FLAGS) -pthread $^ -o $(EXE)
 	cp $(EXE) ../../bin
+
+client: daemon.o watch.o exception.o event.o core.o mask.o client.o
+	$(CC) $(FLAGS) -pthread $^ -o client
+
+client.o: ANotifyClient.cpp ANotifyDaemon.h
+	$(CC) $(FLAGS) -c ANotifyClient.cpp -o client.o
 
 example: example.o watch.o exception.o event.o core.o mask.o
 	$(CC) $(FLAGS) -pthread $^ -o example
@@ -42,4 +51,4 @@ core.o: ANotify.h ANotify.cpp
 	$(CC) $(FLAGS) -c ANotify.cpp -o core.o
 
 clean:
-	rm -rf *.o *~ *# $(EXE) example
+	rm -rf *.o *~ *# $(GOALS)

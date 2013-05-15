@@ -5,10 +5,16 @@
 --- Demarrer le daemon
 
 'S' (1 octet)
+sur_chemin (1 octet) -> 'Y' si un chemin est specifie, 'N' sinon
+taille_chemin (1 octet) -> taille du chemin
+chemin (talle_chemin octet) -> chemin specifie
 
 --- Redemarrer le daemon
 
 'R' (1 octet)
+sur_chemin (1 octet) -> 'Y' si un chemin est specifie, 'N' sinon
+taille_chemin (4 octet) -> entier codant la taille du chemin
+chemin (talle_chemin octet) -> chemin specifie
 
 --- Arreter le daemon
 
@@ -25,8 +31,8 @@
 --- Retirer un watch
 
 'D' (1 octet) --> instruction de suppression
-recursif (1 octet) --> suppression recursive ou non: un entier, 0 pour faux, autre chose pour vrai
-taille_du_chemin (1 octet) --> entier codant la taille du chemin vers le fichier
+recursif (1 octet) --> suppression recursive ou non: un caracter, 'Y' pour vrai, 'N' ou autre chose pour faux
+taille_du_chemin (4 octets) --> entier codant la taille du chemin vers le fichier
 chemin (taille_du_chemin octets) --> chemin du fichier sur lequel appliquer l'instruction
 
 #####################

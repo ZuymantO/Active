@@ -19,35 +19,54 @@
 #ifndef __ANotify__ANotifyEvent__
 #define __ANotify__ANotifyEvent__
 
+#include <string>
 #include <iostream>
 #include "ANotifyUtils.h"
 #include "ANotifyMask.h"
 #include "ANotifyException.h"
-class ANotifyWatch;
 
 class ANotifyEvent
 {
   
-private:
-    //  ANotifyWatch* m_pANWatch;       // Contient le FD de inotify sous linux kq de kqueu sous unix
+ private:
+  //  ANotifyWatch* m_pANWatch;       // Contient le FD de inotify sous linux kq de kqueu sous unix
   ANOTIFY_EVENT*  m_pEvent;
   FD              m_evtDescr;     /* Identifiant de l'auditeur */
   std::string     m_name;         //* nom fichier source d'event (optionnel et terminé par un caractère nul) */
   ANMASK          m_mask;
-  ANotifyWatch* m_pWatch;
+  //ANotifyWatch* m_pWatch;
+  std::string m_basename; //Nom du repertoire parent
+  std::string m_filename; //Nom du fichier
   
-public:
-  ANotifyEvent() : m_evtDescr((FD)0), m_pEvent(NULL), m_name(""), m_pWatch(NULL){ }
+ public:
+
+ ANotifyEvent() : m_evtDescr((FD)0), m_pEvent(NULL), m_name(""), m_basename(""), m_filename(""){ }
   
-  ANotifyEvent(ANOTIFY_EVENT* ipEvt, ANMask imask, ANotifyWatch* ipWatch = NULL)
-  : m_pEvent(ipEvt),  m_name(""), m_evtDescr((FD)-1), m_mask(imask), m_pWatch(ipWatch){
+ ANotifyEvent(ANOTIFY_EVENT* ipEvt, ANMask imask, std::string basename = "")
+   : m_pEvent(ipEvt),  m_name(""), m_basename(basename), m_filename(""), m_evtDescr((FD)-1), m_mask(imask){
     m_pEvent = ipEvt;
     if (ipEvt != NULL) {
 #ifndef __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
-    m_evtDescr = ipEvt->wd; // fd of concerned file
-    if (ipEvt->name != NULL)
-      m_name = (ipEvt->len > 0 ? std::string(ipEvt->name) : "");
+      m_evtDescr = ipEvt->wd; // fd of concerned file
+      if (ipEvt->name != NULL){
+	m_basename = basename;
+	m_filename = ipEvt->name;
+
+	m_name = m_basename;
+
+	if(m_basename.length() > 0){
+	  if(m_basename[m_basename.length()] != '/'){
+	    m_name += "/";
+	  }
+	}
+	else{
+	  m_name = "/";
+	}
+
+	m_name += m_filename;
+      }
 #else
+      /* TODO: ne manque-t-il pas la valeur de m_name ? */
       m_evtDescr =  (FD) ipEvt->ident;
 #endif // __ENVIREONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
     }
@@ -158,6 +177,9 @@ public:
     orName.append(getName());
   }
 
+  inline const std::string& getBasename() const {
+    return m_basename;
+  }
 
   void dumpTypes(std::string& orStr) const {
     if (m_pEvent == NULL) {
