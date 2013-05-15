@@ -4,9 +4,10 @@ all:
 	cd daemon && make all && cd ..
 	cd bdd && make all && cd ..
 	cd ui && make all && cd ..
+	cd tinyxml_test && make all
 	cd ../
-
 #Mettre ici toutes les regles de clean pour chaque module
 clean:
-	rm ./*.o
-	rm ./*~
+	tm ./*.o ./*~
+	cd tinyxml_test && make clean
+	cd daemon && make clean

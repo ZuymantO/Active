@@ -6,59 +6,33 @@
 #include <arpa/inet.h>
 #include <iostream>
 #include <string>
+#include <cstdlib>
+#include <string.h>
+#include <sys/file.h>
 
 #include "ANotifyDaemon.h"
 #include "ANotify.h"
 #include "ANotifyException.h"
 
+const std::string ANotifyDaemon::propsPath = "daemon.prop";
+const std::string ANotifyDaemon::logPath = "daemon.log";
 
-ANotifyDaemon::ANotifyDaemon() throw (ANotifyException) {
-  pid_t pid = fork();
-
-  if(pid > 0){
-    //On ne fait rien ?
-    std::cout << "daemon starting ..." << std::endl;
-  }
-  else if(pid == 0){
-    this->start();
-  }
-  else{
-    std::string msg = "";
-
-    switch(errno){
-    case ENOMEM:  
-      throw ANotifyException("Unable to allocate enough memory for child", errno, this);
-      //break;
-
-    case EAGAIN:
-      throw ANotifyException("No empty space in process table", errno, this);
-      //break;
-    }   
-  }
-}
-
-ANotifyDaemon::~ANotifyDaemon(){
-  
-}
-
-void ANotifyDaemon::configDaemon(){
-
-}
-
-void ANotifyDaemon::start(){
-  int fd, port = -1, i, client, length;
+ANotifyDaemon::ANotifyDaemon() throw (ANotifyException) :
+  sock(-1), running(false), notify(NULL), watchPath("/")
+{
+  int port = -1, i, client, length;
   struct sockaddr_in addr;
   std::string str = "";
-  pid_t child_pid, current_pid = getpid();  
+  pid_t current_pid = getpid(), pid;  
 
-  fd = openPropsFile();
-
-  if(fd == -1){
+  this->propsFd = openPropsFile();
+  
+  if(this->propsFd == -1){
     throw ANotifyException("Unable to open or create daemon properties file", errno, this);
   }
 
-  if(!isActiveDaemon(fd, current_pid)){
-    closePropsFile(fd);
+  if(!isActiveDaemon(current_pid)){
+    closePropsFile();
     throw ANotifyException("A daemon is already running");
   }
 
@@ -77,7 +51,7 @@ void ANotifyDaemon::start(){
     addr.sin_port = htons(i);
 
     if(bind(this->sock, (struct sockaddr*)(&addr), sizeof(addr)) != -1
-       && listen(this->sock, 0)){
+       && listen(this->sock, 0) != -1){
       port = i;
       break;
     }
@@ -85,7 +59,7 @@ void ANotifyDaemon::start(){
 
   /* Si aucun port libre n'a ete trouve */
   if(port == -1){
-    closeProsFile(fd);
+    closePropsFile();
     close(this->sock);
     throw ANotifyException("No port available");
   }
@@ -97,21 +71,108 @@ void ANotifyDaemon::start(){
     port:port_du_serveur
   */
 
-  str = "pid:" + current_pid + "\n";
-  str += "port:" + port;
+  str.append("pid:");
+  str += current_pid;
+  str.append("\n");
+  str.append("port:");
+  str += port;
 
-  if(write(fd, str.c_str(), str.length()) < 0){
-    closePropsFile(fd);
+  if(write(this->propsFd, str.c_str(), str.length()) < 0){
+    closePropsFile();
     close(this->sock);
     
     throw ANotifyException("Cannot write into properties file", errno, this);
   }
 
-  closePropsFile(fd);
+  closePropsFile();
 
+  notify = new ANotify();
+  pthread_mutex_init(&runningAccess, NULL);
+
+  pid = fork();
+
+  if(pid > 0){    
+    std::cout << "daemon waiting for incoming connections" << std::endl;
+    this->waitForClients(&addr);
+  }
+  else if(pid == 0){
+    std::cout << "daemon started successfully" << std::endl;
+    this->start();
+  }
+  else{
+    /* TODO */
+    throw ANotifyException("Fork failed", errno, this);
+  }
+}
+
+ANotifyDaemon::~ANotifyDaemon(){
+  this->stop();
+  delete this->notify;
+}
+
+bool ANotifyDaemon::start(){
+  return start(this->watchPath);
+}
+
+bool ANotifyDaemon::start(std::string& path){
+  pid_t pid;
+
+  if(this->isRunning()){
+    return false;
+  }  
+
+  this->setRunning(true);
+
+  /* TODO: lancer la surveillance sur Path */
+
+  pid = fork();
+  
+  if(pid > 0){
+    this->waitForEvents();
+  }
+  else if(pid == 0){
+    this->run();
+    exit(EXIT_SUCCESS);
+  }
+  else{
+    /* TODO */
+    return false;
+  }
+
+  return true;
+}
+
+void ANotifyDaemon::run(){
+  ANotifyEvent pEvt;
+
+  while(this->isRunning()){
+    if(this->notify->getEvent(pEvt)){
+      //traiter l'event
+    }
+
+    sleep(1);
+  }
+}
+
+void ANotifyDaemon::waitForEvents(){
+  while(this->isRunning()){
+    try{
+      this->notify->waitForEvents();
+    }catch(ANotifyException e){
+      //continue;
+      break;
+    }
+  }
+}
+
+void ANotifyDaemon::waitForClients(struct sockaddr_in* addr){
+  pid_t child_pid;
+  int client;
+  socklen_t len;
+ 
   /* Attente de la connexion d'un ou plusieurs clients */
   while(true){
-    client = accept(this->sock, (struct sockaddr*)(&addr), &length);
+    client = accept(this->sock, (struct sockaddr*)(addr), &len);
     
     /* Fermeture de la socket serveur */
     if(client == -1){
@@ -126,7 +187,8 @@ void ANotifyDaemon::start(){
     else if(child_pid == 0){
       close(this->sock);
       communicate(client);
-      break;
+      //break;
+      exit(EXIT_SUCCESS);
     }
     else{
       close(client);
@@ -136,76 +198,187 @@ void ANotifyDaemon::start(){
   }
 }
 
-void ANotifyDaemon::restart(){
-  this->stop();
-  this->start();
+bool ANotifyDaemon::restart(){
+  return restart(this->watchPath);
 }
 
-void ANotifyDaemon::stop(){
-  if(notify != NULL){
+bool ANotifyDaemon::restart(std::string& path){
+  bool startRes, stopRes;
+
+  stopRes = this->stop();
+  startRes = this->start(path);
+
+  return startRes && stopRes;
+}
+
+bool ANotifyDaemon::stop(){
+  if(!this->isRunning()){
+    return false;
+  }  
+
+  /*if(notify != NULL){
     delete notify;
     notify = NULL;
-  }
+    }*/
+
+  this->setRunning(false);
+  this->notify->AClose();
+
+  return true;
 }
 
-void ANotifyDaemon::kill(){  
+bool ANotifyDaemon::kill(){
+  /* TODO: voir quand il faut renvoyer false */
   stop();
-  deleteProps();
+  deletePropsFile();
   close(this->sock);
+  pthread_mutex_destroy(&runningAccess);
+
+  if(notify != NULL){
+    delete notify;
+  }
+
+  return true;
 }
 
 void ANotifyDaemon::communicate(int client_socket){
-  int readLength, length;
-  char buffer[100];
+  int readLength;
+  char c;
+  bool res = true;
+  bool alive = true;
 
-  while(true){
-    readLength = read(client_socket, buffer, 1, 0);
+  while(alive){
+    readLength = recv(client_socket, &c, 1, 0);
 
-    if(readLength == -1){
+    if(readLength <= 0){
       /* TODO: voir ce qu'il faut faire dans ce cas la */
-      break;
+      return;
     }
 
-    switch(buffer[0]){
-    case 'D'://delete (remove watch) 
+    switch(c){
+    case 'D'://delete (removes a watch) 
+      bool rec;
+
+      //Recursivite
+      readLength = recv(client_socket, &c, 1, 0);
+      if(readLength <= 0){
+	return;
+      }
+      rec = (c == 0) ? false : true;      
+      
+      int length;
+
+      //Taille du chemin
+      readLength = recv(client_socket, &c, 1, 0);
+      if(readLength <= 0){
+	return;
+      }
+      length = (int)c;
+      
+      char path[length + 1];
+
+      //Chemin
+      readLength = recv(client_socket, path, length, 0);
+      if(readLength <= 0){
+	return;
+      }
+      if(readLength < length){
+	res = false;
+      }
+
+      if(res){
+	std::string pathStr(path);
+	res = removeWatch(pathStr, rec);
+      }
       break;
 
-    case 'S'://start (starts daemon) [A voir]
+    case 'S'://start (starts the daemon) [A voir]
+      res = this->start();
       break;
 
     case 'K'://kill (definitively kill the daemon) [A voir]
+      res = this->kill();
+      alive = false;
       break;
 
-    case 'E'://end (stops daemon)
+    case 'E'://end (stops the daemon)
+      res = this->stop();
       break;
 
-    case 'R'://restart (restarts daemon)
+    case 'R'://restart (restarts the daemon)
+      res = this->restart();
       break; 
- 
-   
+
+    default:
+      continue;
     }
+
+    c = res ? 'Y' : 'N';
+    send(client_socket, &c, 1, 0);
   }
 }
 
 int ANotifyDaemon::openPropsFile(){
   /* TODO: Modifier le chemin si besoin est + poser un verrou sur le fichier */
-  fd = open(propsPath, O_RDWR | O_CREAT);
+  int ret;  
+  
+  //this->propsFd = open(propsPath, O_RDWR | O_CREAT, 0777);  
+  this->propsFd = open(propsPath.c_str(), O_RDWR | O_CREAT);
+
+  if(this->propsFd == -1){
+    return -1;
+  }
+
+  ret = flock(this->propsFd, LOCK_EX | LOCK_NB);
+
+  if(ret == -1){
+    return -1;
+  }
+
+  return this->propsFd;
 }
 
-int ANotifyDaemon::closePropsFile(int fd){
-  close(fd);  
+int ANotifyDaemon::closePropsFile(){   
   /* TODO: Liberer le verrou sur le fichier de proprietes */
+  flock(this->propsFd, LOCK_UN);
+  return close(this->propsFd);  
 }
 
 int ANotifyDaemon::deletePropsFile(){
-  return remove(propsPath);
+  return remove(propsPath.c_str());
 }
 
-bool ANotifyDaemon::isActiveDaemon(int props_fd, pid_t pid){
+bool ANotifyDaemon::isRunning(){
+  bool res = false;
+
+  pthread_mutex_lock(&runningAccess);
+
+  res = this->running;
+
+  pthread_mutex_unlock(&runningAccess);
+
+  return res;
+}
+
+void ANotifyDaemon::setRunning(bool run){
+  pthread_mutex_lock(&runningAccess);
+
+  this->running = run;
+
+  pthread_mutex_unlock(&runningAccess);
+}
+
+bool ANotifyDaemon::isActiveDaemon(pid_t pid){
   char buffer[50];
   int length; 
+  int newlinePos;
+  pid_t pid_read;
 
-  length = read(props_fd, buffer, 50);
+  if(this->propsFd == -1){
+    return false;
+  }
+
+  length = read(this->propsFd, buffer, 50);
 
   if(length == 0){
     return true;
@@ -213,20 +386,37 @@ bool ANotifyDaemon::isActiveDaemon(int props_fd, pid_t pid){
 
   buffer[length] = '\0';
 
-  if(length <strncmp(buffer, "pid:", 4) != 0
-     || length < 4){
+  if(length < 5
+     || strncmp(buffer, "pid:", 4) != 0){
     return false;
   }
 
-  std::string firstLine(buffer);
+  std::string pidStr(&buffer[4]);
 
+  newlinePos = pidStr.find('\n');
   
+  if(newlinePos != std::string::npos){
+    pidStr = pidStr.substr(0, newlinePos);
+  }
+
+  pid_read = (pid_t)(std::atoi(pidStr.c_str()));
+
+  return (pid_read == pid);
 }
 
-bool removeWatch(std::string& path){
+bool ANotifyDaemon::removeWatch(std::string& path, bool rec){
+  if(rec){
+    return removeOneWatch(path);
+  }
+  else{
+    return recRemoveWatch(path);
+  }
+}
+
+bool ANotifyDaemon::removeOneWatch(std::string& path){
   return true;
 }
 
-bool recRemoveWatch(std::string& path){
+bool ANotifyDaemon::recRemoveWatch(std::string& path){
   return true;
 }

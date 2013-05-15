@@ -11,19 +11,11 @@ class ANotifyDaemon {
 
  private:
   ANotify* notify;
-  ANOTIFY_EVENT sharedEvent;
-  ANotifyEvent* notifyEvent;
-  ANMask mask;
-
   int sock;
-  struct sockaddr_in* addr;
-
+  struct sockaddr_in* sock_infos;
   int propsFd;
-
   bool running;
   pthread_mutex_t runningAccess;
-
-  /* Racine du chemin en cours de surveillance */
   std::string watchPath;
   
   /* Retire la surveillance d'un fichier */
@@ -58,8 +50,6 @@ class ANotifyDaemon {
   bool stop();
   /* Tue le daemon */
   bool kill();
-  /* Liste les fichiers surveilles */
-  bool list(int client_socket);
 
   /* Renvoie un descripteur vers le fichier des proprietes du daemon */
   int openPropsFile();
@@ -75,8 +65,6 @@ class ANotifyDaemon {
 
   /* Fonction de traitement des evenements provenant du ANotify */
   void run();
-  /* Tente de surveiller (recursivement) 'path' (si c'est un repertoire) */
-  bool addWatch(std::string& path);
   /* Fonction d'attente des evenements du ANotify */
   void waitForEvents();
   /* Attend la connexion de clients */

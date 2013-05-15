@@ -18,10 +18,6 @@
 
 'K' (1 octet)
 
---- Lister les fichiers surveilles
-
-'L' (1 octet)
-
 --- Retirer un watch
 
 'D' (1 octet) --> instruction de suppression
