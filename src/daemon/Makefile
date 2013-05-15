@@ -3,12 +3,18 @@ CC=g++
 #FLAGS=-Wall
 FLAGS=
 OBJ=active
+GOALS=active example client
 
-
-all: active
+all: active client
 
 active: daemon.o main.o watch.o exception.o event.o core.o mask.o
 	$(CC) $(FLAGS) -pthread $^ -o $(OBJ)
+
+client: daemon.o watch.o exception.o event.o core.o mask.o client.o
+	$(CC) $(FLAGS) -pthread $^ -o client
+
+client.o: ANotifyClient.cpp ANotifyDaemon.h
+	$(CC) $(FLAGS) -c ANotifyClient.cpp -o client.o
 
 example: example.o watch.o exception.o event.o core.o mask.o
 	$(CC) $(FLAGS) -pthread $^ -o example
@@ -41,4 +47,4 @@ core.o: ANotify.h ANotify.cpp
 	$(CC) $(FLAGS) -c ANotify.cpp -o core.o
 
 clean:
-	rm -rf *.o *~ *# $(OBJ) example
+	rm -rf *.o *~ *# $(GOALS)

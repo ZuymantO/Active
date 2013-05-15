@@ -231,7 +231,7 @@ void ANotify::waitForEvents(bool fNoIntr) throw (ANotifyException)
       /* TODO: trouver le bon mask en argument */
       //ANotifyEvent evt(pEvt, pW->getMask(), pW);
       //ANotifyEvent* evt = new ANotifyEvent(pEvt, pW->getMask(), pW);
-      ANotifyEvent* evt = new ANotifyEvent(pEvt, (ANMask)pEvt->mask, pW);
+      ANotifyEvent* evt = new ANotifyEvent(pEvt, (ANMask)pEvt->mask, pW->getPath());
       /*if (    ANotifyEvent::isType(pW->getMask(), IN_ANOTIFY_ONESHOT)
           ||  ANotifyEvent::isType(evt.getMask(), IN_ANOTIFY_IGNORED))*/
       /*if (    ANotifyMask::isType(pW->getMask(), ANOTIFY_ONESHOT)
@@ -252,7 +252,9 @@ void ANotify::waitForEvents(bool fNoIntr) throw (ANotifyException)
     if (n > 0) {
       pW = findWatch((FD)pEvt->ident);
       if(pW != NULL){
-        ANotifyEvent* aevt = new ANotifyEvent(pEvt, (ANMask)pEvt->fflags, pW);
+        //ANotifyEvent* aevt = new ANotifyEvent(pEvt, (ANMask)pEvt->fflags, pW);
+	/* TOCHECK: voir si ca marche */
+	ANotifyEvent* aevt = new ANotifyEvent(pEvt, (ANMask)pEvt->fflags, pW->getPath());
         m_events.push_back(aevt);
       }
     }

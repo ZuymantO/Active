@@ -28,7 +28,7 @@
 
 
 class ANotify;
-class ANotifyEvent;
+//class ANotifyEvent;
 
 class ANotifyWatch
 {

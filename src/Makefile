@@ -8,6 +8,6 @@ all:
 	cd ../
 #Mettre ici toutes les regles de clean pour chaque module
 clean:
-	tm ./*.o ./*~
+	rm -rf ./*.o ./*~
 	cd tinyxml_test && make clean
 	cd daemon && make clean

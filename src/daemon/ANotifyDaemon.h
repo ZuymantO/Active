@@ -29,7 +29,7 @@ class ANotifyDaemon {
   /* Retire la surveillance d'un fichier */
   bool removeOneWatch(std::string& path);
   /* 
-     Retire recursivement la surveillance sur le fichier 
+     Retire recursivement la surveillance sur le fichier 'path'
      et les fichiers fils (si repertoire)
   */
   bool recRemoveWatch(std::string& path);
@@ -38,8 +38,7 @@ class ANotifyDaemon {
   /* Chemin vers le fichier des proprietes du daemon */
   static const std::string propsPath;
   /* Chemin vers le fichier de log du daemon */
-  static const std::string logPath;
-  
+  static const std::string logPath;  
 
   /* Constructeur */
   ANotifyDaemon() throw (ANotifyException);
@@ -62,11 +61,11 @@ class ANotifyDaemon {
   bool list(int client_socket);
 
   /* Renvoie un descripteur vers le fichier des proprietes du daemon */
-  int openPropsFile();
+  static int openPropsFile();
   /* Ferme le fichier des proprietes du daemon */
-  int closePropsFile();
+  static int closePropsFile(int fd);
   /* Supprime le contenu du fichier de proprietes */
-  int deletePropsFile();
+  static int deletePropsFile();
 
   /* Indique l'etat du daemon */
   bool isRunning();
@@ -79,6 +78,7 @@ class ANotifyDaemon {
   bool addWatch(std::string& path);
   /* Fonction d'attente des evenements du ANotify */
   void waitForEvents();
+
   /* Attend la connexion de clients */
   void waitForClients(struct sockaddr_in* addr);
   /* Fonction de communication avec le client */
@@ -89,7 +89,9 @@ class ANotifyDaemon {
      (renvoie true s'il n'y a aucun daemon en cours)
   */
   bool isActiveDaemon(pid_t daemon_pid);
-  
+  /* Renvoie le port d'ecoute du daemon, -1 en cas d'echec */
+  static int getDaemonPort(int fd);
+
   /* 
      Retire la surveillance du fichier a l'emplacement path
      et aussi celle de ses fils, recursivement, si rec est true

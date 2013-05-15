@@ -35,7 +35,7 @@ ANotifyDaemon::ANotifyDaemon() throw (ANotifyException) :
   }
 
   if(!isActiveDaemon(current_pid)){
-    closePropsFile();
+    closePropsFile(this->propsFd);
     throw ANotifyException("A daemon is already running");
   }
 
@@ -62,7 +62,7 @@ ANotifyDaemon::ANotifyDaemon() throw (ANotifyException) :
 
   /* Si aucun port libre n'a ete trouve */
   if(port == -1){
-    closePropsFile();
+    closePropsFile(this->propsFd);
     close(this->sock);
     throw ANotifyException("No port available");
   }
@@ -81,13 +81,13 @@ ANotifyDaemon::ANotifyDaemon() throw (ANotifyException) :
   str += port;
 
   if(write(this->propsFd, str.c_str(), str.length()) < 0){
-    closePropsFile();
+    closePropsFile(this->propsFd);
     close(this->sock);
     
     throw ANotifyException("Cannot write into properties file", errno, this);
   }
 
-  closePropsFile();
+  closePropsFile(this->propsFd);
 
   this->notify = new ANotify();
   this->mask = ANOTIFY_RENAME | ANOTIFY_WRITE | ANOTIFY_DELETE | ANOTIFY_ATTRIBUT;
@@ -365,7 +365,7 @@ bool ANotifyDaemon::kill(){
 }
 
 void ANotifyDaemon::communicate(int client_socket){
-  int readLength;
+  int readLength, pathLength;
   char c;
   bool res = true;
   bool alive = true;
@@ -387,25 +387,24 @@ void ANotifyDaemon::communicate(int client_socket){
       if(readLength <= 0){
 	return;
       }
-      rec = (c == 0) ? false : true;      
+      rec = (c == 'Y') ? true : false;      
       
       int length;
 
       //Taille du chemin
-      readLength = recv(client_socket, &c, 1, 0);
+      readLength = recv(client_socket, &pathLength, sizeof(int), 0);
       if(readLength <= 0){
 	return;
       }
-      length = (int)c;
       
-      char path[length + 1];
+      char path[pathLength + 1];
 
       //Chemin
-      readLength = recv(client_socket, path, length, 0);
+      readLength = recv(client_socket, path, pathLength, 0);
       if(readLength <= 0){
 	return;
       }
-      if(readLength < length){
+      if(readLength < pathLength){
 	res = false;
       }
 
@@ -447,28 +446,29 @@ void ANotifyDaemon::communicate(int client_socket){
 
 int ANotifyDaemon::openPropsFile(){
   /* TODO: Modifier le chemin si besoin est + poser un verrou sur le fichier */
-  int ret;  
+  int ret, fd; 
+  
   
   //this->propsFd = open(propsPath, O_RDWR | O_CREAT, 0777);  
-  this->propsFd = open(propsPath.c_str(), O_RDWR | O_CREAT);
+  fd = open(propsPath.c_str(), O_RDWR | O_CREAT, 0666);
 
-  if(this->propsFd == -1){
+  if(fd == -1){
     return -1;
   }
 
-  ret = flock(this->propsFd, LOCK_EX | LOCK_NB);
+  ret = flock(fd, LOCK_EX | LOCK_NB);
 
   if(ret == -1){
     return -1;
   }
 
-  return this->propsFd;
+  return fd;
 }
 
-int ANotifyDaemon::closePropsFile(){   
+int ANotifyDaemon::closePropsFile(int fd){   
   /* TODO: Liberer le verrou sur le fichier de proprietes */
-  flock(this->propsFd, LOCK_UN);
-  return close(this->propsFd);  
+  flock(fd, LOCK_UN);
+  return close(fd);  
 }
 
 int ANotifyDaemon::deletePropsFile(){
@@ -529,6 +529,57 @@ bool ANotifyDaemon::isActiveDaemon(pid_t pid){
   pid_read = (pid_t)(std::atoi(pidStr.c_str()));
 
   return (pid_read == pid);
+}
+
+int ANotifyDaemon::getDaemonPort(int fd){
+  char buffer[50];
+  int length, newlinePos, port;
+  
+  if(fd == -1){
+    return -1;
+  }
+
+  length = read(fd, buffer, 50);
+
+  if(length == 0){
+    return true;
+  }
+
+  buffer[length] = '\0';
+
+  if(length < 5
+     || strncmp(buffer, "pid:", 4) != 0){
+    return -1;
+  }
+
+  std::string pidStr(buffer), portStr = "";
+
+  newlinePos = pidStr.find('\n');
+  
+  if(newlinePos != std::string::npos){
+    portStr = pidStr.substr(newlinePos+1);
+  }
+  else{
+    return -1;
+  }
+
+  length = read(fd, buffer, 50); 
+  portStr = portStr + buffer;
+
+  /* 
+     Si la ligne ne commence par par "port:" ou si elle ne contient
+     pas au minimum un caractere apres "port:"
+  */
+  if(portStr.length() < 6
+     || strncmp(portStr.c_str(), "port:", 5) != 0){
+    return -1;
+  }
+
+  portStr = portStr.substr(5);
+
+  port = (int)(std::atoi(portStr.c_str()));
+
+  return port;
 }
 
 bool ANotifyDaemon::removeWatch(std::string& path, bool rec){
