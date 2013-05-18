@@ -21,7 +21,10 @@ const std::string ANotifyDaemon::propsPath = "daemon.prop";
 const std::string ANotifyDaemon::logPath = "daemon.log";
 
 ANotifyDaemon::ANotifyDaemon() throw (ANotifyException) :
-  sock(-1), running(false), notify(NULL), watchPath("/")
+  sock(-1), running(false), notify(NULL), 
+  /* TODO: decommenter pour la partie finale */
+  //watchPath("/")
+  watchPath("/home/cuisse/")
 {
   int port = -1, i, client, length;
   struct sockaddr_in addr;
@@ -89,36 +92,63 @@ ANotifyDaemon::ANotifyDaemon() throw (ANotifyException) :
 
   closePropsFile(this->propsFd);
 
+  this->logFd = openLogFile();
+
+  if(this->logFd == -1){
+    closePropsFile(this->propsFd);
+    close(this->sock);
+  }
+
+  this->addr = &addr;
+
   this->notify = new ANotify();
   this->mask = ANOTIFY_RENAME | ANOTIFY_WRITE | ANOTIFY_DELETE | ANOTIFY_ATTRIBUT;
   this->notifyEvent = new ANotifyEvent(&this->sharedEvent, this->mask);
   
   pthread_mutex_init(&this->runningAccess, NULL);
+  pthread_mutex_init(&this->logLock, NULL);
 
   pid = fork();
 
-  if(pid > 0){    
-    std::cout << "daemon waiting for incoming connections" << std::endl;
-    this->waitForClients(&addr);
+  if(pid > 0){
+    
   }
   else if(pid == 0){
-    std::cout << "daemon started successfully" << std::endl;
-    this->start();
+    this->init();
     exit(EXIT_SUCCESS);
   }
   else{
     /* TODO */
+    close(this->sock);
+    closePropsFile(this->propsFd);
+    closeLogFile();
     throw ANotifyException("Fork failed", errno, this);
   }
 }
 
 ANotifyDaemon::~ANotifyDaemon(){
-  this->stop();
-  if(this->notifyEvent != NULL){
-    delete this->notifyEvent;
+  this->kill();
+}
+
+void ANotifyDaemon::init(){
+  pid_t pid;
+  std::string str;
+  
+  pid = fork();
+  
+  if(pid > 0){    
+    str = "daemon waiting for incoming connections ...";
+    printLog(str);
+    this->waitForClients(this->addr);
   }
-  if(this->notify != NULL){
-    delete this->notify;
+  else if(pid == 0){
+    str = "daemon started successfully";
+    printLog(str);
+    this->start();
+    exit(EXIT_SUCCESS);
+  }
+  else{
+    /* TODO */
   }
 }
 
@@ -129,6 +159,7 @@ bool ANotifyDaemon::start(){
 bool ANotifyDaemon::start(std::string& path){
   pid_t pid;
   bool res;
+  std::string str;
 
   if(this->isRunning()){
     return false;
@@ -140,6 +171,8 @@ bool ANotifyDaemon::start(std::string& path){
   res = this->addWatch(path);
 
   if(!res){
+    str = "[ERROR] failed to start daemon on path '" + path;
+    printLog(str);
     return false;
   }
 
@@ -164,26 +197,38 @@ bool ANotifyDaemon::addWatch(std::string& path){
   struct stat st;
   DIR* dir = NULL;
   struct dirent* entry = NULL;
-  std::string filepath;
+  std::string filepath, logMsg;
 
   if(stat(path.c_str(), &st) != 0){
     return false;
   }
 
   if(S_ISDIR(st.st_mode)){
-    ANotifyWatch dirWatch(path, this->notifyEvent, true, true);
+    std::string newpath;
+    
+    newpath = path;
+
+    if(path[path.length() -1] != '/'){
+      newpath += '/';
+    }
+
+    ANotifyWatch dirWatch(newpath, this->notifyEvent, true, true);
 
     dirWatch.setMonitor(this->notify);
 
     try{
       this->notify->add(dirWatch);
+      logMsg = "[ADDED] " + newpath;
+      printLog(logMsg);
     }catch(ANotifyException e){
       return false;
     }
 
-    dir = opendir(path.c_str());
+    dir = opendir(newpath.c_str());
 
     if(dir == NULL){
+      logMsg = "[ERROR] failed to open dir '" + newpath;
+      printLog(logMsg);
       return false;
     }
 
@@ -193,9 +238,22 @@ bool ANotifyDaemon::addWatch(std::string& path){
 	continue;
       }
 
-      filepath = path + entry->d_name;
+      /*filepath = path;
+      
+      if(path[path.length() - 1] != '/'){
+	filepath += '/';
+      }
+
+      filepath += entry->d_name;*/
+
+      //this->addWatch(filepath);
+      filepath = newpath;
+      filepath += entry->d_name;
+
       this->addWatch(filepath);
     }
+
+    closedir(dir);
   }
 #ifndef __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
   
@@ -216,10 +274,19 @@ bool ANotifyDaemon::addWatch(std::string& path){
 
 void ANotifyDaemon::run(){
   ANotifyEvent pEvt;
+  std::string str;
+
+  str = "running mode";
+  printLog(str);
 
   while(this->isRunning()){
+    str = "is_running";
+    printLog(str);
+
     if(this->notify->getEvent(pEvt)){
       //traiter l'event
+      str = "[EVENT] " + pEvt.getName();
+      printLog(str);
     }
 
     sleep(1);
@@ -346,10 +413,14 @@ bool ANotifyDaemon::stop(){
 
 bool ANotifyDaemon::kill(){
   /* TODO: voir quand il faut renvoyer false */
-  stop();
-  deletePropsFile();
+  this->stop();
+  this->deletePropsFile();
+  this->closeLogFile();
+  
   close(this->sock);
-  pthread_mutex_destroy(&runningAccess);
+
+  pthread_mutex_destroy(&this->runningAccess);
+  pthread_mutex_destroy(&this->logLock);
 
   if(this->notifyEvent != NULL){
     delete this->notifyEvent;
@@ -475,13 +546,41 @@ int ANotifyDaemon::deletePropsFile(){
   return remove(propsPath.c_str());
 }
 
+int ANotifyDaemon::openLogFile(){
+  this->logFd = open(logPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0666);
+
+  /*if(fd == -1){
+    return -1;
+    }
+
+    return fd;*/
+  return this->logFd;
+}
+
+int ANotifyDaemon::closeLogFile(){
+  int res;
+
+  pthread_mutex_lock(&this->logLock);
+  res = close(this->logFd);
+  pthread_mutex_unlock(&this->logLock);
+
+  return res;
+}
+
+void ANotifyDaemon::printLog(std::string& msg){
+  if(this->logFd != -1){
+    pthread_mutex_lock(&(this->logLock));
+    write(this->logFd, msg.c_str(), msg.length());
+    write(this->logFd, "\n", 1);
+    pthread_mutex_unlock(&(this->logLock));
+  }
+}
+
 bool ANotifyDaemon::isRunning(){
   bool res = false;
 
   pthread_mutex_lock(&runningAccess);
-
   res = this->running;
-
   pthread_mutex_unlock(&runningAccess);
 
   return res;

@@ -155,6 +155,8 @@ int main(int argc, char** argv){
 
 	    if(length <= 0){
 	      /* TODO */
+	      connected = false;
+	      break;
 	    }
 	  }
 	  else if(cmds.size() == 1){
@@ -164,6 +166,8 @@ int main(int argc, char** argv){
 
 	    if(length <= 0){
 	      /* TODO */
+	      connected = false;
+	      break;
 	    }
 	  }
 	  else{
@@ -173,6 +177,15 @@ int main(int argc, char** argv){
 	}
 	else if(cmds[0] == "restart"){
 	  /* TODO */
+	  msg = 'R';
+	  length = send(socket, &msg, 1, 0);
+
+	  if(length <= 0){
+	    /* TODO */
+	    connected = false;
+	    break;
+	  }
+
 	  
 	}
 	else if(cmds[0] == "remove"){
@@ -180,15 +193,18 @@ int main(int argc, char** argv){
 	  if(cmds.size() >= 2){
 	    rec = (cmds[1] == "-r");
 	    ibool = rec ? 1 : 0;
+
+	    
+	  }
+	  else{
+	    cout << "error: Invalid arguments" << endl;
 	  }
 	}
 	else{
-	  cout << "Unknown command" << endl;
+	  cout << "error: Unknown command" << endl;
 	  //getRet = false;
 	  continue;
-	}
-
-	
+	}	
       }
     }
       

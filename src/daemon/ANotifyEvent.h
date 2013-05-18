@@ -66,6 +66,8 @@ class ANotifyEvent
 	m_name += m_filename;
       }
 #else
+      /* TODO: Verifier l'affectation */
+      m_basename = name;
       /* TODO: ne manque-t-il pas la valeur de m_name ? */
       m_evtDescr =  (FD) ipEvt->ident;
 #endif // __ENVIREONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
