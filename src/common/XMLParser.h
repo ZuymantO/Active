@@ -1,7 +1,12 @@
+#ifndef _XMLParser__
+#define _XMLParser__
+
 #include <string>
 #include <sstream>
 #include <list>
-#include <tinyxml.h>
+#include <iostream>
+//#include <tinyxml.h>
+#include "tinyxml.h"
 
 #include "Search.h"
 #include "Result.h"
@@ -14,7 +19,7 @@ class XMLParser {
   Utils u;
 
  public :
-  Search InterpretSearch(string xmlStream);
+  Search* InterpretSearch(string xmlStream);
   Results InterpretResult(string xmlStream);
   Indexation InterpretIndexation(string xmlStream);
   // permet d'extraire une date a partir d'un noeud
@@ -24,3 +29,5 @@ class XMLParser {
   list<Suppression> GetSuppressions(TiXmlNode *nodeDepth1);
   list<Creation> GetCreations(TiXmlNode *nodeDepth1);
 };
+
+#endif
