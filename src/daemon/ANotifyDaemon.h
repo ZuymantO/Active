@@ -22,8 +22,8 @@ class ANotifyDaemon {
   int logFd;
 
   bool running;
-  pthread_mutex_t runningAccess;
-  pthread_mutex_t logLock;
+  mutable pthread_mutex_t runningAccess;
+  mutable pthread_mutex_t logLock;
 
   /* Racine du chemin en cours de surveillance */
   std::string watchPath;
@@ -50,6 +50,9 @@ class ANotifyDaemon {
 
   ~ANotifyDaemon();
 
+  /* ------- FONCTIONS D'INITIALISATION ------- */
+
+  //void forkInit() throw (ANotifyException);
   void initDaemon() throw (ANotifyException);
   static int initWithThread(ANotifyDaemon* dae) throw (ANotifyException);
   /* Lance le processus principal du daemon */

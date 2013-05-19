@@ -13,6 +13,7 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <pthread.h>
+#include <sstream>
 
 #include "ANotifyDaemon.h"
 #include "ANotify.h"
@@ -22,22 +23,40 @@ const std::string ANotifyDaemon::propsPath = "daemon.prop";
 const std::string ANotifyDaemon::logPath = "daemon.log";
 
 ANotifyDaemon::ANotifyDaemon() throw (ANotifyException) :
-  sock(-1), running(false), notify(NULL), 
+  sock(-1), propsFd(-1), logFd(-1), running(false), notify(NULL), notifyEvent(NULL),
   /* TODO: decommenter pour la partie finale */
-  watchPath("/")
-  //watchPath("/home/cuisse/")
+  //watchPath("/")
+  watchPath("/home/cuisse/Documents/save_genie")
 {
-  
+  //initDaemon();
 }
 
 ANotifyDaemon::~ANotifyDaemon(){
   this->kill();
 }
 
+/*void ANotifyDaemon::forkInit() throw (ANotifyException){
+  pid_t pid;
+
+  pid = fork();
+
+  if(pid > 0){
+
+  }
+  else if(pid == 0){
+  this->initDaemon();
+  }
+  else{
+  this->kill();
+  throw ANotifyException("Fork init failed", errno, this);
+  }
+  }*/
+
 void ANotifyDaemon::initDaemon() throw (ANotifyException){
   int port = -1, i, client, length, res;
   struct sockaddr_in addr;
   std::string str = "";
+  std::stringstream ss(str);
   pid_t current_pid = getpid(), pid; 
   pthread_t init_thread;
   
@@ -87,11 +106,8 @@ void ANotifyDaemon::initDaemon() throw (ANotifyException){
     port:port_du_serveur
   */
   
-  str.append("pid:");
-  str += current_pid;
-  str.append("\n");
-  str.append("port:");
-  str += port;
+  ss << "pid:" << current_pid << "\n" << "port:" << port;
+  str = ss.str();
   
   if(write(this->propsFd, str.c_str(), str.length()) < 0){
     closePropsFile(this->propsFd);
@@ -107,6 +123,8 @@ void ANotifyDaemon::initDaemon() throw (ANotifyException){
   if(this->logFd == -1){
     closePropsFile(this->propsFd);
     close(this->sock);
+
+    throw ANotifyException("Cannot open log file", errno, this);
   }
   
   this->addr = &addr;
@@ -128,16 +146,12 @@ int ANotifyDaemon::initWithThread(ANotifyDaemon* dae) throw (ANotifyException){
   
   res = pthread_create(&init_thread, NULL, init, (void*)dae);
   
-  /* TODO: verifier le -1 en cas d'echec */
-  if(res != 0){    
-    close(dae->sock);
-    closePropsFile(dae->propsFd);
-    dae->closeLogFile();
+  if(res != 0){   
+    dae->kill();
     throw ANotifyException("thread failed", errno, dae);
   }
 
-  str = "[SUCCESS] initWithThread " + res;
-  dae->printLog(str);
+  //init((void*)dae);
   
   return res;
 }
@@ -146,7 +160,8 @@ void* ANotifyDaemon::init(void* arg){
   std::string str;
   pthread_t thread;
   int res;
-  ANotifyDaemon* dae = (ANotifyDaemon*)arg;  
+  ANotifyDaemon* dae = (ANotifyDaemon*)arg;
+  //std::pair<ANotifyDaemon*, std::string> daemon_path;
   
   str = "[SUCCESS] init";
   dae->printLog(str);
@@ -162,17 +177,26 @@ void* ANotifyDaemon::init(void* arg){
     dae->printLog(str);
     pthread_exit(NULL);
   }
-  /*res = pthread_create(&threads[1], NULL, start, arg);
-  if(res == 0){    
+  //waitForClients(arg);
+  
+
+  /*daemon_path.first = dae;
+    daemon_path.second = dae->watchPath;
+    res = pthread_create(&threads[1], NULL, startT, (void*)(&daemon_path));
+    if(res == 0){    
     str = "daemon started successfully";
     dae->printLog(str);
+    }
+    else{
+    str = "failed to wait for incoming connections";
+    dae->printLog(str);
+    pthread_exit(NULL);
     }*/
 
-  dae->start();
-  str = "daemon started successfully";
-  dae->printLog(str);
+  //sleep(1);
+  //dae->start();
   
-  pthread_exit(NULL);
+  //pthread_exit(NULL);
 }
 
 bool ANotifyDaemon::retrieveBoolResult(void* (f)(void*), void* arg){
@@ -221,6 +245,8 @@ void* ANotifyDaemon::startT(void* arg){
   res = dae->addWatch(path);
   
   std::cout << "ended addWatch" << std::endl;
+
+  throw ANotifyException("lol", errno, dae);
 
   if(!res){
     str = "[ERROR] failed to start daemon on path '" + path;
@@ -277,7 +303,9 @@ bool ANotifyDaemon::addWatch(std::string& path){
     dirWatch.setMonitor(this->notify);
     
     try{
+      std::cout << "add start" << std::endl;
       this->notify->add(dirWatch);
+      std::cout << "[ADDED] " << dirWatch.getPath() << std::endl;
       logMsg = "[ADDED] " + newpath;
       //std::cout << logMsg << std::endl;
       printLog(logMsg);
@@ -378,6 +406,7 @@ void* ANotifyDaemon::waitForEvents(void* arg){
 void* ANotifyDaemon::waitForClients(void* arg){
   pid_t child_pid;
   int client, res;
+  std::string str;
   socklen_t len;
   ANotifyDaemon* dae = (ANotifyDaemon*)arg;
  
@@ -389,6 +418,9 @@ void* ANotifyDaemon::waitForClients(void* arg){
     if(client == -1){
       break;
     }
+
+    str = "[SOCKET] New client";
+    dae->printLog(str);
     
     pthread_t client_thread;
     std::pair<ANotifyDaemon*, int> infos_client;
@@ -467,8 +499,9 @@ bool ANotifyDaemon::stop(){
   }  
 
   this->setRunning(false);
-  this->notify->AClose();
-
+  if(notify != NULL){
+    this->notify->AClose();
+  }
   return true;
 }
 
@@ -480,18 +513,20 @@ bool ANotifyDaemon::kill(){
   
   close(this->sock);
 
-  pthread_mutex_destroy(&this->runningAccess);
-  pthread_mutex_destroy(&this->logLock);
+  //sleep(3);
 
-  if(this->notifyEvent != NULL){
+  /*if(this->notifyEvent != NULL){
     delete this->notifyEvent;
     this->notifyEvent = NULL;
-  }
+    }*/
 
   if(this->notify != NULL){
     delete this->notify;
     this->notify = NULL;
   }
+
+  pthread_mutex_destroy(&this->runningAccess);
+  pthread_mutex_destroy(&this->logLock);
 
   return true;
 }
@@ -586,21 +621,20 @@ void* ANotifyDaemon::communicate(void* arg){
 
 int ANotifyDaemon::openPropsFile(){
   /* TODO: Modifier le chemin si besoin est + poser un verrou sur le fichier */
-  int ret, fd; 
-  
+  int ret, fd;   
   
   //this->propsFd = open(propsPath, O_RDWR | O_CREAT, 0777);  
-  fd = open(propsPath.c_str(), O_RDWR | O_CREAT, 0666);
+  fd = open(propsPath.c_str(), O_RDWR | O_CREAT | O_APPEND, 0666);
 
   if(fd == -1){
     return -1;
   }
-
+  /*
   ret = flock(fd, LOCK_EX | LOCK_NB);
 
   if(ret == -1){
     return -1;
-  }
+    }*/
 
   return fd;
 }
@@ -657,9 +691,7 @@ bool ANotifyDaemon::isRunning(){
 
 void ANotifyDaemon::setRunning(bool run){
   pthread_mutex_lock(&runningAccess);
-
   this->running = run;
-
   pthread_mutex_unlock(&runningAccess);
 }
 
@@ -669,7 +701,7 @@ bool ANotifyDaemon::isActiveDaemon(pid_t pid){
   int newlinePos;
   pid_t pid_read;
 
-  if(this->propsFd == -1){
+  if(this->propsFd == -1){  
     return false;
   }
 

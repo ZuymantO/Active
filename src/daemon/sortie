@@ -1,0 +1,1 @@
+g++  -c ANotify.cpp -o core.o

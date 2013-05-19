@@ -118,6 +118,9 @@ public:
       throw ANotifyException(IN_EXC_MSG("event cannot occur on disabled watch"), EINVAL, this);
     }
     setEnabled(false);
+
+    /* TODO: IN_WRITE_END manquant ? */
+    IN_WRITE_END
   }
   inline ANotifyEvent* getAEvent() const{
     return m_pAEvent;
@@ -142,7 +145,7 @@ public:
   void setMonitor(ANotify& irANot){
     setMonitor(&irANot);
   }
-  void setDescritor(FD iFD){
+  void setDescriptor(FD iFD){
     m_wDescr =  iFD;
   }
   void setPath(std::string *str){

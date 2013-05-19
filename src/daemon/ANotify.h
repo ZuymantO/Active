@@ -79,24 +79,24 @@ public:
   bool removeAll() throw (ANotifyException);
 
   inline size_t getWatchCount() const{
-    IN_READ_BEGIN
+    IN_WATCH_READ_BEGIN
     size_t n = (size_t) m_paths.size();
-    IN_READ_END
+    IN_WATCH_READ_END
     return n;
   }
   inline size_t getEnabledCount() const{
-    IN_READ_BEGIN
+    IN_WATCH_READ_BEGIN
     size_t n = (size_t) m_watches.size();
-    IN_READ_END
+    IN_WATCH_READ_END
     return n;
   }
 
   
   void waitForEvents(bool ifNoIntr = false) throw (ANotifyException);
   inline size_t getEventCount(){
-    IN_READ_BEGIN
+    IN_EVENT_READ_BEGIN
     size_t n = (size_t) m_events.size();
-    IN_READ_END
+    IN_EVENT_READ_END
     return n;
   }
 

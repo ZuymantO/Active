@@ -30,7 +30,7 @@ main.o: Main.cpp
 	$(CC) $(FLAGS) -c Main.cpp -o main.o
 
 daemon.o: ANotifyDaemon.h ANotifyDaemon.cpp
-#daemon.o: ANotifyDaemon.h Daemon.cpp
+#daemon.o: Daemon.h Daemon.cpp
 	$(CC) $(FLAGS) -c ANotifyDaemon.cpp -o daemon.o
 #	$(CC) $(FLAGS) -c Daemon.cpp -o daemon.o
 
@@ -46,7 +46,7 @@ event.o: ANotifyEvent.h ANotifyEvent.cpp
 mask.o: ANotifyMask.h ANotifyMask.cpp
 	$(CC) $(FLAGS) -c ANotifyMask.cpp -o mask.o
 
-core.o: ANotify.h ANotify.cpp
+core.o: ANotify.h ANotify.cpp ANotifyUtils.h
 #	$(CC) $(FLAGS) -c ANotify.cpp -D__APPLE__ -o core.o
 	$(CC) $(FLAGS) -c ANotify.cpp -o core.o
 

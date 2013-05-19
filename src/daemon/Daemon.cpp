@@ -13,7 +13,7 @@
 #include <unistd.h>
 #include <dirent.h>
 
-#include "ANotifyDaemon.h"
+#include "Daemon.h"
 #include "ANotify.h"
 #include "ANotifyException.h"
 

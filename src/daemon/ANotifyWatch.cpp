@@ -36,7 +36,12 @@ void ANotifyWatch::setEnabled(bool ibEnabled) throw (ANotifyException)
 
 void ANotifyWatch::__disable()
 {
-  IN_WRITE_BEGIN
+  /* 
+     TODO: decommenter tout ? (utilisation de IN_WRITE_BEGIN et END en
+     dehors de ANotify)
+  */
+
+  /*IN_WRITE_BEGIN
   
   if (!m_wEnabled) {
     IN_WRITE_END_NOTHROW
@@ -50,7 +55,8 @@ void ANotifyWatch::__disable()
   
   m_wEnabled = false;
   
-  IN_WRITE_END
+  IN_WRITE_END*/
+
 }
 
 

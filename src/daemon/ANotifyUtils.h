@@ -8,100 +8,142 @@
 
 #include <iostream>
 #include <sys/types.h>
-  /// procfs inotify base path, pour la configuration chemin 'a choisir encore et bien d'efinir
+/// procfs inotify base path, pour la configuration chemin 'a choisir encore et bien d'efinir
 #define PROCFS_ANOTIFY_BASE "/proc/sys/fs/inotify/" // mettre path pour unix
 
 
 
 /*#ifndef __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
-#include <sys/inotify.h>
+  #include <sys/inotify.h>
   /// procfs inotify base path 
-#define PROCFS_ANOTIFY_BASE "/proc/sys/fs/inotify/"
-#endif // __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
-#include <sys/event.h>*/
+  #define PROCFS_ANOTIFY_BASE "/proc/sys/fs/inotify/"
+  #endif // __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
+  #include <sys/event.h>*/
 /** <MOD> **/
 #ifndef __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
-   #include <sys/inotify.h>
-   #include <sys/eventfd.h>
-   /// procfs inotify base path 
-   #define PROCFS_ANOTIFY_BASE "/proc/sys/fs/inotify/"
+#include <sys/inotify.h>
+#include <sys/eventfd.h>
+/// procfs inotify base path 
+#define PROCFS_ANOTIFY_BASE "/proc/sys/fs/inotify/"
 #else
-   #include <sys/event.h>
+#include <sys/event.h>
 #endif // __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
 
 #define IN_EXC_MSG(msg) (std::string(__PRETTY_FUNCTION__) + ": " + msg)
 /** </MOD> **/
 
+/* TODO: commenter cette ligne */
+#define INOTIFY_THREAD_SAFE
+
 #ifdef INOTIFY_THREAD_SAFE
-   #include <pthread.h>
+#include <pthread.h>
 
-   #define IN_LOCK_DECL mutable pthread_rwlock_t __m_lock;
-   #define IN_LOCK_INIT \
-   { \
-   pthread_rwlockattr_t attr; \
-   int res = 0; \
-   if ((res = pthread_rwlockattr_init(&attr)) != 0) \
-   throw InotifyException(IN_EXC_MSG("cannot initialize lock attributes"), res, this); \
-   if ((res = pthread_rwlockattr_setkind_np(&attr, PTHREAD_RWLOCK_PREFER_WRITER_NP)) != 0) \
-   throw InotifyException(IN_EXC_MSG("cannot set lock kind"), res, this); \
-   if ((res = pthread_rwlock_init(&__m_lock, &attr)) != 0) \
-   throw InotifyException(IN_EXC_MSG("cannot initialize lock"), res, this); \
-   pthread_rwlockattr_destroy(&attr); \
-   }
+/*#define IN_LOCK_DECL				\
+  {						\
+    mutable pthread_rwlock_t __m_lock;			\
+    mutable pthread_rwlock_t __m_event_lock;		\
+    mutable pthread_rwlock_t __m_watch_lock;		\
+    }*/
 
-   #define IN_LOCK_DONE pthread_rwlock_destroy(&__m_lock);
+#define IN_LOCK_DECL mutable pthread_rwlock_t __m_lock; mutable pthread_rwlock_t __m_event_lock; mutable pthread_rwlock_t __m_watch_lock;
 
-   #define IN_READ_BEGIN \
-   { \
-   int res = pthread_rwlock_rdlock(&__m_lock); \
-   if (res != 0) \
-   throw InotifyException(IN_EXC_MSG("locking for reading failed"), res, (void*) this); \
-   }
+#define IN_LOCK_INIT							\
+  {									\
+    pthread_rwlockattr_t attr;						\
+    int res = 0;							\
+    if ((res = pthread_rwlockattr_init(&attr)) != 0)			\
+      throw ANotifyException(IN_EXC_MSG("cannot initialize lock attributes"), res, this); \
+    if ((res = pthread_rwlockattr_setkind_np(&attr, PTHREAD_RWLOCK_PREFER_WRITER_NP)) != 0) \
+      throw ANotifyException(IN_EXC_MSG("cannot set lock kind"), res, this); \
+    if ((res = pthread_rwlock_init(&__m_lock, &attr)) != 0)		\
+      throw ANotifyException(IN_EXC_MSG("cannot initialize lock"), res, this); \
+    if ((res = pthread_rwlock_init(&__m_event_lock, &attr)) != 0)	\
+      throw ANotifyException(IN_EXC_MSG("cannot initialize event lock"), res, this); \
+    if ((res = pthread_rwlock_init(&__m_watch_lock, &attr)) != 0)	\
+      throw ANotifyException(IN_EXC_MSG("cannot initialize watch lock"), res, this); \
+    pthread_rwlockattr_destroy(&attr);					\
+  }
 
-   #define IN_READ_END \
-   { \
-   int res = pthread_rwlock_unlock(&__m_lock); \
-   if (res != 0) \
-   throw InotifyException(IN_EXC_MSG("unlocking failed"), res, (void*) this); \
-   }
+#define IN_LOCK_DONE				\
+  {						\
+    pthread_rwlock_destroy(&__m_lock);		\
+    pthread_rwlock_destroy(&__m_watch_lock);	\
+    pthread_rwlock_destroy(&__m_event_lock);	\
+  }
 
-   #define IN_READ_END_NOTHROW pthread_rwlock_unlock(&__m_lock);
+#define IN_READ_BEGIN_FROM(mutable_lock) 				\
+  {									\
+    int res = pthread_rwlock_rdlock(&mutable_lock);			\
+    if(res != 0){							\
+      throw ANotifyException(IN_EXC_MSG("locking for reading failed"), res, (void*) this); \
+    }									\
+  }
 
-   #define IN_WRITE_BEGIN \
-   { \
-   int res = pthread_rwlock_wrlock(&__m_lock); \
-   if (res != 0) \
-   throw InotifyException(IN_EXC_MSG("locking for writing failed"), res, (void*) this); \
-   }
+#define IN_READ_END_FROM(mutable_lock) 					\
+  {									\
+    int res = pthread_rwlock_unlock(&mutable_lock);			\
+    if (res != 0)							\
+      throw ANotifyException(IN_EXC_MSG("unlocking failed"), res, (void*) this); \
+  }
 
-   #define IN_WRITE_END IN_READ_END
-   #define IN_WRITE_END_NOTHROW IN_READ_END_NOTHROW
+#define IN_READ_BEGIN IN_READ_BEGIN(__m_lock)
+#define IN_READ_END IN_READ_END_FROM(__m_lock)
+#define IN_WATCH_READ_BEGIN IN_READ_BEGIN_FROM(__m_watch_lock)
+#define IN_WATCH_READ_END IN_READ_END_FROM(__m_watch_lock)
+#define IN_EVENT_READ_BEGIN IN_READ_BEGIN_FROM(__m_event_lock)
+#define IN_EVENT_READ_END IN_READ_END_FROM(__m_event_lock)
+
+#define IN_READ_END_NOTHROW_FROM(mutable_lock) pthread_rwlock_unlock(&mutable_lock);
+
+#define IN_READ_END_NOTHROW IN_READ_END_NOTHROW_FROM(__m_lock)
+#define IN_WATCH_READ_END_NOTHROW IN_READ_END_NOTHROW_FROM(__m_watch_lock)
+#define IN_EVENT_READ_END_NOTHROW IN_READ_END_NOTHROW_FROM(__m_event_lock)
+
+
+
+#define IN_WRITE_BEGIN_FROM(mutable_lock)				\
+  {									\
+    int res = pthread_rwlock_wrlock(&mutable_lock);			\
+    if (res != 0)							\
+      throw ANotifyException(IN_EXC_MSG("locking for writing failed"), res, (void*) this); \
+  }
+
+#define IN_WRITE_BEGIN IN_WRITE_BEGIN_FROM(__m_lock)
+#define IN_WATCH_WRITE_BEGIN IN_WRITE_BEGIN_FROM(__m_watch_lock)
+#define IN_EVENT_WRITE_BEGIN IN_WRITE_BEGIN_FROM(__m_event_lock); 
+
+#define IN_WRITE_END IN_READ_END
+#define IN_WRITE_END_NOTHROW IN_READ_END_NOTHROW
+#define IN_WATCH_WRITE_END IN_WATCH_READ_END
+#define IN_WATCH_WRITE_END_NOTHROW IN_WATCH_READ_END_NOTHROW
+#define IN_EVENT_WRITE_END IN_EVENT_READ_END
+#define IN_EVENT_WRITE_END_NOTHROW IN_EVENT_READ_END_NOTHROW
 
 #else // INOTIFY_THREAD_SAFE
 
-   #define IN_LOCK_DECL
-   #define IN_LOCK_INIT
-   #define IN_LOCK_DONE
-   #define IN_READ_BEGIN
-   #define IN_READ_END
-   #define IN_READ_END_NOTHROW
-   #define IN_WRITE_BEGIN
-   #define IN_WRITE_END
-   #define IN_WRITE_END_NOTHROW
+#define IN_LOCK_DECL
+#define IN_LOCK_INIT
+#define IN_LOCK_DONE
+#define IN_READ_BEGIN
+#define IN_READ_END
+#define IN_READ_END_NOTHROW
+#define IN_WRITE_BEGIN
+#define IN_WRITE_END
+#define IN_WRITE_END_NOTHROW
 
 #endif // INOTIFY_THREAD_SAFE
 
 
 /* <MOD> */
 /*#define ANOTIFY_INIT() (kqueue())
-#define ANOTIFY_EVENT struct kevent*/
+  #define ANOTIFY_EVENT struct kevent*/
 
 #ifndef __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
-  #define ANOTIFY_INIT() inotify_init()
-  #define ANOTIFY_EVENT struct inotify_event
+#define ANOTIFY_INIT() inotify_init()
+#define ANOTIFY_EVENT struct inotify_event
 #else
-  #define ANOTIFY_INIT() (kqueue())
-  #define ANOTIFY_EVENT struct kevent
+#define ANOTIFY_INIT() (kqueue())
+#define ANOTIFY_EVENT struct kevent
 #endif
 /* </MOD> */
 
@@ -115,18 +157,18 @@
 #define ANOPAQUEDATE void*
 
 #ifdef __APPLE__
-   #ifdef TARGET_OS_MAC
-      #define ANOTIFY_INIT() kqueue() //kqueue etc.
-      #define ANOTIFY_EVENT struct kevent
-      #define ANMASK uint16_t // mask
-   #endif
+#ifdef TARGET_OS_MAC
+#define ANOTIFY_INIT() kqueue() //kqueue etc.
+#define ANOTIFY_EVENT struct kevent
+#define ANMASK uint16_t // mask
+#endif
 #elif defined _WIN32 || defined _WIN64 // For fun, on touche pas a windows...
-   #define ANOTIFY_INIT()
-   #define ANOTIFY_EVENT
+#define ANOTIFY_INIT()
+#define ANOTIFY_EVENT
 #elif defined LINUX // struct inotify_event,
-   #define ANOTIFY_INIT() inotify_init()
-   #define ANOTIFY_EVENT struct inotify_event
-   #define ANMASK uint32_t // mask
+#define ANOTIFY_INIT() inotify_init()
+#define ANOTIFY_EVENT struct inotify_event
+#define ANMASK uint32_t // mask
 #endif
 
 
