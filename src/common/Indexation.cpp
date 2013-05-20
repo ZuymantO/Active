@@ -105,11 +105,16 @@ void File::AddIndex(Indexage i) {
 // Class Modification
 // ----------------------------------------------------------------------------
 
-Modification::Modification(string pa, string d, int t, string pr, string g, string p, list<Indexage> i, string n) : File(pa, d, t, pr, g, p, i) {
+Modification::Modification(string pa, string d, int t, string pr, string g, string p, list<Indexage> i, string n) {
+  this->file = new File(pa, d, t, pr, g, p, i);
   this->newpath = n;
 }
 
 Modification::~Modification() {}
+
+File* Modification::GetFile() const {
+  return this->file;
+}
 
 string Modification::GetNewpath() const {
   return this->newpath;
@@ -119,11 +124,16 @@ string Modification::GetNewpath() const {
 // Class Creation
 // ----------------------------------------------------------------------------
 
-Creation::Creation(string pa, string d, int t, string pr, string g, string p, list<Indexage> i, string f) : File(pa, d, t, pr, g, p, i) {
+Creation::Creation(string pa, string d, int t, string pr, string g, string p, list<Indexage> i, string f) {
+  this->file = new File(pa, d, t, pr, g, p, i);
   this->format = f;
 }
 
 Creation::~Creation() {}
+
+File* Creation::GetFile() const {
+  return this->file;
+}
 
 string Creation::GetFormat() const {
   return this->format;

@@ -53,13 +53,13 @@ int main() {
   list<Modification> mf = ind.GetModif();
   std::list<Modification>::const_iterator lit2(mf.begin()), lend2(mf.end());
   for (; lit2 != lend2; ++lit2) {
-    cout << "path : " << lit2->GetPath() << endl;
-    cout << "date : " << lit2->GetDate() << endl;
-    cout << "taille : " << lit2->GetTaille() << endl;
-    cout << "prop : " << lit2->GetProprietaire() << endl;
-    cout << "groupe : " << lit2->GetGroupe() << endl;
-    cout << "perm : " << lit2->GetPerm() << endl;
-    list<Indexage> li = lit2->GetIndex();
+    cout << "path : " << lit2->GetFile()->GetPath() << endl;
+    cout << "date : " << lit2->GetFile()->GetDate() << endl;
+    cout << "taille : " << lit2->GetFile()->GetTaille() << endl;
+    cout << "prop : " << lit2->GetFile()->GetProprietaire() << endl;
+    cout << "groupe : " << lit2->GetFile()->GetGroupe() << endl;
+    cout << "perm : " << lit2->GetFile()->GetPerm() << endl;
+    list<Indexage> li = lit2->GetFile()->GetIndex();
     std::list<Indexage>::const_iterator llit(li.begin()), llend(li.end());
     for (; llit != llend; ++llit) {
       cout << "le mot #" << llit->GetWord() << "# apparait : " << llit->GetOccurrence() << endl;
@@ -81,13 +81,13 @@ int main() {
   cout << cr.size() << endl;
   std::list<Creation>::const_iterator lit4(cr.begin()), lend4(cr.end());
   for (; lit4 != lend4; ++lit4) {
-    cout << "path : " << lit4->GetPath() << endl;
-    cout << "date : " << lit4->GetDate() << endl;
-    cout << "taille : " << lit4->GetTaille() << endl;
-    cout << "prop : " << lit4->GetProprietaire() << endl;
-    cout << "groupe : " << lit4->GetGroupe() << endl;
-    cout << "perm : " << lit4->GetPerm() << endl;
-    list<Indexage> li2 = lit4->GetIndex();
+    cout << "path : " << lit4->GetFile()->GetPath() << endl;
+    cout << "date : " << lit4->GetFile()->GetDate() << endl;
+    cout << "taille : " << lit4->GetFile()->GetTaille() << endl;
+    cout << "prop : " << lit4->GetFile()->GetProprietaire() << endl;
+    cout << "groupe : " << lit4->GetFile()->GetGroupe() << endl;
+    cout << "perm : " << lit4->GetFile()->GetPerm() << endl;
+    list<Indexage> li2 = lit4->GetFile()->GetIndex();
     std::list<Indexage>::const_iterator llit2(li2.begin()), llend2(li2.end());
     for (; llit2 != llend2; ++llit2) {
       cout << "le mot #" << llit2->GetWord() << "# apparait : " << llit2->GetOccurrence() << endl;
