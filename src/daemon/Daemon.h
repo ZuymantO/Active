@@ -22,8 +22,8 @@ class ANotifyDaemon {
   int logFd;
 
   bool running;
-  pthread_mutex_t runningAccess;
-  pthread_mutex_t logLock;
+  mutable pthread_mutex_t runningAccess;
+  mutable pthread_mutex_t logLock;
 
   /* Racine du chemin en cours de surveillance */
   std::string watchPath;
@@ -42,27 +42,48 @@ class ANotifyDaemon {
   /* Chemin vers le fichier de log du daemon */
   static const std::string logPath;  
 
-  /* Constructeur */
+  /* ------- CONSTRUCTEUR ------- */
+
   ANotifyDaemon() throw (ANotifyException);
-  /* Destructeur */
+
+  /* ------- DESTRUCTEUR ------- */
+
   ~ANotifyDaemon();
 
-  /* Lance le processus principale du daemon */
-  void init();
+  /* ------- FONCTIONS D'INITIALISATION ------- */
+
+  //void forkInit() throw (ANotifyException);
+  void initDaemon() throw (ANotifyException);
+  static int initWithThread(ANotifyDaemon* dae) throw (ANotifyException);
+  /* Lance le processus principal du daemon */
+  static void* init(void* daemon);   // ---> void
+
+  /* ------- FONCTIONS DE CONTROLE ------- */
+
+  /* Recupere le retour d'une fonction de thread renvoyant un booleen */
+  bool retrieveBoolResult(void* (f)(void*), void* arg);
+
   /* Demarre la surveillance sur 'watchPath' */
   bool start();
   /* Demarre la surveillance sur le chemin en argument */
-  bool start(std::string& path);  
-  /* Demarre la surveillance sur 'watchPath' */
+  bool start(std::string& path);
+  static void* startT(void* daemon_path_pair);   // ---> bool
+
+  /* Redemarre la surveillance sur 'watchPath' */
   bool restart();
   /* Redemarre la surveillance sur le chemin en argument */
   bool restart(std::string& path);
+
   /* Arrete le daemon */
   bool stop();
+
   /* Tue le daemon */
   bool kill();
+
   /* Liste les fichiers surveilles */
   bool list(int client_socket);
+
+  /* ------- FONCTIONS D'INFORMATIONS ------- */
 
   /* Renvoie un descripteur vers le fichier des proprietes du daemon */
   static int openPropsFile();
@@ -78,23 +99,6 @@ class ANotifyDaemon {
   /* Ecrit le message 'msg' dans le fichier de log */
   void printLog(std::string& msg);
 
-  /* Indique l'etat du daemon */
-  bool isRunning();
-  /* Changer l'etat du daemon */
-  void setRunning(bool run);
-
-  /* Fonction de traitement des evenements provenant du ANotify */
-  void run();
-  /* Tente de surveiller (recursivement) 'path' (si c'est un repertoire) */
-  bool addWatch(std::string& path);
-  /* Fonction d'attente des evenements du ANotify */
-  void waitForEvents();
-
-  /* Attend la connexion de clients */
-  void waitForClients(struct sockaddr_in* addr);
-  /* Fonction de communication avec le client */
-  void communicate(int client_socket);
-
   /* 
      Indique si le processus courant est celui du daemon en execution
      (renvoie true s'il n'y a aucun daemon en cours)
@@ -102,6 +106,27 @@ class ANotifyDaemon {
   bool isActiveDaemon(pid_t daemon_pid);
   /* Renvoie le port d'ecoute du daemon, -1 en cas d'echec */
   static int getDaemonPort(int fd);
+
+  /* ------- FONCTIONS D'ETAT ------- */
+
+  /* Indique l'etat du daemon */
+  bool isRunning();
+  /* Change l'etat du daemon */
+  void setRunning(bool run);
+
+  /* ------- FONCTIONS ------- */
+
+  /* Fonction de traitement des evenements provenant du ANotify */
+  static void* run(void* dae);
+  /* Tente de surveiller (recursivement) 'path' (si c'est un repertoire) */
+  bool addWatch(std::string& path);
+  /* Fonction d'attente des evenements du ANotify */
+  static void* waitForEvents(void* dae);
+
+  /* Attend la connexion de clients */
+  static void* waitForClients(void* dae);
+  /* Fonction de communication avec le client */
+  static void* communicate(void* daemon_socketfd_pair);
 
   /* 
      Retire la surveillance du fichier a l'emplacement path

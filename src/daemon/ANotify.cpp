@@ -66,19 +66,27 @@ void ANotify::AClose()
   IN_WRITE_END
     }
 
+void ANotify::Close(){  
+  IN_WRITE_BEGIN  
+    if (m_fileDescr != -1) {
+      removeAll();
+    }  
+  IN_WRITE_END
+}
+
 void ANotify::add(ANotifyWatch* pWatch) throw (ANotifyException)
 {
-  IN_WRITE_BEGIN
+  //IN_WRITE_BEGIN
 
     // invalid descriptor - this case shouldn't occur - go away
     if (m_fileDescr == -1) {
-      IN_WRITE_END_NOTHROW
+      //IN_WRITE_END_NOTHROW
 	throw ANotifyException(IN_EXC_MSG("invalid file descriptor"), EBUSY, this);
     }
   
   // this path already watched - go away
   if (findWatch(pWatch->getPath()) != NULL) {
-    IN_WRITE_END_NOTHROW
+    //IN_WRITE_END_NOTHROW
       throw ANotifyException(IN_EXC_MSG("path already watched"), EBUSY, this);
   }
   
@@ -98,39 +106,9 @@ void ANotify::add(ANotifyWatch* pWatch) throw (ANotifyException)
     
     // adding failed - go away
     if (wd == -1) {
-      IN_WRITE_END_NOTHROW
+      //IN_WRITE_END_NOTHROW
 #ifndef __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
-	std::string errMessage = "";
-      std::stringstream errStream;
-      switch(errno){
-      case EACCES:
-	errMessage = "Read access to the given file is not permitted";
-	break;
-      case EBADF:
-	errStream << "The given file descriptor is not valid."
-		  << "mD: "
-		  << m_fileDescr
-		  << ", wd: "
-		  << wd;
-	errMessage = errStream.str();
-	break;
-      case EFAULT:
-	errMessage = "Pathname points outside of the process's accessible address space.";
-	break;
-      case EINVAL:
-	errMessage = "The given event mask contains no valid events; or fd is not an inotify file descriptor.";
-	break;
-      case ENOENT:
-	errMessage = "A directory component in pathname does not exist or is a dangling symbolic link.";
-	break;
-      case ENOMEM:
-	errMessage = "Insufficient kernel memory was available.";
-	break;
-      case ENOSPC:
-	errMessage = "The user limit on the total number of inotify watches was reached or the kernel failed to allocate a needed resource.";
-	break;
-      }
-      throw ANotifyException(IN_EXC_MSG(("adding watch failed: [" + errMessage + "] on " + pWatch->getPath())), errno, this);
+	throw ANotifyException(IN_EXC_MSG("adding watch failed"), errno, this);
 #else
       throw ANotifyException(IN_EXC_MSG("adding watch failed"), errno, this);
 #endif
@@ -154,7 +132,8 @@ void ANotify::add(ANotifyWatch* pWatch) throw (ANotifyException)
     
     pWatch->setDescriptor(wd);
     IN_WATCH_WRITE_BEGIN
-      m_watches.insert(std::pair<FD, ANotifyWatch*>(pWatch->getDescriptor(), pWatch));
+      //m_watches.insert(std::pair<FD, ANotifyWatch*>(pWatch->getDescriptor(), pWatch));
+      m_watches.insert(std::pair<FD, ANotifyWatch*>(wd, pWatch));
     IN_WATCH_WRITE_END
 
       }
@@ -164,7 +143,7 @@ void ANotify::add(ANotifyWatch* pWatch) throw (ANotifyException)
   IN_WATCH_WRITE_END
     pWatch->setMonitor(this);
   
-  IN_WRITE_END
+  //IN_WRITE_END
     }
 
 bool ANotify::remove(ANotifyWatch* pWatch) throw (ANotifyException)
@@ -177,7 +156,8 @@ bool ANotify::remove(ANotifyWatch* pWatch) throw (ANotifyException)
     // invalid descriptor - this case shouldn't occur - go away
     if (m_fileDescr == -1) {
       IN_WATCH_WRITE_END_NOTHROW
-	throw ANotifyException(IN_EXC_MSG("invalid file descriptor"), EBUSY, this);
+	/*throw ANotifyException(IN_EXC_MSG("invalid file descriptor"), EBUSY, this);*/
+	return false;
     }
   
   // for enabled watch
@@ -193,9 +173,12 @@ bool ANotify::remove(ANotifyWatch* pWatch) throw (ANotifyException)
     EV_SET((pWatch->getAEvent()->getEvent()), pWatch->getDescriptor() , EVFILT_VNODE, EV_DELETE | EV_DISABLE | EV_CLEAR, pWatch->getMask(), 0, 0);;
 #endif
 
-    if (wd == -1){// {
+    if (wd == -1){
       IN_WATCH_WRITE_END_NOTHROW
-	throw ANotifyException(IN_EXC_MSG("removing watch failed"), errno, this);
+	//throw ANotifyException(IN_EXC_MSG("removing watch failed"), errno, this);
+	/*throw ANotifyException(IN_EXC_MSG("removing watch failed [" + ss.str() + "]"), errno, this);*/
+      /* TODO: decommenter plus haut si besoin */
+      return false;
     }
     m_watches.erase(pWatch->getDescriptor());
     pWatch->setDescriptor(-1);
@@ -208,27 +191,63 @@ bool ANotify::remove(ANotifyWatch* pWatch) throw (ANotifyException)
     return true;
 }
 
+bool ANotify::clearWatch(ANotifyWatch* pWatch) throw (ANotifyException){
+   if(pWatch == NULL){
+     return false;
+   }
+   
+   // invalid descriptor - this case shouldn't occur - go away
+   if (m_fileDescr == -1) {
+    return false;
+    }
+  
+   // for enabled watch
+   if (pWatch->getDescriptor() != -1) {    
+     // removing watch failed - go away
+     /* TODO: quand est changee la valeur sous Mac ? */
+     FD wd = -1;
+#ifndef __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
+     wd = inotify_rm_watch(m_fileDescr, pWatch->getDescriptor());
+#else
+     EV_SET((pWatch->getAEvent()->getEvent()), pWatch->getDescriptor() , EVFILT_VNODE, EV_DELETE | EV_DISABLE | EV_CLEAR, pWatch->getMask(), 0, 0);;
+#endif
+     
+     if (wd == -1){
+      return false;
+    }
+    m_watches.erase(pWatch->getDescriptor());
+    pWatch->setDescriptor(-1);
+  }
+  
+  m_paths.erase(pWatch->getPath());
+  pWatch->setMonitor(NULL);
+    return true;
+}
+
 bool ANotify::removeAll() throw (ANotifyException)
 {
   /* TODO: enlever les locks si besoin est */
   //IN_WATCH_READ_BEGIN
-  //IN_WATCH_WRITE_BEGIN
-  
+  IN_WATCH_WRITE_BEGIN
+
   bool b = true;
   WatchPathMap::iterator it = m_paths.begin();
   while (it != m_paths.end()) {
     ANotifyWatch* pW = (*it).second;
-    if(!b || remove(pW))
+    //if(!b || remove(pW))
+    b = b && clearWatch(pW);
+    //if(!b || !remove(pW))
       b = false;
     it++;
   }
   
+  //IN_WATCH_WRITE_BEGIN
+
   m_watches.clear();
   m_paths.clear();
-  
-  //IN_WATCH_READ_END
-  //IN_WATCH_WRITE_END
-    
+
+  IN_WATCH_WRITE_END
+      
   return b;
 }
 

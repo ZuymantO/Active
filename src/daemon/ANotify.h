@@ -20,7 +20,7 @@
 #define __ANotify__ANotify__
 
 #ifndef __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
-   #include <sys/inotify.h>
+#include <sys/inotify.h>
 #endif // __ENVIREONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
 
 #include <deque>  // La liste des evenements est une deque
@@ -31,7 +31,7 @@
 #include "ANotifyWatch.h" // Un objet surveill'e est encapsul'e dans un Watch
 #include "ANotifyMask.h"  // Ensemble de masque support'e pour les evements et signaux system (on reduit la puissance de kevent)
 
-  // Capacités limite du systeme de notification (pour configurer le system
+// Capacités limite du systeme de notification (pour configurer le system
 typedef enum{
   MAX_EVENTS     = 0,  ///< max. events in the kernel queue
   MAX_INSTANCES  = 1,  ///< max. inotify file descriptors per process
@@ -44,15 +44,15 @@ class ANotifyException;
 class ANotifyWatch;
 class ANotifyEvent;
 
-  // Map by file descriptor
+// Map by file descriptor
 typedef std::map<FD, ANotifyWatch*> WatchFDMap;       // Le type pour stocker les fichiers surveill'es par File Descriptor
-  // Map by path
+// Map by path
 typedef std::map<std::string, ANotifyWatch*> WatchPathMap;  // Le type pour stocker les fichiers surveill'es par nom
 
 class ANotify
 {
   
-private:
+ private:
   FD m_fileDescr;                             // file descriptor
   WatchFDMap m_watches;               // watches (by descriptors)
   WatchPathMap m_paths;                    // watches (by paths)
@@ -61,17 +61,18 @@ private:
   std::deque<ANotifyEvent*> m_events;    ///< event deque
   IN_LOCK_DECL // On declare un verrou pour les acces aux ressources partages (listes ci-dessus, buffer etc)
   
-public:
+    public:
 
   ANotify() throw (ANotifyException);
   ~ANotify();
   void AClose();
+  void Close();
   void add(ANotifyWatch* ipWatch) throw (ANotifyException);
   inline void add(ANotifyWatch& irWatch) throw (ANotifyException){
     add(&irWatch);
   }
   
-
+  bool clearWatch(ANotifyWatch* pWatch) throw (ANotifyException);
   bool remove(ANotifyWatch* ipWatch) throw (ANotifyException);
   inline bool remove(ANotifyWatch& irWatch) throw (ANotifyException){
     return remove(&irWatch);
@@ -80,24 +81,24 @@ public:
 
   inline size_t getWatchCount() const{
     IN_WATCH_READ_BEGIN
-    size_t n = (size_t) m_paths.size();
+      size_t n = (size_t) m_paths.size();
     IN_WATCH_READ_END
-    return n;
+      return n;
   }
   inline size_t getEnabledCount() const{
     IN_WATCH_READ_BEGIN
-    size_t n = (size_t) m_watches.size();
+      size_t n = (size_t) m_watches.size();
     IN_WATCH_READ_END
-    return n;
+      return n;
   }
 
   
   void waitForEvents(bool ifNoIntr = false) throw (ANotifyException);
   inline size_t getEventCount(){
     IN_EVENT_READ_BEGIN
-    size_t n = (size_t) m_events.size();
+      size_t n = (size_t) m_events.size();
     IN_EVENT_READ_END
-    return n;
+      return n;
   }
 
   bool getEvent(ANotifyEvent* opEvt) throw (ANotifyException);
@@ -121,6 +122,28 @@ public:
   WatchPathMap getWatchesPathMap(){
     return m_paths;
   }
+
+  std::vector<std::string> getWatchPaths(){
+    IN_WATCH_WRITE_BEGIN
+      
+      std::vector<std::string> paths;
+    std::string path;
+    WatchPathMap::iterator it;
+    
+    it = m_paths.begin();
+    
+    while (it != m_paths.end()) {
+      path = it->first;
+      paths.push_back(path);
+
+      it++;
+    }   
+      
+    IN_WATCH_WRITE_END
+
+      return paths;
+  }
+
   FD getFileDescriptor(){
     return m_fileDescr;
   }

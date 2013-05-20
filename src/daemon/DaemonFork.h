@@ -16,17 +16,14 @@ class ANotifyDaemon {
   ANMask mask;
 
   int sock;
-  //struct sockaddr_in* addr;
-  struct sockaddr_in addr;
+  struct sockaddr_in* addr;
 
   int propsFd;
   int logFd;
 
   bool running;
-  bool alive;
-  mutable pthread_mutex_t runningAccess;
-  mutable pthread_mutex_t logLock;
-  mutable pthread_mutex_t aliveAccess;
+  pthread_mutex_t runningAccess;
+  pthread_mutex_t logLock;
 
   /* Racine du chemin en cours de surveillance */
   std::string watchPath;
@@ -45,51 +42,33 @@ class ANotifyDaemon {
   /* Chemin vers le fichier de log du daemon */
   static const std::string logPath;  
 
-  /* ------- CONSTRUCTEUR ------- */
-
+  /* Constructeur */
   ANotifyDaemon() throw (ANotifyException);
-
-  /* ------- DESTRUCTEUR ------- */
-
+  /* Destructeur */
   ~ANotifyDaemon();
 
-  /* ------- FONCTIONS D'INITIALISATION ------- */
-
-  //void forkInit() throw (ANotifyException);
-  void initDaemon() throw (ANotifyException);
-
-  /* ------- FONCTIONS DE CONTROLE ------- */
-
-  /* Recupere le retour d'une fonction de thread renvoyant un booleen */
-  bool retrieveBoolResult(void* (f)(void*), void* arg);
-
+  /* Lance le processus principale du daemon */
+  void init();
   /* Demarre la surveillance sur 'watchPath' */
   bool start();
   /* Demarre la surveillance sur le chemin en argument */
-  bool start(std::string& path);
-  static void* startT(void* daemon_path_pair);   // ---> bool
-
-  /* Redemarre la surveillance sur 'watchPath' */
+  bool start(std::string& path);  
+  /* Demarre la surveillance sur 'watchPath' */
   bool restart();
   /* Redemarre la surveillance sur le chemin en argument */
   bool restart(std::string& path);
-
   /* Arrete le daemon */
   bool stop();
-
   /* Tue le daemon */
   bool kill();
-
   /* Liste les fichiers surveilles */
   bool list(int client_socket);
-
-  /* ------- FONCTIONS D'INFORMATIONS ------- */
 
   /* Renvoie un descripteur vers le fichier des proprietes du daemon */
   static int openPropsFile();
   /* Ferme le fichier des proprietes du daemon */
   static int closePropsFile(int fd);
-  /* Supprime le fichier de proprietes */
+  /* Supprime le contenu du fichier de proprietes */
   static int deletePropsFile();
 
   /* Renvoie un descripteur vers le fichier de log */
@@ -98,9 +77,23 @@ class ANotifyDaemon {
   int closeLogFile();
   /* Ecrit le message 'msg' dans le fichier de log */
   void printLog(std::string& msg);
-  /* Supprime le fichier de log */
-  int deleteLogFile();
-  
+
+  /* Indique l'etat du daemon */
+  bool isRunning();
+  /* Changer l'etat du daemon */
+  void setRunning(bool run);
+
+  /* Fonction de traitement des evenements provenant du ANotify */
+  void run();
+  /* Tente de surveiller (recursivement) 'path' (si c'est un repertoire) */
+  bool addWatch(std::string& path);
+  /* Fonction d'attente des evenements du ANotify */
+  void waitForEvents();
+
+  /* Attend la connexion de clients */
+  void waitForClients(struct sockaddr_in* addr);
+  /* Fonction de communication avec le client */
+  void communicate(int client_socket);
 
   /* 
      Indique si le processus courant est celui du daemon en execution
@@ -109,33 +102,6 @@ class ANotifyDaemon {
   bool isActiveDaemon(pid_t daemon_pid);
   /* Renvoie le port d'ecoute du daemon, -1 en cas d'echec */
   static int getDaemonPort(int fd);
-
-  /* ------- FONCTIONS D'ETAT ------- */
-
-  /* Indique l'etat du daemon */
-  bool isRunning();
-  /* Change l'etat du daemon */
-  void setRunning(bool run);
-
-  /* */
-  bool isAlive();
-  /* */
-  void setAlive(bool alv);
-
-  /* ------- FONCTIONS ------- */
-
-  /* Fonction de traitement des evenements provenant du ANotify */
-  static void* run(void* dae);
-  /* Tente de surveiller (recursivement) 'path' (si c'est un repertoire) */
-  bool addWatch(std::string& path);
-  /* Fonction d'attente des evenements du ANotify */
-  static void* waitForEvents(void* dae);
-
-  void waitForClients();
-  /* Attend la connexion de clients */
-  static void* waitForClients(void* dae);
-  /* Fonction de communication avec le client */
-  static void* communicate(void* daemon_socketfd_pair);
 
   /* 
      Retire la surveillance du fichier a l'emplacement path
