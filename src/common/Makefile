@@ -7,7 +7,7 @@ LDFLAGS=
 
 all : $(MAIN)
 
-$(MAIN) : $(MAIN).o XMLParser.o Search.o Result.o Indexation.o MyDate.o Utils.o tinyxml.o tinystr.o tinyxmlerror.o tinyxmlparser.o
+$(MAIN) :XMLParser.o Search.o Result.o Indexation.o MyDate.o Utils.o tinyxml.o tinystr.o tinyxmlerror.o tinyxmlparser.o $(MAIN).o
 	$(CC) -static -o $@ $^ $(LDFLAGS)
 
 %.o : %.cpp

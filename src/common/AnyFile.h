@@ -46,9 +46,9 @@ public:
   
   AnyFile(){};
   ~AnyFile(){};
-
+  /*Mis a jour d'un champs du fichier par nom du champ et valeur */
   bool majField(const string& irname, const string& irvalue){
-
+    // TODO faire le cas des dates
     if (irname == "path") {
       path = irvalue;
       return true;

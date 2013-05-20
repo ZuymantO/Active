@@ -20,9 +20,10 @@
 #include <map>
 #include <vector>
 
-namespace acommon {
+namespace acommon { // espace de nom des fichiers communs
   
-  
+  // Permet d'identifier le type de requete recu insertion, update etc. 
+  // Indispensable pour la transformation AQuery -> SQL  
 typedef enum _aqueryType{
   UNKNOWT = 0,
   INSERT, // insert  // peut avoir une liste de resultat (qui sont des elements a inserer)
@@ -31,6 +32,11 @@ typedef enum _aqueryType{
   SELECT // search ou S comme Select
 }AQueryType;
 
+/* Si cette requete concerne un seul fichier.
+ * Genre modifier ce fichier par un autre, supprimer ce fichier, 
+ * ou encore que ca concerne une liste de fichier d'un meme type
+ * Alors l'indiquer est indispensable pour bien tenir a jour la base de donnee
+ * */
 
 typedef enum _aqueryObject{
   ANY = 0,
@@ -43,12 +49,12 @@ typedef enum _aqueryObject{
 }AQueryObject;
 
   // Un objet de cette classe est genere par le module d'analyse de requete xml
-  // Une fois l'AQuery génere on fait appel a getSQLQuery() qui generer la requetes sql correspondante
+  // Une fois l'AQuery géner'e on fait appel a getSQLQuery() qui generer la requetes sql correspondante
   // Une fois cette requete recupere, on peut alors interrogere la bdd
   //
   // Cette classe permet aussi la communication inverse. C'est à dire une fois une requetes sql effectué,
   // Recuperer les resultats dans un objet SQLQuery, de cette objet on génere un AQuery.
-  // Et ainsi de l'AQuery l'on pourra generer une reauete XML.
+  // Et ainsi de l'AQuery l'on pourra generer une requete XML.
 class SQLQuery;
 class AQuery {
 private:

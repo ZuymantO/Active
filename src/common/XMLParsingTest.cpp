@@ -118,7 +118,7 @@ int main() {
   oss << "</FILE>";
   
   oss << "</RESULT>";
-  
+  ind = p.InterpretIndexation(oss.str().c_str());
   Results r = p.InterpretResult(oss.str().c_str());
   cout << "id : " << r.GetID() << endl << endl;
   list<Result> rst = r.GetRes();

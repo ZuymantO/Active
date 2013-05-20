@@ -7,6 +7,8 @@
 #include <time.h>
 
 #include "XMLGeneration.h"
+#include "AnyFile.h"
+#include "AQuery.h"
 
 using namespace std;
 
@@ -101,19 +103,23 @@ string XMLGeneration::MIToBI(ANotifyEvent ane) {
   return oss.str();
 }
 
-string XMLGeneration::BIToMR(vector<AnyFile>* AQResult, int searchID) {
+string XMLGeneration::BIToMR(AQuery* ipquery, int searchID) {
   ostringstream oss;
+  if(ipquery == NULL || !ipquery->hasNewResult()) return oss.str();
+  vector<AnyFile>* AQResult = ipquery->results();
+  AnyFile::iterator tmpIt = AQResult->begin();
   oss << "<RESULT id=" << searchID << ">";
-  for (int i(0); i < AQResult.size(); ++i) {
+  for (int i(0); it != AQResult->end() && i < AQResult->size(); it++, ++i) {
+    AnyFile f = *it;
     oss << "<FILE>";
-    oss << "<NAME>" << AQResult.getName() << "</NAME>";
-    oss << "<PATH>" << AQResult.getPath() << "</PATH>";
-    oss << "<PERM>" << AQResult.getMime() << "</PERM">;
-    oss << "<SIZE>" << AQResult.getDiskSize() << "</SIZE>";
-    if (AQResult.getLastModif() != NULL) {
-      oss << "<LASTMODIF>" << AQResult.getLastModif() << "</LASTMODIF>";
+    oss << "<NAME>" << f.getName() << "</NAME>";
+    oss << "<PATH>" << f.getPath() << "</PATH>";
+    oss << "<PERM>" << f.getMime() << "</PERM">;
+    oss << "<SIZE>" << f.getDiskSize() << "</SIZE>";
+    if (f.getLastModif() != NULL) {
+      oss << "<LASTMODIF>" << f.getLastModif() << "</LASTMODIF>";
     }
-    oss << "<PROPRIO>" << AQResult.getUserID() << "</PROPRIO>";
+    oss << "<PROPRIO>" << f.getUserID() << "</PROPRIO>";
     oss << "</FILE>";
   }
   oss << "</RESULT>";
