@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "../daemon/ANotifyEvent.h"
-#include "../bi/AnyFile.h"
+#include "AQuery.h"
 
 const std::string EN_TETE = "<?XML version=\"1.0\" encoding=\"UTF-8\"?>";
 int id = 0;
@@ -23,7 +23,7 @@ class XMLGeneration {
    * Envoie d'informations de la base d'indexation au moteur de recherche
    * (donc, normalement le resultat de la recherche)
    */
-  std::string BIToMR(vector<AnyFile>* AQResult, int searchID);
+  std::string BIToMR(AQuery* aq, int searchID);
   /*
    * Envoie d'informations du moteur de recherche vers la base d'indexation
    * (donc, normalement une recherche)
