@@ -101,20 +101,22 @@ string XMLGeneration::MIToBI(ANotifyEvent ane) {
   return oss.str();
 }
 
-string XMLGeneration::BIToMR(vector<AnyFile>* AQResult, int searchID) {
+string XMLGeneration::BIToMR(AQuery* aq, int searchID) {
   ostringstream oss;
   oss << "<RESULT id=" << searchID << ">";
-  for (int i(0); i < AQResult.size(); ++i) {
-    oss << "<FILE>";
-    oss << "<NAME>" << AQResult.getName() << "</NAME>";
-    oss << "<PATH>" << AQResult.getPath() << "</PATH>";
-    oss << "<PERM>" << AQResult.getMime() << "</PERM">;
-    oss << "<SIZE>" << AQResult.getDiskSize() << "</SIZE>";
-    if (AQResult.getLastModif() != NULL) {
-      oss << "<LASTMODIF>" << AQResult.getLastModif() << "</LASTMODIF>";
+  if(AQResult.hasNewResult()) {
+    for (int i(0); i < AQResult.size(); ++i) {
+      oss << "<FILE>";
+      oss << "<NAME>" << aq.AQResult[i].getName() << "</NAME>";
+      oss << "<PATH>" << aq.AQResult[i].getPath() << "</PATH>";
+      oss << "<PERM>" << aq.AQResult[i].getMime() << "</PERM">;
+      oss << "<SIZE>" << aq.AQResult[i].getDiskSize() << "</SIZE>";
+      if (aq.AQResult[i].getLastModif() != NULL) {
+	oss << "<LASTMODIF>" << aq.AQResult[i].getLastModif() << "</LASTMODIF>";
+      }
+      oss << "<PROPRIO>" << aq.AQResult[i].getUserID() << "</PROPRIO>";
+      oss << "</FILE>";
     }
-    oss << "<PROPRIO>" << AQResult.getUserID() << "</PROPRIO>";
-    oss << "</FILE>";
   }
   oss << "</RESULT>";
   return oss.str();
