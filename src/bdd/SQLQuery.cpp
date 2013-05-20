@@ -8,9 +8,8 @@
 #include <iostream>
 #include <vector>
 #include <map>
-#include "SQLQuery.h"
 #include "common.h"
-
+#include "SQLQuery.h"
 
   
 using namespace std;

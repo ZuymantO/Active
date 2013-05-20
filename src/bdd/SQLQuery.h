@@ -10,19 +10,17 @@
 #define __BI__SQLQuery__
 
 #include <iostream>
-#include <sqlite3.h>
+#include "sqlite3.h"
 #include "SQLite3DBException.h"
-#include "AQuery.h"
+#include "common.h"
 #include "SQLite3DB.h"
 #include <map>
 #include <vector>
-
 namespace asqlite {
-  
+
 using namespace std;
 
-class SQLQuery {
-  
+class SQLQuery {  
 private:
   vector<map<string, string> >*  SQLResult;
   bool hasResult;

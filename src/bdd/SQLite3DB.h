@@ -8,13 +8,12 @@
 
 #ifndef __BI__SQLite3DB__
 #define __BI__SQLite3DB__
-
 #include <iostream>
-#include <sqlite3.h>
+#include "sqlite3.h"
 #include "SQLite3DBException.h"
-
-namespace asqlite {
   
+namespace asqlite {
+
 using namespace std;
 
 class SQLQuery;

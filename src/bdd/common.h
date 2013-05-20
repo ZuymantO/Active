@@ -8,14 +8,13 @@
 
 #ifndef BI_sharedUtils_h
 #define BI_sharedUtils_h
-#include "AQuery.h"
-#include "AnyFile.h"
-#include "AudioFile.h"
-#include "TextFile.h"
-#include "VideoFile.h"
-#include "ImageFile.h"
-#include "ObjectFile.h"
-#include "ArchiveFile.h"
-
+#include "../common/AQuery.h"
+#include "../common/AnyFile.h"
+#include "../common/AudioFile.h"
+#include "../common/TextFile.h"
+#include "../common/VideoFile.h"
+#include "../common/ImageFile.h"
+#include "../common/ObjectFile.h"
+#include "../common/ArchiveFile.h"
 
 #endif
