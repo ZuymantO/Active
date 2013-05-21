@@ -97,8 +97,8 @@ public:
   void sortByModificationDate(bool iasc);
   
   vector<AnyFile>* results();
-  
-  SQLQuery* getSQLquery();
+  AQueryObject queryObject(){ return aobj; };
+  AQueryType queryType(){ return aqt; };
   bool hasNewResult(){
     return hasResult;
   }

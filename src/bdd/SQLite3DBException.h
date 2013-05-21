@@ -10,11 +10,11 @@
 #define __BI__SQLite3DBException__
 
 #include <iostream>
-#include <exception>
 
 namespace asqlite {
+
 using namespace std;
-class SQLite3DBException  : public exception {
+class SQLite3DBException {
   
 private:
 protected:
@@ -28,7 +28,7 @@ public:
     m_pSrc = ipSrc;
   }
 
-  ~SQLite3DBException() throw(); 
+  //~SQLite3DBException() throw() {};  // util si on etend d'exception 
   inline const std::string& getMessage() const{
     return m_msg;
   }

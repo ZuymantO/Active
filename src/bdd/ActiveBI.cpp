@@ -22,8 +22,6 @@
 #include "SQLite3DB.h"
 #include "common.h"
 #include "SQLQuery.h"
-#include "SQLite3DBException.h"
-
 
 #define REF_DATA_BASE_PATH "active.db"  // par defaut on cree la db sur place
 
@@ -57,13 +55,13 @@ int main(int argc, const char * argv[])
     }
   }
   
-  ================================ FIN GESTION DES ARGUMENTS ================================
+  //================================ FIN GESTION DES ARGUMENTS ================================
   
-  string fq = "SELECT * FROM AnyFile;";  
+  string fq("SELECT * FROM AnyFile;");  
   SQLite3DB db ; 
   checkOrCreateDB(db, REF_DATA_BASE_PATH);
   
-  SQLQuery fquery;
+  asqlite::SQLQuery fquery;
   fquery.setDataBase(&db);
   fquery.setQuery(fq);
   
@@ -78,7 +76,7 @@ int main(int argc, const char * argv[])
     return 0;
 }
 
-bool checkOrCreateDB(SQLite3DB& irdb, const string& irname){
+bool checkOrCreateDB(asqlite::SQLite3DB& irdb, const string& irname){
 
   bool exists = false;
   if(ifstream(irname.c_str()))		/*Le fichier existe*/
