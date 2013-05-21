@@ -28,4 +28,8 @@ namespace acommon {
     id = s;
   }
 
+  string AQuery::GetId() {
+    return id;
+  }
+
 }

@@ -93,7 +93,7 @@ string XMLGeneration::BIToMR(AQuery& ipquery, int searchID) {
   
   vector<AnyFile>* AQResult = ipquery.results();
   vector<AnyFile>::iterator tmpIt = AQResult->begin();
-  oss << "<RESULT id=" << searchID << ">";
+  oss << "<RESULT id=" << ipquery.GetId() << ">";
   if(ipquery.hasNewResult()) {
     while (tmpIt != AQResult->end()) {
       AnyFile f = *tmpIt;
