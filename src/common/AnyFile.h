@@ -46,7 +46,7 @@ public:
   int GetIdData() const;
   string GetHashGen() const;
   string GetUserFlags() const;
-  string GetPaht() const;
+  string GetPath() const;
   string GetName() const;
   string GetMime() const;
   string GetExt() const;

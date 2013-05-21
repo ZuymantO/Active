@@ -10,6 +10,8 @@
 #include "../daemon/ANotifyEvent.h"
 #include "AnyFile.h"
 #include "AQuery.h"
+#include "Utils.h"
+#include "Search.h"
 
 namespace acommon {
 
@@ -17,6 +19,9 @@ const std::string EN_TETE = "<?XML version=\"1.0\" encoding=\"UTF-8\"?>";
 int id = 0;
 
 class XMLGeneration {
+ private :
+  Utils u;
+
  public :
   /*
    * Envoie d'informations du moteur d'indexation a la base d'indexation
@@ -33,9 +38,7 @@ class XMLGeneration {
    * Envoie d'informations du moteur de recherche vers la base d'indexation
    * (donc, normalement une recherche)
    */
-  /*
-  std::string MRToBI(MR mr, int searchID);
-  */
+  std::string MRToBI(Search search, int searchID);
 };
 
 }
