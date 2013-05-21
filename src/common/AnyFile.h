@@ -42,13 +42,31 @@ public:
   time_t*       last_stat;
   time_t*       created_on; // file's creation date
   time_t*       insert_date;  // date of insertion on the database
+
+  int GetIdData() const;
+  string GetHashGen() const;
+  string GetUserFlags() const;
+  string GetPaht() const;
+  string GetName() const;
+  string GetMime() const;
+  string GetExt() const;
+  int GetMask() const;
+  short GetHardLink() const;
+  unsigned int GetUserId() const;
+  unsigned int GetGroupId() const;
+  unsigned int GetDiskSize() const;
+  time_t* GetLastAccess() const;
+  time_t* GetLastModif() const;
+  time_t* GetLastStat() const;
+  time_t* GetCreatedOn() const;
+  time_t* GetInsertDate() const;
   
   
   AnyFile(){};
   ~AnyFile(){};
-  /*Mis a jour d'un champs du fichier par nom du champ et valeur */
+
   bool majField(const string& irname, const string& irvalue){
-    // TODO faire le cas des dates
+
     if (irname == "path") {
       path = irvalue;
       return true;
