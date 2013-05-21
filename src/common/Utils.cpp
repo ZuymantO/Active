@@ -14,3 +14,16 @@ int Utils::StringToInt(string s) {
   iss >> i;
   return i;
 }
+
+string Utils::GetExtension(string filename) {
+  int i = filename.length();
+  while (i >= 0) {
+    if (filename[i] != '.') {
+      i--;
+    }
+    else {
+      break;
+    }
+  }
+  return filename.substr(i+1, filename.length());
+}

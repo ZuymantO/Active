@@ -25,7 +25,7 @@ string AnyFile::GetUserFlags() const {
   return this->user_flags;
 }
 
-string AnyFile::GetPaht() const {
+string AnyFile::GetPath() const {
   return this->path;
 }
 

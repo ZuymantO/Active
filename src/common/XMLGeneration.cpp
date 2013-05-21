@@ -51,10 +51,10 @@ string XMLGeneration::MIToBI(ANotifyEvent ane) {
   }
   else if (ane.isType(INOTIFY_CREATE)) {
     fileName = ane.getName();
-    if (stat(fileName, &fileInfo) == 0) {
+    if (stat(fileName.c_str(), &fileInfo) == 0) {
       oss << "<CREATIONS id=" << id << "><FICHIERCREE>";
       oss << "<PATH>" << fileName << "</PATH>";
-      oss << "<format>" << GetExtension(filename) << "</format>";
+      oss << "<format>" << u.GetExtension(fileName) << "</format>";
       oss << "<DATECREATION>" << ctime(&fileInfo.st_mtime) << "</DATECREATION>";
       oss << "<TAILLE>" << fileInfo.st_size << "</TAILLE>";
       oss << "<PROPRIETAIRE>" << fileInfo.st_uid << "</PROPRIETAIRE>";
@@ -84,55 +84,61 @@ string XMLGeneration::MIToBI(ANotifyEvent ane) {
 // comme explique dans le code des ANotify la convention i/o (input/output) p/r(pointer/ref) nom_variable 
 // permet de vite analyser la le fonctionnement de la fonction. ipquery voulait dire input pointer query ici aq devrait etre nomme
 // iraq par exemple...
-string XMLGeneration::BIToMR(AQuery& aq, int searchID) {
+string XMLGeneration::BIToMR(AQuery& ipquery, int searchID) {
+  if (&ipquery == 0 || !ipquery.hasNewResult()) {
+    return "";
+  }
+
   ostringstream oss;
-  if(ipquery == NULL || !aq.hasNewResult()) return oss.str();
-  vector<AnyFile>* AQResult = aq.results();
-  AnyFile::iterator tmpIt = AQResult->begin();
+  
+  vector<AnyFile>* AQResult = ipquery.results();
+  vector<AnyFile>::iterator tmpIt = AQResult->begin();
   oss << "<RESULT id=" << searchID << ">";
-  if(AQResult.hasNewResult()) {
-    for (int i(0); i < AQResult.size(); ++i) {
+  if(ipquery.hasNewResult()) {
+    while (tmpIt != AQResult->end()) {
+      AnyFile f = *tmpIt;
       oss << "<FILE>";
-      oss << "<NAME>" << aq.AQResult[i].getName() << "</NAME>";
-      oss << "<PATH>" << aq.AQResult[i].getPath() << "</PATH>";
-      oss << "<PERM>" << aq.AQResult[i].getMime() << "</PERM">;
-      oss << "<SIZE>" << aq.AQResult[i].getDiskSize() << "</SIZE>";
-      if (aq.AQResult[i].getLastModif() != NULL) {
-	oss << "<LASTMODIF>" << aq.AQResult[i].getLastModif() << "</LASTMODIF>";
+      oss << "<NAME>" << f.GetName() << "</NAME>";
+      oss << "<PATH>" << f.GetPath() << "</PATH>";
+      oss << "<PERM>" << f.GetMime() << "</PERM>";
+      oss << "<SIZE>" << f.GetDiskSize() << "</SIZE>";
+      if (f.GetLastModif() != NULL) {
+	oss << "<LASTMODIF>" << f.GetLastModif() << "</LASTMODIF>";
       }
-      oss << "<PROPRIO>" << aq.AQResult[i].getUserID() << "</PROPRIO>";
+      oss << "<PROPRIO>" << f.GetUserId() << "</PROPRIO>";
       oss << "</FILE>";
+      tmpIt++;
     }
   }
   oss << "</RESULT>";
   return oss.str();
 }
 
-string XMLGeneration::MRToBI(MR mr, int searchID) {
+string XMLGeneration::MRToBI(Search search, int searchID) {
   ostringstream oss;
   oss << "<SEARCH id=" << searchID << ">";
-  oss << "<WORD>" << mr.getWord() << "</WORD>";
-  oss << "<CONTENT>" << mr.getContent() << "</CONTENT>";
-  if (mr.getPathDir() != NULL) {
-    oss << "<PATHDIR>" << mr.getPathDir() << "</PATHDIR>";
+  oss << "<WORD>" << search.getWord() << "</WORD>";
+  oss << "<CONTENT>" << search.getContent() << "</CONTENT>";
+  if (search.getPathDir() != "") {
+    oss << "<PATHDIR>" << search.getPathDir() << "</PATHDIR>";
   }
-  if (mr.getPerm() != NULL) {
-    oss << "<PERM>" << mr.getPerm() << "</PERM>";
+  if (search.getPerm() != "") {
+    oss << "<PERM>" << search.getPerm() << "</PERM>";
   }
-  if (mr.getExtension() != NULL) {
-    oss << "<EXTENSION>" << mr.getExtension() << "</EXTENSION>";
+  if (search.getExtension() != "") {
+    oss << "<EXTENSION>" << search.getExtension() << "</EXTENSION>";
   }
-  if (mr.timeSlot()) {
+  if (search.timeSlot()) {
     oss << "<TIMESLOT><BEGIN>";
-    oss << "<DAY>" << mr.getBeginDay() << "</DAY>";
-    oss << "<MONTH>" << mr.getBeginMonth() << "</MONTH>";
-    oss << "<YEAR>" << mr.getBeginYear() << "</YEAR>";
+    oss << "<DAY>" << search.getBeginDay() << "</DAY>";
+    oss << "<MONTH>" << search.getBeginMonth() << "</MONTH>";
+    oss << "<YEAR>" << search.getBeginYear() << "</YEAR>";
     oss << "</BEGIN><END>";
-    oss << "<DAY>" << mr.getEndDay() << "</DAY>";
-    oss << "<MONTH>" << mr.getEndMonth() << "</MONTH>";
-    oss << "<YEAR>" << mr.getEndYear() << "</YEAR>";
+    oss << "<DAY>" << search.getEndDay() << "</DAY>";
+    oss << "<MONTH>" << search.getEndMonth() << "</MONTH>";
+    oss << "<YEAR>" << search.getEndYear() << "</YEAR>";
     oss << "</END></TIMESLOT>";
   }
   oss << "</SEARCH>";
-  return oss;
+  return oss.str();
 }

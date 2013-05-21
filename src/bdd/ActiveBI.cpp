@@ -22,6 +22,8 @@
 #include "SQLite3DB.h"
 #include "common.h"
 #include "SQLQuery.h"
+#include "SQLite3DBException.h"
+
 
 #define REF_DATA_BASE_PATH "active.db"  // par defaut on cree la db sur place
 

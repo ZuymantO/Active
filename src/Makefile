@@ -1,12 +1,19 @@
+# lance les tests pour le parsing XML
 
-#Les regles de construction pour chaque executable
-all:
-	cd daemon && make all && cd ..
-	cd bdd && make all && cd ..
-	cd ui && make all && cd ..
-	cd ../
-#Mettre ici toutes les regles de clean pour chaque module
-clean:
-	rm -rf ./*.o ./*~
-	cd tinyxml_test && make clean
-	cd daemon && make clean
+MAIN=XMLParsingTest
+CC=g++
+CFLAGS=-W -Wall -g #-ansi -pedantic
+LDFLAGS=
+SRC=$(shell find . -name "*.cpp") # demander au shell de trouver les .cpp
+OBJ=$(SRC:%.cpp=%.o) # liste des fichier objet a partir des source
+
+all : $(OBJ) $(MAIN) #generer les objets
+
+$(MAIN) : XMLParser.o Search.o Result.o Indexation.o MyDate.o Utils.o tinyxml.o tinystr.o tinyxmlerror.o tinyxmlparser.o $(MAIN).o
+	$(CC) -static -o $@ $^ $(LDFLAGS)
+
+%.o : %.cpp 
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+clean :
+	rm -rf *.o *.gch $(MAIN) *~
