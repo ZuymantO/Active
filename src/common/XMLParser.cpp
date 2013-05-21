@@ -1,6 +1,7 @@
 #include "XMLParser.h"
 
 using namespace std;
+using namespace acommon;
 
 Date* XMLParser::GetDate(TiXmlNode *nodeDepth2) {
   int day, year;
@@ -121,10 +122,10 @@ Search* XMLParser::InterpretSearch(string xmlStream) {
   return research;
 }
 
-Results XMLParser::InterpretResult(string xmlStream) {
-  Result *tmpResult;
-  string id, n, pa, pe, lm, pr, tSize;
-  unsigned int s;
+AQuery* XMLParser::InterpretResult(string xmlStream) {
+  AQuery *opaquery = new AQuery(SELECT, ANY);
+  AnyFile *tmpFile;
+  const char* id;
   istringstream iss;
   list<Result> results;
 
@@ -148,16 +149,13 @@ Results XMLParser::InterpretResult(string xmlStream) {
   hdl = hdl.FirstChildElement("RESULT");
   tagDepth1 = hdl.Element();
   id = tagDepth1->Attribute("id");
+  (*opaquery).setId(id);
   hdl = hdl.FirstChildElement("FILE");
   // et on la met dans un TiXmlElement
   tagDepth1 = hdl.Element();
 
   if(!tagDepth1){
-    cout << "le noeud a atteindre n'existe pas" << endl;
-    //mettre un return null ou liste/vector vide
-    list<Result> rtmp;
-    Results *res = new Results("", rtmp);
-    return *res;
+    return opaquery;
   }
 
   // parcours des balises <FILE></FILE>, 1 iteration par balise
@@ -168,12 +166,7 @@ Results XMLParser::InterpretResult(string xmlStream) {
     // on recuperer la premiere balise dans le FILE courant
     tagDepth2 = nodeDepth1->FirstChildElement();
 
-    n = "";
-    pa = "";
-    pe = "";
-    lm = "";
-    pr = "";
-    tSize = "";
+    tmpFile = new AnyFile();
 
     // parcours du contenu de la balise <FILE></FILE> de l'iteration courrante
     while (tagDepth2) {
@@ -185,39 +178,33 @@ Results XMLParser::InterpretResult(string xmlStream) {
       tagName = nodeDepth2->Value();
       
       if (strcmp(tagName, "NAME") == 0) {
-        n = tagDepth2->GetText();
+	(*tmpFile).majField("name", tagDepth2->GetText());
       }
       else if (strcmp(tagName, "PATH") == 0) {
-        pa = tagDepth2->GetText();
+	(*tmpFile).majField("path", tagDepth2->GetText());
       }
       else if (strcmp(tagName, "PERM") == 0) {
-        pe = tagDepth2->GetText();
+	(*tmpFile).majField("mime", tagDepth2->GetText());
       }
       else if (strcmp(tagName, "SIZE") == 0) {
-	tSize = tagDepth2->GetText();
-	istringstream iss(tSize);
-	iss >> s;
+	(*tmpFile).majField("disk_size", tagDepth2->GetText());
       }
       else if (strcmp(tagName, "LASTMODIF") == 0) {
-        lm = tagDepth2->GetText();
+	(*tmpFile).majField("last_modif", tagDepth2->GetText());
       }
       else if (strcmp(tagName, "PROPRIO") == 0) {
-        pr = tagDepth2->GetText();
+	(*tmpFile).majField("user_id", tagDepth2->GetText());
       }
       
       tagDepth2 = tagDepth2->NextSiblingElement();
       
     }
-    if (n != "" && pa != "" && pe != "") {
-      tmpResult = new Result(n, pa, pe, s, lm, pr);
-      results.push_back(*tmpResult);
-    }
+    (*opaquery).addFile(tmpFile);
     
     tagDepth1 = tagDepth1->NextSiblingElement("FILE");
   }
 
-  Results *res = new Results(id, results);
-  return *res;
+  return opaquery;
 }
 
 Indexation XMLParser::InterpretIndexation(string xmlStream) {

@@ -8,9 +8,9 @@ using namespace std;
 
 class Utils {
  public :
-  string IntToString(int i);
-  int StringToInt(string s);
-  string GetExtension(string filename);
+  static string IntToString(int i);
+  static int StringToInt(string s);
+  static string GetExtension(string filename);
 };
 
 #endif

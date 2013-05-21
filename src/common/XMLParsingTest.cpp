@@ -1,6 +1,7 @@
 #include "XMLParser.h"
 
 using namespace std;
+using namespace acommon;
 
 int main() {
   ostringstream oss;
@@ -12,6 +13,7 @@ int main() {
 
   cout << " ----------------------------------------------------" << endl;
   cout << "Test de Indexation" << endl;
+  cout << " ----------------------------------------------------" << endl;
 
   oss << "<?xml version='1.0' encoding='UTF-8'?>" << endl;
   
@@ -101,6 +103,10 @@ int main() {
   // --------------------------------------------------------------------------
   // Test de Result
   // --------------------------------------------------------------------------
+
+  cout << " ----------------------------------------------------" << endl;
+  cout << "Test de Result" << endl;
+  cout << " ----------------------------------------------------" << endl;
   oss.flush();
   oss << "<?xml version='1.0' encoding='UTF-8'?>" << endl;
   oss << "<RESULT id=\"34\">";
@@ -119,35 +125,41 @@ int main() {
   
   oss << "</RESULT>";
   ind = p.InterpretIndexation(oss.str().c_str());
-  Results r = p.InterpretResult(oss.str().c_str());
-  cout << "id : " << r.GetID() << endl << endl;
-  list<Result> rst = r.GetRes();
-  std::list<Result>::const_iterator litR(rst.begin()), lendR(rst.end());
-  for (; litR != lendR; ++litR) {
-    cout << "name : " << litR->getName() << endl;
-    cout << "path : " << litR->getPath() << endl;
-    cout << "perm : " << litR->getPerm() << endl;
-    cout << "size : " << litR->getSize() << endl;
-    cout << "lastmodif : ";
-    if (litR->getLastModif() != "") {
-      cout << litR->getLastModif();
-    } else {
-      cout << "NULL";
+  AQuery* ipquery = p.InterpretResult(oss.str().c_str());
+  
+  //cout << "id : " << r.GetID() << endl << endl;
+  vector<AnyFile>* AQResult = (*ipquery).results();
+
+  vector<AnyFile>::iterator tmpIt = AQResult->begin();
+  if ((*ipquery).hasNewResult()) {
+    
+    while (tmpIt != AQResult->end()) {
+      cout << "name : " << tmpIt->GetName() << endl;
+      cout << "path : " << tmpIt->GetPath() << endl;
+      cout << "perm : " << tmpIt->GetMime() << endl;
+      cout << "size : " << tmpIt->GetDiskSize() << endl;
+      cout << "lastmodif : ";
+      if (tmpIt->GetLastModif() != "") {
+	cout << tmpIt->GetLastModif();
+      } else {
+	cout << "NULL";
+      }
+      cout << endl;
+      cout << "proprio : " << tmpIt->GetUserId() << endl;
+      cout << endl;
+      tmpIt++;
     }
-    cout << endl;
-    cout << "proprio : ";
-    if (litR->getProprio() != "") {
-      cout << litR->getProprio();
-    } else {
-      cout << "NULL";
-    }
-    cout << endl;
-    cout << endl;
+    
   }
+  
 
   // --------------------------------------------------------------------------
   // Test de Search
   // --------------------------------------------------------------------------
+
+  cout << " ----------------------------------------------------" << endl;
+  cout << "Test de Search" << endl;
+  cout << " ----------------------------------------------------" << endl;
   oss.flush();
   oss << "<?xml version='1.0' encoding='UTF-8'?>" << endl;
   oss << "<SEARCH id=\"34\"><WORD>MOT</WORD><CONTENT>true</CONTENT><PATHDIR>/home/matthieu</PATHDIR><PERM>-rw-rw-rw-</PERM><EXTENSION>txt</EXTENSION>";

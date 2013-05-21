@@ -19,26 +19,23 @@ const std::string EN_TETE = "<?XML version=\"1.0\" encoding=\"UTF-8\"?>";
 int id = 0;
 
 class XMLGeneration {
- private :
-  Utils u;
-
  public :
   /*
    * Envoie d'informations du moteur d'indexation a la base d'indexation
    * (donc d'une modification sur l'arborescence surveillee)
    */
-  std::string MIToBI(ANotifyEvent ane);
+  static std::string MIToBI(ANotifyEvent ane);
   /*
    * Envoie d'informations de la base d'indexation au moteur de recherche
    * (donc, normalement le resultat de la recherche)
    */
 
-  std::string BIToMR(AQuery& iraquery, int searchID);
+  static std::string BIToMR(AQuery& iraquery, int searchID);
   /*
    * Envoie d'informations du moteur de recherche vers la base d'indexation
    * (donc, normalement une recherche)
    */
-  std::string MRToBI(Search search, int searchID);
+  static std::string MRToBI(Search search, int searchID);
 };
 
 }

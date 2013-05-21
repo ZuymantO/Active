@@ -49,11 +49,11 @@ short AnyFile::GetHardLink() const {
   return this->hard_link;
 }
 
-unsigned int AnyFile::GetUserId() const {
+string AnyFile::GetUserId() const {
   return this->user_id;
 }
 
-unsigned int AnyFile::GetGroupId() const {
+string AnyFile::GetGroupId() const {
   return this->group_id;
 }
 
@@ -61,23 +61,23 @@ unsigned int AnyFile::GetDiskSize() const {
   return this->disk_size;
 }
 
-time_t* AnyFile::GetLastAccess() const {
+string AnyFile::GetLastAcces() const {
   return this->last_acces;
 }
 
-time_t* AnyFile::GetLastModif() const {
+string AnyFile::GetLastModif() const {
   return this->last_modif;
 }
 
-time_t* AnyFile::GetLastStat() const {
+string AnyFile::GetLastStat() const {
   return this->last_stat;
 }
 
-time_t* AnyFile::GetCreatedOn() const {
+string AnyFile::GetCreatedOn() const {
   return this->created_on;
 }
 
-time_t* AnyFile::GetInsertDate() const {
+string AnyFile::GetInsertDate() const {
   return this->insert_date;
 }
 

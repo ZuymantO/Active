@@ -34,14 +34,14 @@ public:
   string ext ;  // file extension
   int     mask;
   short   hard_link;  // no hard link
-  unsigned int user_id;
-  unsigned int group_id;
+  string user_id;
+  string group_id;
   unsigned int   disk_size;
-  time_t*       last_acces;
-  time_t*       last_modif;
-  time_t*       last_stat;
-  time_t*       created_on; // file's creation date
-  time_t*       insert_date;  // date of insertion on the database
+  string       last_acces;
+  string      last_modif;
+  string       last_stat;
+  string       created_on; // file's creation date
+  string       insert_date;  // date of insertion on the database
 
   int GetIdData() const;
   string GetHashGen() const;
@@ -52,14 +52,14 @@ public:
   string GetExt() const;
   int GetMask() const;
   short GetHardLink() const;
-  unsigned int GetUserId() const;
-  unsigned int GetGroupId() const;
+  string GetUserId() const;
+  string GetGroupId() const;
   unsigned int GetDiskSize() const;
-  time_t* GetLastAccess() const;
-  time_t* GetLastModif() const;
-  time_t* GetLastStat() const;
-  time_t* GetCreatedOn() const;
-  time_t* GetInsertDate() const;
+  string GetLastAcces() const;
+  string GetLastModif() const;
+  string GetLastStat() const;
+  string GetCreatedOn() const;
+  string GetInsertDate() const;
   
   
   AnyFile(){};
@@ -95,25 +95,24 @@ public:
       idData = atoi(irvalue.c_str());
       return true;
     }else if(irname == "user_id"){
-      user_id = atoi(irvalue.c_str());
+      user_id = irvalue;
       return true;
     }else if(irname == "group_id"){
-      group_id = atoi(irvalue.c_str());
+      group_id = irvalue;
       return true;
     }else if(irname == "disk_size"){
       disk_size = atoi(irvalue.c_str());
       return true;
     }else if(irname == "last_acces"){
-      name = "" ;
-        // TODO convertir les str en dates system pour stocker dans la classe (faire des tests pour voir le format de sqlite)
+      last_acces = irvalue ;
     }else if(irname == "last_modif"){
-      name = irvalue;
+      last_modif = irvalue;
       return true;
     }else if(irname == "created_on"){
-      name = irvalue;
+      created_on = irvalue;
       return true;
     }else if(irname == "insert_date"){
-      name = irvalue;
+      insert_date = irvalue;
       return true;
     }
     

@@ -54,7 +54,7 @@ string XMLGeneration::MIToBI(ANotifyEvent ane) {
     if (stat(fileName.c_str(), &fileInfo) == 0) {
       oss << "<CREATIONS id=" << id << "><FICHIERCREE>";
       oss << "<PATH>" << fileName << "</PATH>";
-      oss << "<format>" << u.GetExtension(fileName) << "</format>";
+      oss << "<format>" << Utils::GetExtension(fileName) << "</format>";
       oss << "<DATECREATION>" << ctime(&fileInfo.st_mtime) << "</DATECREATION>";
       oss << "<TAILLE>" << fileInfo.st_size << "</TAILLE>";
       oss << "<PROPRIETAIRE>" << fileInfo.st_uid << "</PROPRIETAIRE>";
@@ -102,7 +102,7 @@ string XMLGeneration::BIToMR(AQuery& ipquery, int searchID) {
       oss << "<PATH>" << f.GetPath() << "</PATH>";
       oss << "<PERM>" << f.GetMime() << "</PERM>";
       oss << "<SIZE>" << f.GetDiskSize() << "</SIZE>";
-      if (f.GetLastModif() != NULL) {
+      if (f.GetLastModif() != "") {
 	oss << "<LASTMODIF>" << f.GetLastModif() << "</LASTMODIF>";
       }
       oss << "<PROPRIO>" << f.GetUserId() << "</PROPRIO>";

@@ -11,7 +11,11 @@
 #include "Result.h"
 #include "Indexation.h"
 
+#include "AQuery.h"
+#include "AnyFile.h"
+
 using namespace std;
+using namespace acommon;
 
 class XMLParser {
  private :
@@ -19,7 +23,7 @@ class XMLParser {
 
  public :
   Search* InterpretSearch(string xmlStream);
-  Results InterpretResult(string xmlStream);
+  AQuery* InterpretResult(string xmlStream);
   Indexation InterpretIndexation(string xmlStream);
   // permet d'extraire une date a partir d'un noeud
   Date* GetDate(TiXmlNode *nodeDepth2);
