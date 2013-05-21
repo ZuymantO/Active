@@ -15,7 +15,7 @@ make_common: common.h
 	cd $(CMM) ; make
 	cd ../bdd/
 
-activebi: sqlite3.o $(CMM)/AQuery.o $(CMM)/AnyFile.o $(CMM)/AudioFile.o $(CMM)/ObjectFile.o $(CMM)/ArchiveFile.o $(CMM)/VideoFile.o $(CMM)/ImageFile.o $(CMM)/TextFile.o SQLite3DBException.o SQLite3DB.o SQLQuery.o ActiveBI.o 
+$(EXE): sqlite3.o SQLite3DBException.o $(CMM)/AQuery.o $(CMM)/AnyFile.o $(CMM)/AudioFile.o $(CMM)/ObjectFile.o $(CMM)/ArchiveFile.o $(CMM)/VideoFile.o $(CMM)/ImageFile.o $(CMM)/TextFile.o SQLite3DB.o SQLQuery.o ActiveBI.o 
 	$(CC) $(FLAGS) -pthread $^ -o $(EXE)
 	cp $(EXE) ../../bin
 
