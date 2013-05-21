@@ -9,9 +9,9 @@
 #include "AnyFile.h"
 #include <string>
 
-unsing namespace std;
+namespace acommon {
 
-namespace acommon{
+unsing namespace std;
 
 int AnyFile::GetIdData() const {
   return this->idData;
@@ -26,7 +26,7 @@ string AnyFile::GetUserFlags() const {
 }
 
 string AnyFile::GetPaht() const {
-  return this-path>;
+  return this->path;
 }
 
 string AnyFile::GetName() const {
