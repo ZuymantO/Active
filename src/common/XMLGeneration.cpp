@@ -11,6 +11,7 @@
 #include "AQuery.h"
 
 using namespace std;
+using namespace acommon;
 
 string XMLGeneration::MIToBI(ANotifyEvent ane) {
   ostringstream oss;
@@ -130,6 +131,7 @@ string XMLGeneration::BIToMR(AQuery& iraquery, int searchID) {
   return oss.str();
 }
 
+/*
 string XMLGeneration::MRToBI(MR mr, int searchID) {
   ostringstream oss;
   oss << "<SEARCH id=" << searchID << ">";
@@ -158,3 +160,4 @@ string XMLGeneration::MRToBI(MR mr, int searchID) {
   oss << "</SEARCH>";
   return oss;
 }
+*/
