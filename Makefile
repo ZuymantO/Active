@@ -8,7 +8,7 @@ all:
 
 #Mettre ici toutes les regles de clean pour chaque module
 clean:
-	cd src && make clean && cd ..
+	cd src && make clean_all && cd ..
 	rm -rf ./bin/*
 	rm -rf ./obj/*
 

@@ -25,5 +25,5 @@ clean :
 
 clean_all: clean
 	cd common/ && make clean && cd ..
-	cd bdd/ && make && cd ..
-	cd daemon/ && make && cd ..
+	cd bdd/ && make clean && cd ..
+	cd daemon/ && make clean && cd ..
