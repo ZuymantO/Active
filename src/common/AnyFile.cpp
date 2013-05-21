@@ -11,7 +11,7 @@
 
 namespace acommon {
 
-unsing namespace std;
+using namespace std;
 
 int AnyFile::GetIdData() const {
   return this->idData;
