@@ -84,7 +84,7 @@ string XMLGeneration::MIToBI(ANotifyEvent ane) {
 // comme explique dans le code des ANotify la convention i/o (input/output) p/r(pointer/ref) nom_variable 
 // permet de vite analyser la le fonctionnement de la fonction. ipquery voulait dire input pointer query ici aq devrait etre nomme
 // iraq par exemple...
-string XMLGeneration::BIToMR(AQuery& ipquery, int searchID) {
+string XMLGeneration::BIToMR(AQuery& ipquery) {
   if (&ipquery == 0 || !ipquery.hasNewResult()) {
     return "";
   }
