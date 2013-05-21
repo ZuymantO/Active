@@ -2,7 +2,7 @@
 CC=g++
 C=gcc
 #FLAGS=-W -Wall -ansi -pedantic
-FLAGS=-W -Wall -lpthread -ldl
+FLAGS=-W -Wall -lpthread -ldl -g
 OBJ=../../obj
 EXE=activebi
 CMM=../common
