@@ -2,18 +2,20 @@
 CC=g++
 C=gcc
 #FLAGS=-W -Wall -ansi -pedantic
-FLAGS=-W -Wall
+FLAGS=-W -Wall -lpthread -ldl
 OBJ=../../obj
 EXE=activebi
+CMM=../common
+# Repertoire de fichier commun
 SRC=SQLite3DB.cpp SQLQuery.cpp SQLite3DBException.cpp ActiveBI.cpp
 
 all: make_common $(EXE)
 
 make_common: common.h
-	cd ../common/ ; make
+	cd $(CMM) ; make
 	cd ../bdd/
 
-activebi: sqlite3.o SQLite3DBException.o SQLite3DB.o SQLQuery.o ActiveBI.o 
+activebi: sqlite3.o $(CMM)/AQuery.o $(CMM)/AnyFile.o $(CMM)/AudioFile.o $(CMM)/ObjectFile.o $(CMM)/ArchiveFile.o $(CMM)/VideoFile.o $(CMM)/ImageFile.o $(CMM)/TextFile.o SQLite3DBException.o SQLite3DB.o SQLQuery.o ActiveBI.o 
 	$(CC) $(FLAGS) -pthread $^ -o $(EXE)
 	cp $(EXE) ../../bin
 
@@ -25,7 +27,7 @@ SQLite3DB.o: SQLite3DB.cpp SQLite3DB.h
 SQLite3DBException.o: SQLite3DBException.cpp SQLite3DBException.h
 	$(CC) $(FLAGS) -c $^ 
 
-SQLQuery.o: SQLQuery.cpp SQLQuery.h
+SQLQuery.o: SQLQuery.cpp SQLQuery.h SQLite3DBException.h
 	$(CC) $(FLAGS) -c $^ -lsqlite3
 
 ActiveBI.o: ActiveBI.cpp 

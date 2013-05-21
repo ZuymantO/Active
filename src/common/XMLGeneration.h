@@ -10,6 +10,7 @@
 #include "AnyFile.h"
 #include "AQuery.h"
 
+
 namespace acommon {
 
 const std::string EN_TETE = "<?XML version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -36,6 +37,7 @@ class XMLGeneration {
   std::string MRToBI(MR mr, int searchID);
   */
 };
+
 
 }
 #endif

@@ -2,7 +2,7 @@
 
 MAIN=XMLParsingTest
 CC=g++
-CFLAGS=-W -Wall #-ansi -pedantic
+CFLAGS=-W -Wall -g #-ansi -pedantic
 LDFLAGS=
 SRC=$(shell find . -name "*.cpp") # demander au shell de trouver les .cpp
 OBJ=$(SRC:%.cpp=%.o) # liste des fichier objet a partir des source
