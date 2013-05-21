@@ -9,7 +9,7 @@ OBJ=$(SRC:%.cpp=%.o) # liste des fichier objet a partir des source
 
 all : $(OBJ) $(MAIN) #generer les objets
 
-$(MAIN) :XMLParser.o Search.o Result.o Indexation.o MyDate.o Utils.o tinyxml.o tinystr.o tinyxmlerror.o tinyxmlparser.o $(MAIN).o
+$(MAIN) : XMLParser.o Search.o Result.o Indexation.o MyDate.o Utils.o tinyxml.o tinystr.o tinyxmlerror.o tinyxmlparser.o $(MAIN).o
 	$(CC) -static -o $@ $^ $(LDFLAGS)
 
 %.o : %.cpp 
