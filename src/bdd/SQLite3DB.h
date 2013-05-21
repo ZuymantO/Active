@@ -72,7 +72,7 @@ public:
   }
 
   void close(){
-    sqlite3_close(dataBase);
+    sqlite3_close_v2(dataBase);
   }
   
   ~ SQLite3DB(){
@@ -82,5 +82,6 @@ public:
   };
   
 };
+
 }
 #endif /* defined(__BI__SQLite3DB__) */

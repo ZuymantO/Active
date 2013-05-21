@@ -48,27 +48,44 @@ private:
     SQLResult = new vector<map<string, string> >();
     int cols = sqlite3_column_count(stmt);
     int result = 0;
+    int counter = 0; // Permet de compter le nombre de resultat
+    cout << " Cols num " << cols << endl;
     do{
       result = sqlite3_step(stmt);
+      cout << "Resultat " << result << endl;
       if(result == SQLITE_ROW) {
         map<string, string> tmp;
         for(int col = 0; col < cols; col++){
-          string name = sqlite3_column_name(stmt, col);
-          string value = (char*)sqlite3_column_text(stmt, col);
-          tmp[name] = value;
+	  cout << "Recherche de nom" << endl;
+          const char* name = (sqlite3_column_name(stmt, col));
+	  cout << "Nom trouve " << name << endl;
+          const unsigned char* value = (sqlite3_column_text(stmt, col));
+	  cout << "Value = " << (char*) value << endl;
+	  string nval((char*) name);
+	  string vval((char*) value);
+          tmp[nval] = vval;
+	  cout << name << " = " << value << endl;
         }
+        cout << "MAJ DANS RESULT SQ" << endl;
         SQLResult->push_back(tmp);
+	counter++;
       }else
         break;
     }while (true);
+    
     sqlite3_finalize(stmt);
-    hasResult = true;
+    if(counter != 0) // aussi SQLResult.size() > 0;
+      hasResult = true;
+    else
+      hasResult = false;
+    cout << " valeur counter " << counter; 
   };
 
+  
   acommon::AnyFile createFile(acommon::AQueryObject iAQO);
 public:
   acommon::AQuery* getAQuery() throw (SQLite3DBException);
-  
+  bool hasNewResult(){ return hasResult; };
   SQLQuery(){
     initSQLQuery();
   }
@@ -78,7 +95,7 @@ public:
     dataBase = ipdb;
   };
 
-  SQLQuery(acommon::AQueryType iaqtype, acommon::AQueryObject iaqobj){
+  SQLQuery(AQueryType iaqtype, acommon::AQueryObject iaqobj){
     initSQLQuery();
     aqt = iaqtype;
     aobj = iaqobj;
@@ -86,7 +103,7 @@ public:
   
   ~SQLQuery(){};
 
-  void alignWith(AQuery& iraq){
+  void alignWith(acommon::AQuery& iraq){
     aqt = iraq.queryType();
     aobj = iraq.queryObject();
   }
@@ -152,17 +169,19 @@ public:
       throw SQLite3DBException(str);;
     }
     if(aqt != acommon::SELECT){
+      cout << "Perform some query which is not a SELECT" << endl; 
     if(sqlite3_step(stmt) != SQLITE_DONE)
       fprintf(stderr, "Impossible d'effectuer la requete %s : %s \n", query.c_str(), sqlite3_errmsg(dataBase->getSQLDB()));
     if(sqlite3_finalize(stmt) != SQLITE_OK)
       fprintf(stderr, "Impossible de finaliser la requete %s : %s \n", query.c_str(), sqlite3_errmsg(dataBase->getSQLDB()));
     }else{
+      cout << "Tentative de recherche de donnee " << endl;
       fetch();
     }
   }
   
     // Permet de retrouver les resultats d'une requetes deja prepare
-  vector<map<string, string> >* result() {
+  vector<map<string, string> >* results() {
     return SQLResult;
   };
   

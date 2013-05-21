@@ -34,7 +34,7 @@ void printHelp(){
 };
 bool checkOrCreateDB(SQLite3DB& irdb, const string& irname); // Check l'existence de la bdd et la cree sinon avec les tables
 std::map<string, string>* paramsAssigner(const char* ippparams[], int nbparams); // creer la table des valeurs de parametre (nom, valeur)
-
+void tests(SQLite3DB& db);
 
 int main(int argc, const char * argv[])
 {
@@ -57,23 +57,26 @@ int main(int argc, const char * argv[])
   
   //================================ FIN GESTION DES ARGUMENTS ================================
   
-  string fq("SELECT * FROM AnyFile;");  
-  SQLite3DB db ; 
-  checkOrCreateDB(db, REF_DATA_BASE_PATH);
-  
-  asqlite::SQLQuery fquery;
-  fquery.setDataBase(&db);
-  fquery.setQuery(fq);
-  
-   try {
-        fquery.prepare();
-        fquery.perform();
-      } catch (SQLite3DBException e) {
-        cout << "Error occur on db creation : " << e.getMessage() << endl;
-	return false;
-    }
+   
+  SQLite3DB db ; // Creation de la structure de la bd
+  checkOrCreateDB(db, REF_DATA_BASE_PATH); // Verification d'existance d'une bd par defaut
+  //*******************************
+  try{
+    db.open(REF_DATA_BASE_PATH);	// Ouverture de la base de donnee
+  }catch (SQLite3DBException e) {
+        cout << "Error : " << e.getMessage() << endl;
+	exit(EXIT_FAILURE);
+  }
+  /*********************************
+   * Debut du programme ou des tests
+   * 
+   ********************************/
+  tests(db);
+  //********************************
+  db.close();	// Fermeture de la base de donnee
   std::cout << " Fermeture de la base d'indexation !" << std::endl;
-    return 0;
+  return EXIT_SUCCESS;
+    
 }
 
 bool checkOrCreateDB(asqlite::SQLite3DB& irdb, const string& irname){
@@ -169,3 +172,42 @@ bool checkOrCreateDB(asqlite::SQLite3DB& irdb, const string& irname){
   } // end else
   return true;
 }
+
+void tests(SQLite3DB& db){
+  string fq("SELECT * FROM AnyFile;"); 
+  AQuery actualQuery(SELECT, ANY); 
+  asqlite::SQLQuery fquery(actualQuery.queryType(), actualQuery.queryObject());
+  fquery.setDataBase(&db);
+  fquery.setQuery(fq);
+  fquery.alignWith(actualQuery);
+  //cout << "AQuery  Type " << actualQuery.queryType() << endl;
+ 
+   try {
+        fquery.prepare();
+	cout << "Requete prepare " << endl;
+        fquery.perform();
+      } catch (SQLite3DBException e) {
+        cout << "Error occur on db creation : " << e.getMessage() << endl;
+	exit(EXIT_FAILURE);
+    }
+    cout << " Requete effectue " << endl;
+    if(fquery.hasNewResult()){ // La base de donnee a des resultats ?
+      vector<map<string, string> >* r =  fquery.results();
+      if(r->size() == 0) { // Aucun resultat apparemment
+	cout << " Indique des resultats mais aucun resultats transmis " << endl;
+	return ;
+      }
+      
+      vector<map<string, string> >::iterator it = r->begin();
+      while(it != r->end()){
+	map<string, string> ar = *it; // actual row
+	if(ar.size() == 0) { // Aucune donnee ? bizarre
+	  cout << " Aucune donnee sur cette ligne " << endl;
+	}
+	it++;
+      }
+    }else{
+      cout << " La requete de selection \"" << fq << "\" n'a fournie aucune donnee " << endl;
+    }
+}
+
