@@ -1,0 +1,13 @@
+Utilisation:
+
+- ./active  pour lancer le daemon
+
+- ./client pour lancer un client, appeler la commande 'start' une premiere fois pour lancer la surveillance. (Remarque: le client ne se lancera pas si aucun daemon n'est en cours)
+
+
+
+En cas de problemes:
+
+- si aucun processus daemon n'est en cours mais que le lancement de ./active vous signale le contraire, supprimer le fichier daemon.prop
+
+- pour tuer le processus du daemon correctement, lancer un client (voir ci-dessus comment faire), puis appeler la commande 'kill'

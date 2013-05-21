@@ -8,11 +8,13 @@ EXE=active
 OBJ=active
 GOALS=active example client
 
-all: active client
-
+all: active client example	
+	cp active ../../bin
+	cp client ../../bin
+	cp example ../../bin
 active: daemon.o main.o watch.o exception.o event.o core.o mask.o
 	$(CC) $(FLAGS) -pthread $^ -o $(EXE)
-	cp $(EXE) ../../bin
+#	cp $(EXE) ../../bin/
 
 client: daemon.o watch.o exception.o event.o core.o mask.o client.o
 	$(CC) $(FLAGS) -pthread $^ -o client
@@ -30,9 +32,7 @@ main.o: Main.cpp
 	$(CC) $(FLAGS) -c Main.cpp -o main.o
 
 daemon.o: ANotifyDaemon.h ANotifyDaemon.cpp
-#daemon.o: Daemon.h Daemon.cpp
 	$(CC) $(FLAGS) -c ANotifyDaemon.cpp -o daemon.o
-#	$(CC) $(FLAGS) -c Daemon.cpp -o daemon.o
 
 watch.o: ANotifyWatch.h ANotifyWatch.cpp
 	$(CC) $(FLAGS) -c ANotifyWatch.cpp -o watch.o

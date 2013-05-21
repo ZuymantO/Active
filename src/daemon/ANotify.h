@@ -73,7 +73,10 @@ class ANotify
   }
   
   bool clearWatch(ANotifyWatch* pWatch) throw (ANotifyException);
+  bool remove(std::string& path, bool rec);
   bool remove(ANotifyWatch* ipWatch) throw (ANotifyException);
+  bool removeOneWatch(std::string& path);
+  bool removeRecWatch(std::string& path);
   inline bool remove(ANotifyWatch& irWatch) throw (ANotifyException){
     return remove(&irWatch);
   }
@@ -112,6 +115,7 @@ class ANotify
   }
   ANotifyWatch* findWatch(int iDescriptor);
   ANotifyWatch* findWatch(const std::string& irPath);
+  ANotifyWatch* findWatchWOLock(std::string& path);
   inline int getDescriptor() const{
     return m_fileDescr;
   }

@@ -18,6 +18,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <string.h>
 #ifndef __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
 #include <sys/inotify.h>
 #endif // __ENVIREONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
@@ -191,6 +192,85 @@ bool ANotify::remove(ANotifyWatch* pWatch) throw (ANotifyException)
     return true;
 }
 
+bool ANotify::removeOneWatch(std::string& path){
+  IN_WATCH_WRITE_BEGIN
+
+  ANotifyWatch* pW;
+  bool res;
+
+  pW = findWatchWOLock(path);
+  
+  if(pW != NULL){
+    clearWatch(pW);
+    res = true;
+  }
+  else{
+    res = false;
+  }
+
+  IN_WATCH_WRITE_END
+
+  return res;
+}
+
+bool ANotify::removeRecWatch(std::string& path){
+  IN_WATCH_WRITE_BEGIN
+
+  WatchPathMap::iterator it = m_paths.begin();
+  std::string filepath;
+  int filepathLength;
+  std::vector<std::string> vectPaths;
+  std::vector<std::string>::iterator vectIt;
+  ANotifyWatch* pWatch;
+  bool res = true;
+  
+  while(it != m_paths.end()){
+    filepath = it->first;
+    filepathLength = filepath.length();
+    
+    if(strncmp(filepath.c_str(), path.c_str(), path.length()) == 0){
+      vectPaths.push_back(filepath);
+    }
+    
+    it++;
+  }
+  
+  vectIt = vectPaths.begin();
+
+  while(vectIt != vectPaths.end()){
+    filepath = *vectIt;
+    pWatch = findWatchWOLock(filepath);
+    
+    if(pWatch == NULL){
+      res = false;
+    }
+    else{
+      res = res && clearWatch(pWatch);
+    }   
+
+    vectIt++;
+  }
+
+
+  IN_WATCH_WRITE_END  
+    
+    return true;
+}
+
+bool ANotify::remove(std::string& path, bool rec){
+    ANotifyWatch* pWatch;
+    bool res;
+
+    if(!rec){
+      res = removeOneWatch(path);
+    }
+    else{
+      res = removeRecWatch(path);
+    }
+
+    return res;
+}
+
 bool ANotify::clearWatch(ANotifyWatch* pWatch) throw (ANotifyException){
    if(pWatch == NULL){
      return false;
@@ -221,7 +301,7 @@ bool ANotify::clearWatch(ANotifyWatch* pWatch) throw (ANotifyException){
   
   m_paths.erase(pWatch->getPath());
   pWatch->setMonitor(NULL);
-    return true;
+  return true;
 }
 
 bool ANotify::removeAll() throw (ANotifyException)
@@ -324,17 +404,21 @@ bool ANotify::peekEvent(ANotifyEvent* opEvt) throw (ANotifyException)
     throw ANotifyException(IN_EXC_MSG("Please allow space for event"), EINVAL, this);
   
   IN_EVENT_READ_BEGIN
+
     bool b = !m_events.empty();
   if (b) {
     *opEvt = *(m_events.front());
   }
+
   IN_EVENT_READ_END
+
     return b;
 }
 
 ANotifyWatch* ANotify::findWatch(FD iDescriptor)
 {
   IN_WATCH_READ_BEGIN
+
     ANotifyWatch* pW;
   WatchFDMap::iterator it = m_watches.find(iDescriptor);
   if(it == m_watches.end() ) {
@@ -354,15 +438,29 @@ ANotifyWatch* ANotify::findWatch(const std::string& irPath)
   
     WatchPathMap::iterator it = m_paths.find(irPath);
 
-  ANotifyWatch* pW ;
+  ANotifyWatch* pW;
   if(it == m_paths.end()) {
     pW = NULL;
   }else {
     pW = (*it).second;
   }
+
   IN_WATCH_READ_END
   
     return pW;
+}
+
+ANotifyWatch* ANotify::findWatchWOLock(std::string& path){
+  WatchPathMap::iterator it = m_paths.find(path);
+  ANotifyWatch* pW;
+  
+  if(it == m_paths.end()) {
+    pW = NULL;
+  }else {
+    pW = (*it).second;
+  }
+  
+  return pW;
 }
 
 void ANotify::setNonBlock(bool fNonBlock) throw (ANotifyException)

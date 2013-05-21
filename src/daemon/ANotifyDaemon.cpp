@@ -25,9 +25,7 @@ const std::string ANotifyDaemon::logPath = "daemon.log";
 ANotifyDaemon::ANotifyDaemon() throw (ANotifyException) :
   sock(-1), propsFd(-1), logFd(-1), running(false), notify(NULL), notifyEvent(NULL),
   /* TODO: decommenter pour la partie finale */
-  //watchPath("/")
-  //watchPath("/home/cuisse/Documents/save_genie")
-  watchPath("/home/cuisse/Documents/")
+  watchPath("/home/")
 {
   this->alive = true;
   initDaemon();
@@ -355,10 +353,9 @@ bool ANotifyDaemon::restart(std::string& path){
 
   stopRes = this->stop();
   startRes = this->start(path);
-  /*std::pair<ANotifyDaemon
-    pthread_create(&thread, NULL, startT,*/
 
-  return startRes && stopRes;
+  //return startRes && stopRes;
+  return startRes;
 }
 
 bool ANotifyDaemon::list(int client){
@@ -869,12 +866,18 @@ int ANotifyDaemon::getDaemonPort(int fd){
 }
 
 bool ANotifyDaemon::removeWatch(std::string& path, bool rec){
-  if(!rec){
+  /*if(!rec){
     return removeOneWatch(path);
   }
   else{
     return recRemoveWatch(path);
+    }*/
+
+  if(this->notify == NULL){
+    return false;
   }
+
+  return this->notify->remove(path, rec);
 }
 
 bool ANotifyDaemon::removeOneWatch(std::string& path){
