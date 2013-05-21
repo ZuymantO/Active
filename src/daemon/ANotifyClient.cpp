@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <iostream>
 #include <netinet/in.h>
+#include <sys/types.h>
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <sstream>
@@ -26,7 +28,7 @@ void printHelp(){
 }
 
 int main(int argc, char** argv){
-  int socket, //descripteur socket
+  int sock, //descripteur socket
     port = -1, //port socket
     propsFd = -1; //descripteur fichier
   bool connected = true, //etat de la connexion
@@ -36,24 +38,50 @@ int main(int argc, char** argv){
     path; //chemin fourni en argument
   struct sockaddr_in addr; //infos de connexion pour la socket
   char msg; //caractere correspondant a l'instruction courante
-  int nb, length, i, pathLength, ibool;
+  int nb, length, i, pathLength;
   char buffer[300]; //chaine contenant le chemin d'un fichier
 
-  /*propsFd = ANotifyDaemon::openPropsFile();
+  propsFd = ANotifyDaemon::openPropsFile();
 
   if(propsFd == -1){
-  //TODO: Lever une exception
+    /* TODO: Lever une exception */
     exit(EXIT_FAILURE);
   }
 
   port = ANotifyDaemon::getDaemonPort(propsFd);
 
   if(port == -1){
+    ANotifyDaemon::closePropsFile(propsFd);
     exit(EXIT_FAILURE);
-    }*/
+  }
 
+  ANotifyDaemon::closePropsFile(propsFd);
+  
   /* TODO: <Connexion de la socket au port> */
   
+  sock = socket(AF_INET, SOCK_STREAM, 0);
+
+  struct hostent* host = gethostbyname("localhost");
+    
+  if(host == NULL){
+    std::cout << "Hote inexistant: localhost" << std::endl;
+    ANotifyDaemon::closePropsFile(propsFd);
+    close(sock);
+    exit(EXIT_FAILURE);
+  }
+  
+  memcpy(&(addr.sin_addr.s_addr), host->h_addr_list[0], host->h_length);
+  
+  addr.sin_family = AF_INET;
+  addr.sin_port = htons(port);
+  
+  if(connect(sock, (struct sockaddr*)(&addr), sizeof(addr)) == -1){
+    std::cout << "Connexion echouee" << std::endl;
+    ANotifyDaemon::closePropsFile(propsFd);
+    close(sock);
+    exit(EXIT_FAILURE);
+  }
+
   /* </Connexion> */
   
   cout << "Type 'help' for usage" << endl;
@@ -73,7 +101,7 @@ int main(int argc, char** argv){
     else if(instruction == "kill"){
       msg = 'K';
 
-      length = send(socket, &msg, 1, 0);
+      length = send(sock, &msg, 1, 0);
 
       if(length <= 0){
 	connected = false;
@@ -85,7 +113,7 @@ int main(int argc, char** argv){
     else if(instruction == "stop"){
       msg = 'E';
 
-      length = send(socket, &msg, 1, 0);
+      length = send(sock, &msg, 1, 0);
 
       if(length <= 0){
 	connected = false;
@@ -95,30 +123,39 @@ int main(int argc, char** argv){
     else if(instruction == "list"){
       msg = 'L';
       
-      length = send(socket, &msg, 1, 0);
+      length = send(sock, &msg, 1, 0);
 
       if(length <= 0){
+	cout << "Send failed" << endl;
 	connected = false;
 	break;
       }
 
-      length = recv(socket, &nb, sizeof(int), 0);
+      length = recv(sock, &nb, sizeof(int), 0);
       
       if(length <= 0){
+	cout << "Recv failed" << endl;
 	connected = false;
 	break;
+      }
+
+      if(nb > 0){
+	cout << "(" << nb << " watche(s) found)" << endl;
+      }
+      else{
+	cout << "(No watch found)" << endl;
       }
 
       /* Reception des chemins des fichiers surveilles */
       for(i=0; i<nb; i++){
-	length = recv(socket, &pathLength, sizeof(int), 0);
+	length = recv(sock, &pathLength, sizeof(int), 0);
 
 	if(length <= 0 || pathLength <= 0){
 	  connected = false;
 	  break;
 	}
 
-	length = recv(socket, buffer, pathLength, 0);
+	length = recv(sock, buffer, pathLength, 0);
 
 	if(length < pathLength){
 	  connected = false;
@@ -146,12 +183,12 @@ int main(int argc, char** argv){
 	  /* TODO */
 	  msg = 'S';
 
-	  length = send(socket, &msg, 1, 0);
+	  length = send(sock, &msg, 1, 0);
 
 	  if(cmds.size() == 2){
 	    /* > start PATH*/
 	    msg = 'Y';
-	    length = send(socket, &msg, 1, 0);
+	    length = send(sock, &msg, 1, 0);
 
 	    if(length <= 0){
 	      /* TODO */
@@ -162,7 +199,7 @@ int main(int argc, char** argv){
 	  else if(cmds.size() == 1){
 	    /* > start */
 	    msg = 'N';
-	    length = send(socket, &msg, 1, 0);
+	    length = send(sock, &msg, 1, 0);
 
 	    if(length <= 0){
 	      /* TODO */
@@ -178,23 +215,86 @@ int main(int argc, char** argv){
 	else if(cmds[0] == "restart"){
 	  /* TODO */
 	  msg = 'R';
-	  length = send(socket, &msg, 1, 0);
+	  length = send(sock, &msg, 1, 0);
 
-	  if(length <= 0){
-	    /* TODO */
-	    connected = false;
-	    break;
+	  if(cmds.size() == 2){
+	    /* > start PATH*/
+	    msg = 'Y';
+	    length = send(sock, &msg, 1, 0);
+
+	    if(length <= 0){
+	      /* TODO */
+	      connected = false;
+	      break;
+	    }
 	  }
+	  else if(cmds.size() == 1){
+	    /* > start */
+	    msg = 'N';
+	    length = send(sock, &msg, 1, 0);
 
-	  
+	    if(length <= 0){
+	      /* TODO */
+	      connected = false;
+	      break;
+	    }
+	  }
+	  else{
+	    cout << "Too much arguments" << endl;
+	    continue;
+	  }	  
 	}
 	else if(cmds[0] == "remove"){
 	  /* TODO */
 	  if(cmds.size() >= 2){
-	    rec = (cmds[1] == "-r");
-	    ibool = rec ? 1 : 0;
+	    msg = 'R';
+	    length = send(sock, &msg, 1, 0);
 
+	    if(length <= 0){
+	      connected = false;
+	      break;
+	    }
+
+	    int pathIndex = 1;
+
+	    if(cmds[1] == "-r"){
+	      rec = true;
+	      msg = 'Y';
+	      pathIndex = 2;
+	    }
+	    else{
+	      rec = false;
+	      msg = 'N';
+	    }
+
+	    length = send(sock, &msg, 1, 0);
+
+	    if(length <= 0){
+	      connected = false;
+	      break;
+	    }
 	    
+	    if(cmds.size() == pathIndex + 1){
+	      path = cmds[pathIndex];
+	      pathLength = path.length();
+
+	      length = send(sock, &pathLength, sizeof(int), 0);
+
+	      if(length <= 0){
+		connected = false;
+		break;
+	      }
+
+	      length = send(sock, path.c_str(), pathLength, 0);
+
+	      if(length <= 0){
+		connected = false;
+		break;
+	      }
+	    }
+	    else{
+	      cout << "Too much arguments" << endl;
+	    }
 	  }
 	  else{
 	    cout << "error: Invalid arguments" << endl;
@@ -211,9 +311,23 @@ int main(int argc, char** argv){
     if(!connected){
       break;
     }
+    
+    length = recv(sock, &msg, 1, 0);
+
+    if(length <= 0){
+      cout << "answer recv failed" << endl;
+    }
+    else{
+      if(msg == 'Y'){
+	cout << "[operation succeeded]" << endl;
+      }
+      else{
+	cout << "[operation failed]" << endl;
+      }
+    }
   }
 
-  close(socket);
+  close(sock);
 
   return 0;
 }

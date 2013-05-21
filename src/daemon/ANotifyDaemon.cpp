@@ -26,35 +26,20 @@ ANotifyDaemon::ANotifyDaemon() throw (ANotifyException) :
   sock(-1), propsFd(-1), logFd(-1), running(false), notify(NULL), notifyEvent(NULL),
   /* TODO: decommenter pour la partie finale */
   //watchPath("/")
-  watchPath("/home/cuisse/Documents/save_genie")
+  //watchPath("/home/cuisse/Documents/save_genie")
+  watchPath("/home/cuisse/Documents/")
 {
-  //initDaemon();
+  this->alive = true;
+  initDaemon();
 }
 
 ANotifyDaemon::~ANotifyDaemon(){
   this->kill();
 }
 
-/*void ANotifyDaemon::forkInit() throw (ANotifyException){
-  pid_t pid;
-
-  pid = fork();
-
-  if(pid > 0){
-
-  }
-  else if(pid == 0){
-  this->initDaemon();
-  }
-  else{
-  this->kill();
-  throw ANotifyException("Fork init failed", errno, this);
-  }
-  }*/
-
 void ANotifyDaemon::initDaemon() throw (ANotifyException){
   int port = -1, i, client, length, res;
-  struct sockaddr_in addr;
+  //struct sockaddr_in addr;
   std::string str = "";
   std::stringstream ss(str);
   pid_t current_pid = getpid(), pid; 
@@ -78,14 +63,14 @@ void ANotifyDaemon::initDaemon() throw (ANotifyException){
     throw ANotifyException("Failed to open socket", errno, this);
   }
   
-  addr.sin_family = AF_INET;  
-  addr.sin_addr.s_addr = htonl(INADDR_ANY);
+  this->addr.sin_family = AF_INET;  
+  this->addr.sin_addr.s_addr = htonl(INADDR_ANY);
   
   /* Trouver un port de libre ou ecouter */
   for(i=5000; i<6000; i++){    
-    addr.sin_port = htons(i);
+    this->addr.sin_port = htons(i);
     
-    if(bind(this->sock, (struct sockaddr*)(&addr), sizeof(addr)) != -1
+    if(bind(this->sock, (struct sockaddr*)(&this->addr), sizeof(this->addr)) != -1
        && listen(this->sock, 0) != -1){
       port = i;
       break;
@@ -127,7 +112,7 @@ void ANotifyDaemon::initDaemon() throw (ANotifyException){
     throw ANotifyException("Cannot open log file", errno, this);
   }
   
-  this->addr = &addr;
+  //this->addr = &addr;
   
   this->notify = new ANotify();
   this->mask = ANOTIFY_RENAME | ANOTIFY_WRITE | ANOTIFY_DELETE | ANOTIFY_ATTRIBUT;
@@ -135,68 +120,7 @@ void ANotifyDaemon::initDaemon() throw (ANotifyException){
   
   pthread_mutex_init(&this->runningAccess, NULL);
   pthread_mutex_init(&this->logLock, NULL);  
-
-  initWithThread(this);
-}
-
-int ANotifyDaemon::initWithThread(ANotifyDaemon* dae) throw (ANotifyException){
-  int res;
-  pthread_t init_thread;
-  std::string str;
-  
-  res = pthread_create(&init_thread, NULL, init, (void*)dae);
-  
-  if(res != 0){   
-    dae->kill();
-    throw ANotifyException("thread failed", errno, dae);
-  }
-
-  //init((void*)dae);
-  
-  return res;
-}
-
-void* ANotifyDaemon::init(void* arg){
-  std::string str;
-  pthread_t thread;
-  int res;
-  ANotifyDaemon* dae = (ANotifyDaemon*)arg;
-  //std::pair<ANotifyDaemon*, std::string> daemon_path;
-  
-  str = "[SUCCESS] init";
-  dae->printLog(str);
-
-  /* TODO: que faire quand ca foire ? */
-  res = pthread_create(&thread, NULL, waitForClients, arg);
-  if(res == 0){
-    str = "daemon waiting for incoming connections ...";
-    dae->printLog(str);
-  }
-  else{
-    str = "failed to wait for incoming connections";
-    dae->printLog(str);
-    pthread_exit(NULL);
-  }
-  //waitForClients(arg);
-  
-
-  /*daemon_path.first = dae;
-    daemon_path.second = dae->watchPath;
-    res = pthread_create(&threads[1], NULL, startT, (void*)(&daemon_path));
-    if(res == 0){    
-    str = "daemon started successfully";
-    dae->printLog(str);
-    }
-    else{
-    str = "failed to wait for incoming connections";
-    dae->printLog(str);
-    pthread_exit(NULL);
-    }*/
-
-  //sleep(1);
-  //dae->start();
-  
-  //pthread_exit(NULL);
+  pthread_mutex_init(&this->aliveAccess, NULL);
 }
 
 bool ANotifyDaemon::retrieveBoolResult(void* (f)(void*), void* arg){
@@ -215,11 +139,15 @@ bool ANotifyDaemon::start(){
 
 bool ANotifyDaemon::start(std::string& path){
   std::pair<ANotifyDaemon*, std::string> arg;
+  pthread_t thread;
 
   arg.first = this;
   arg.second = path;
 
-  return retrieveBoolResult(startT, (void*)(&arg));
+  return (pthread_create(&thread, NULL, startT, (void*)&arg) == 0);
+
+  //return true;
+  //return retrieveBoolResult(startT, (void*)(&arg));
 }
 
 void* ANotifyDaemon::startT(void* arg){
@@ -231,34 +159,22 @@ void* ANotifyDaemon::startT(void* arg){
   ANotifyDaemon* dae = daemon_path->first;
   std::string path = daemon_path->second;
   pthread_t threads[2];
-  
+
   if(dae->isRunning()){
     res = false;
     pthread_exit(&res);
   }  
   
   dae->setRunning(true);
-  
-  std::cout << "starting addWatch" << std::endl;
 
-  /* TODO: lancer la surveillance sur Path */
   res = dae->addWatch(path);
-  
-  std::cout << "ended addWatch" << std::endl;
-
-  throw ANotifyException("lol", errno, dae);
 
   if(!res){
     str = "[ERROR] failed to start daemon on path '" + path;
-    std::cout << str << std::endl;
     dae->printLog(str);
     res = false;
     pthread_exit(&res);
   }
-
-  std::cout << "addWatch succeeded" << std::endl;
-  
-  /* TODO: retirer les forks */
   
   ret = pthread_create(&threads[0], NULL, dae->waitForEvents, (void*)dae);
   if(ret != 0){
@@ -284,8 +200,12 @@ bool ANotifyDaemon::addWatch(std::string& path){
   struct dirent* entry = NULL;
   std::string filepath, logMsg;
   
+  if(!this->isRunning()){
+    /* TODO: renvoyer faux ou vrai ? */
+    return false;
+  }
+
   if(stat(path.c_str(), &st) != 0){
-    std::cout << "stat failed on '" + path + "'" << std::endl;
     return false;
   }
   
@@ -303,22 +223,18 @@ bool ANotifyDaemon::addWatch(std::string& path){
     dirWatch.setMonitor(this->notify);
     
     try{
-      std::cout << "add start" << std::endl;
       this->notify->add(dirWatch);
-      std::cout << "[ADDED] " << dirWatch.getPath() << std::endl;
-      logMsg = "[ADDED] " + newpath;
-      //std::cout << logMsg << std::endl;
+      logMsg = "[WATCH] added '" + newpath + "'";
       printLog(logMsg);
     }catch(ANotifyException e){
-      std::cout << e.GetMessage() << std::endl;
-      //std::cout << "add failed on '" + path + "'" << std::endl;
+      logMsg = "[ERROR] failed to add '" + newpath + "'";
+      this->printLog(logMsg);
       return false;
     }
     
     dir = opendir(newpath.c_str());
     
-    if(dir == NULL){     
-      //std::cout << "opendir failed on '" + path + "'" << std::endl;
+    if(dir == NULL){
       logMsg = "[ERROR] failed to open dir '" + newpath;
       printLog(logMsg);
       return false;
@@ -329,16 +245,7 @@ bool ANotifyDaemon::addWatch(std::string& path){
 	 || strcmp(entry->d_name, "..") == 0){
 	continue;
       }
-      
-      /*filepath = path;
-	
-	if(path[path.length() - 1] != '/'){
-	filepath += '/';
-	}
-	
-	filepath += entry->d_name;*/
-      
-      //this->addWatch(filepath);
+
       filepath = newpath;
       filepath += entry->d_name;
 
@@ -369,20 +276,14 @@ bool ANotifyDaemon::addWatch(std::string& path){
 void* ANotifyDaemon::run(void* arg){
   ANotifyDaemon* dae = (ANotifyDaemon*)arg;
   ANotifyEvent pEvt;
-  std::string str;
-
-  str = "running mode";
-  dae->printLog(str);
+  std::string str, tmp = "[EVENT] ";
 
   while(dae->isRunning()){
-    str = "is_running";
-    dae->printLog(str);
-
     if(dae->notify->getEvent(pEvt)){
       //traiter l'event
-      str = "[EVENT] " + pEvt.getName();
+      pEvt.dumpTypes(str);
+      str = tmp + str + pEvt.getName();
       dae->printLog(str);
-      std::cout << "[EVENT]" + pEvt.getName() << std::endl;
     }
 
     sleep(1);
@@ -394,7 +295,7 @@ void* ANotifyDaemon::waitForEvents(void* arg){
 
   while(dae->isRunning()){
     try{
-      dae->notify->waitForEvents();
+      dae->notify->waitForEvents(true);
     }catch(ANotifyException e){
       /* TODO: Continuer ou s'arreter en cas d'erreur ? */
       //continue;
@@ -403,23 +304,31 @@ void* ANotifyDaemon::waitForEvents(void* arg){
   }
 }
 
+void ANotifyDaemon::waitForClients(){
+  pthread_t thread;
+  pthread_create(&thread, NULL, waitForClients, (void*)this);
+}
+
 void* ANotifyDaemon::waitForClients(void* arg){
   pid_t child_pid;
   int client, res;
   std::string str;
-  socklen_t len;
   ANotifyDaemon* dae = (ANotifyDaemon*)arg;
+  socklen_t len = sizeof(dae->addr);
  
+  str = "[SOCKET] waiting for clients";
+  dae->printLog(str);
+
   /* Attente de la connexion d'un ou plusieurs clients */
   while(true){
-    client = accept(dae->sock, (struct sockaddr*)(dae->addr), &len);
+    client = accept(dae->sock, (struct sockaddr*)(&dae->addr), &len);
     
     /* Fermeture de la socket serveur */
     if(client == -1){
       break;
     }
 
-    str = "[SOCKET] New client";
+    str = "[SOCKET] new client";
     dae->printLog(str);
     
     pthread_t client_thread;
@@ -433,6 +342,8 @@ void* ANotifyDaemon::waitForClients(void* arg){
       close(client);
     }
   }
+
+  pthread_exit(NULL);
 }
 
 bool ANotifyDaemon::restart(){
@@ -444,6 +355,8 @@ bool ANotifyDaemon::restart(std::string& path){
 
   stopRes = this->stop();
   startRes = this->start(path);
+  /*std::pair<ANotifyDaemon
+    pthread_create(&thread, NULL, startT,*/
 
   return startRes && stopRes;
 }
@@ -452,24 +365,30 @@ bool ANotifyDaemon::list(int client){
   int len;
   std::string path;
   int pathLength;
-  WatchPathMap::iterator it;
-  WatchPathMap paths;
-
-  /* Obtenir un verrou sur la map */
+  std::vector<std::string>::iterator it;
+  std::vector<std::string> paths;
+  int nb;
 
   if(this->notify != NULL){
-    paths = this->notify->getWatchesPathMap();
+    paths = this->notify->getWatchPaths();
+    nb = paths.size();
+
+    len = send(client, &nb, sizeof(int), 0);
+
+    if(len <= 0){
+      return false;
+    }
+
     it = paths.begin();
 
-    while (it != paths.end()) {
-      path = it->first;
+    while(it != paths.end()){
+      path = *it;
       pathLength = path.length();
 
       //Envoi de la longueur du chemin
       len = send(client, &pathLength, sizeof(int), 0);
 
       if(len <= 0){
-	/* Liberer le verrou sur la map */
 	return false;
       }
  
@@ -477,7 +396,6 @@ bool ANotifyDaemon::list(int client){
       len = send(client, path.c_str(), path.length(), 0);
       
       if(len <= 0){
-	/* Liberer le verrou sur la map */
 	return false;
       }
       
@@ -485,11 +403,9 @@ bool ANotifyDaemon::list(int client){
     }
   }
   else{
-    /* Liberer le verrou sur la map */
     return false;
   }
 
-  /* Liberer le verrou sur la map*/
   return true;
 }
 
@@ -499,45 +415,61 @@ bool ANotifyDaemon::stop(){
   }  
 
   this->setRunning(false);
+
   if(notify != NULL){
-    this->notify->AClose();
+    try{
+      this->notify->Close();
+    }catch(ANotifyException e){}
   }
+
   return true;
 }
 
 bool ANotifyDaemon::kill(){
+  if(!this->isAlive()){
+    return false;
+  }
+
   /* TODO: voir quand il faut renvoyer false */
   this->stop();
   this->deletePropsFile();
   this->closeLogFile();
+  this->deleteLogFile();
   
-  close(this->sock);
+  close(this->sock); 
 
-  //sleep(3);
-
-  /*if(this->notifyEvent != NULL){
-    delete this->notifyEvent;
-    this->notifyEvent = NULL;
-    }*/
+  if(this->notifyEvent != NULL){
+    try{
+      delete this->notifyEvent;
+      this->notifyEvent = NULL;
+    }catch(ANotifyException e1){}
+  }
 
   if(this->notify != NULL){
-    delete this->notify;
-    this->notify = NULL;
+    try{
+      delete this->notify;
+      this->notify = NULL;
+    }catch(ANotifyException e2){}
   }
 
   pthread_mutex_destroy(&this->runningAccess);
   pthread_mutex_destroy(&this->logLock);
+  pthread_mutex_destroy(&this->aliveAccess);
+
+  this->setAlive(false);
 
   return true;
 }
 
 void* ANotifyDaemon::communicate(void* arg){
-  int readLength, pathLength;
+  int readLength, pathLength, length;
   char c;
-  bool res = true, alive = true;
+  bool res = true, alive = true, withPath = false, rec = false, answer = false;
   std::pair<ANotifyDaemon*, int>* daemon_socketfd = (std::pair<ANotifyDaemon*, int>*)arg;
   ANotifyDaemon* dae = daemon_socketfd->first;
   int client_socket = daemon_socketfd->second;
+  std::string str, pathStr;
+  char path[300];
 
   while(alive){
     readLength = recv(client_socket, &c, 1, 0);
@@ -545,77 +477,210 @@ void* ANotifyDaemon::communicate(void* arg){
     if(readLength <= 0){
       /* TODO: voir ce qu'il faut faire dans ce cas la */
       //return;
+      str = "[SOCKET] client disconnected";
+      dae->printLog(str);
+      
+      close(client_socket);
       pthread_exit(NULL);
     }
+    
+    answer = true;
 
     switch(c){
-    case 'D'://delete (removes a watch) 
-      bool rec;
-
+    case 'D'://delete (removes a watch)
       //Recursivite
       readLength = recv(client_socket, &c, 1, 0);
       if(readLength <= 0){
-	//return;
+	//return;	
+	close(client_socket);
 	pthread_exit(NULL);
       }
-      rec = (c == 'Y') ? true : false;      
-      
-      int length;
+      rec = (c == 'Y') ? true : false; 
 
       //Taille du chemin
       readLength = recv(client_socket, &pathLength, sizeof(int), 0);
       if(readLength <= 0){
 	//return;
+	close(client_socket);
 	pthread_exit(NULL);
       }
       
-      char path[pathLength + 1];
+      //char path[pathLength + 1];
 
       //Chemin
       readLength = recv(client_socket, path, pathLength, 0);
       if(readLength <= 0){
 	//return;
+	close(client_socket);
 	pthread_exit(NULL);
       }
       if(readLength < pathLength){
-	res = false;
+	//res = false;
+	close(client_socket);
+	pthread_exit(NULL);
       }
+      
+      path[pathLength] = '\0';
 
-      if(res){
-	std::string pathStr(path);
-	res = dae->removeWatch(pathStr, rec);
-      }
+      //if(res){
+      //std::string pathStr(path);
+      pathStr = path;
+      str = "[WATCH] removing '";
+      str += pathStr + "'";
+      dae->printLog(str);
+      
+      res = dae->removeWatch(pathStr, rec);
+      //}
       break;
 
     case 'S'://start (starts the daemon) [A voir]
-      res = dae->start();
-      break;
+      //Chemin fourni
+      readLength = recv(client_socket, &c, 1, 0);
+      if(readLength <= 0){
+	//return;
+	close(client_socket);
+	pthread_exit(NULL);
+      }
+      withPath = (c == 'Y') ? true : false;      
+      
+      if(withPath){
+	//Taille du chemin
+	readLength = recv(client_socket, &pathLength, sizeof(int), 0);
+	if(readLength <= 0){
+	  //return;
+	  close(client_socket);
+	  pthread_exit(NULL);
+	}
+	
+	//char path[pathLength + 1];
+	
+	//Chemin
+	readLength = recv(client_socket, path, pathLength, 0);
+	if(readLength <= 0){
+	  //return;	  
+	  close(client_socket);
+	  pthread_exit(NULL);
+	}
+	if(readLength < pathLength){	  
+	  close(client_socket);
+	  pthread_exit(NULL);
+	  //res = false;
+	}
+	
+	path[pathLength] = '\0';
 
+	//if(res){
+	//std::string pathStr(path);
+	pathStr = path;
+	str = "[PROCESS] starting daemon on '";
+	str += pathStr + "'";
+	dae->printLog(str);
+	
+	res = dae->start(pathStr);
+	//}
+      }
+      else{
+	//if(res){
+	str = "[PROCESS] starting daemon on '";
+	str += dae->watchPath + "'";
+	dae->printLog(str);
+	
+	res = dae->start();
+	//}
+      }
+      break;
+      
     case 'K'://kill (definitively kill the daemon) [A voir]
+      str = "[PROCESS] killing daemon";
+      dae->printLog(str);
+
       res = dae->kill();
       alive = false;
       break;
 
     case 'E'://end (stops the daemon)
+      str = "[PROCESS] stopping daemon";
+      dae->printLog(str);
+
       res = dae->stop();
       break;
 
     case 'R'://restart (restarts the daemon)
-      res = dae->restart();
+      //Chemin fourni
+      readLength = recv(client_socket, &c, 1, 0);
+      if(readLength <= 0){
+	//return;
+	close(client_socket);
+	pthread_exit(NULL);
+      }
+      withPath = (c == 'Y') ? true : false;      
+      
+      if(withPath){
+	//Taille du chemin
+	readLength = recv(client_socket, &pathLength, sizeof(int), 0);
+	if(readLength <= 0){
+	  //return;
+	  close(client_socket);
+	  pthread_exit(NULL);
+	}
+	
+	//char path[pathLength + 1];
+	
+	//Chemin
+	readLength = recv(client_socket, path, pathLength, 0);
+	if(readLength <= 0){
+	  //return;
+	  close(client_socket);
+	  pthread_exit(NULL);
+	}
+	if(readLength < pathLength){
+	  //res = false;
+	  close(client_socket);
+	  pthread_exit(NULL);
+	}
+	
+	path[pathLength] = '\0';
+	
+	//if(res){
+	//std::string pathStr(path);
+	pathStr = path;
+	str = "[PROCESS] restarting daemon on '";
+	str += pathStr + "'";
+	dae->printLog(str);
+	
+	res = dae->restart(pathStr);
+	//}
+      }
+      else{
+	//if(res){
+	str = "[PROCESS] restarting daemon on '";
+	str += dae->watchPath + "'";
+	dae->printLog(str);
+	
+	res = dae->restart();
+	  //}
+      }
       break; 
 
-    case 'L':
+    case 'L'://list (list current watches)
+      str = "[WATCH] listing watched files";
+      dae->printLog(str);
+
       res = dae->list(client_socket);
       break;
 
     default:
-      continue;
+      answer = false;
+      break;
     }
 
-    c = res ? 'Y' : 'N';
-    send(client_socket, &c, 1, 0);
+    if(answer){
+      c = res ? 'Y' : 'N';
+      send(client_socket, &c, 1, 0);
+    }
   }
 
+  close(client_socket);
   pthread_exit(NULL);
 }
 
@@ -630,9 +695,9 @@ int ANotifyDaemon::openPropsFile(){
     return -1;
   }
   /*
-  ret = flock(fd, LOCK_EX | LOCK_NB);
+    ret = flock(fd, LOCK_EX | LOCK_NB);
 
-  if(ret == -1){
+    if(ret == -1){
     return -1;
     }*/
 
@@ -641,12 +706,13 @@ int ANotifyDaemon::openPropsFile(){
 
 int ANotifyDaemon::closePropsFile(int fd){   
   /* TODO: Liberer le verrou sur le fichier de proprietes */
-  flock(fd, LOCK_UN);
+  //flock(fd, LOCK_UN);
   return close(fd);  
 }
 
 int ANotifyDaemon::deletePropsFile(){
   return remove(propsPath.c_str());
+  //return unlink(propsPath.c_str());
 }
 
 int ANotifyDaemon::openLogFile(){
@@ -668,6 +734,10 @@ int ANotifyDaemon::closeLogFile(){
   pthread_mutex_unlock(&this->logLock);
 
   return res;
+}
+
+int ANotifyDaemon::deleteLogFile(){
+  return remove(logPath.c_str());
 }
 
 void ANotifyDaemon::printLog(std::string& msg){
@@ -693,6 +763,22 @@ void ANotifyDaemon::setRunning(bool run){
   pthread_mutex_lock(&runningAccess);
   this->running = run;
   pthread_mutex_unlock(&runningAccess);
+}
+
+bool ANotifyDaemon::isAlive(){
+  bool res = false;
+
+  pthread_mutex_lock(&aliveAccess);
+  res = this->alive;
+  pthread_mutex_unlock(&aliveAccess);
+
+  return res;
+}
+
+void ANotifyDaemon::setAlive(bool alv){
+  pthread_mutex_lock(&aliveAccess);
+  this->alive = alv;
+  pthread_mutex_unlock(&aliveAccess);
 }
 
 bool ANotifyDaemon::isActiveDaemon(pid_t pid){
@@ -783,7 +869,7 @@ int ANotifyDaemon::getDaemonPort(int fd){
 }
 
 bool ANotifyDaemon::removeWatch(std::string& path, bool rec){
-  if(rec){
+  if(!rec){
     return removeOneWatch(path);
   }
   else{
@@ -806,26 +892,34 @@ bool ANotifyDaemon::removeOneWatch(std::string& path){
 }
 
 bool ANotifyDaemon::recRemoveWatch(std::string& path){
-  bool res = true;
-  WatchPathMap::iterator it;
-  WatchPathMap paths;
+  //WatchPathMap::iterator it;
+  //WatchPathMap paths;
+  std::vector<std::string>::iterator it;
+  std::vector<std::string> paths;
   std::string filepath;
   int filepathLength;
+  ANotifyWatch* pWatch;
 
   /* Obtenir un verrou sur la map */
 
   if(this->notify != NULL){
-    paths = this->notify->getWatchesPathMap();
+    //paths = this->notify->getWatchesPathMap();
+    paths = this->notify->getWatchPaths();
     it = paths.begin();
 
     while (it != paths.end()) {
-      filepath = it->first;
+      //filepath = it->first;
+      filepath = *it;
       filepathLength = filepath.length();
 
-      /* Trouver la bonne fonction */
-      //if(filepath.startsWith(path)){
       if(strncmp(filepath.c_str(), path.c_str(), path.length()) == 0){
-	paths.erase(path);
+      //paths.erase(path);
+	//paths.erase(filepath);
+	
+	pWatch = this->notify->findWatch(filepath);
+	if(pWatch != NULL){
+	  this->notify->remove(pWatch);
+	}
       }
       
       it++;

@@ -1,25 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <signal.h>
 
 #include "ANotify.h"
 #include "ANotifyWatch.h"
 #include "ANotifyEvent.h"
 #include "ANotifyException.h"
 #include "ANotifyDaemon.h"
-
-
-ANotifyDaemon* dae = NULL;
-
-void sigint_handler(int sig){
-  /*try{
-    if(dae != NULL) {
-      dae->restart();
-    }
-  }catch(ANotifyException e){
-    cout << e.GetMessage() << endl;
-    } */ 
-}
 
 int main(){
   pid_t pid;
@@ -28,22 +14,20 @@ int main(){
   pid = fork();
 
   if(pid > 0){
-    exit(EXIT_SUCCESS);
+    
   }
   else if(pid == 0){
     try{
-      signal(SIGTERM, sigint_handler);
-
       ANotifyDaemon dae;
-      
-      dae.start();
-      sleep(1);
-      dae.waitForClients();
-      //dae.start();
 
-      while(dae.isAlive()){
-	//dae.printLog(str);
-	sleep(1);
+      try{
+	dae.initDaemon();
+	//dae.forkInit();
+      }catch(ANotifyException e1){      
+	std::cout << e1.GetMessage() << std::endl;
+	msg = e1.GetMessage();
+	//dae.printLog(msg);
+	dae.kill();
       }
     }catch(ANotifyException e2){
       std::cout << e2.GetMessage() << std::endl;
@@ -56,6 +40,6 @@ int main(){
     exit(EXIT_FAILURE);
   }
   
-  //exit(EXIT_SUCCESS);
-  return 0;
+  exit(EXIT_SUCCESS);
+  //return 0;
 }

@@ -103,24 +103,28 @@ string XMLGeneration::MIToBI(ANotifyEvent ane) {
   return oss.str();
 }
 
-string XMLGeneration::BIToMR(AQuery* ipquery, int searchID) {
+// comme explique dans le code des ANotify la convention i/o (input/output) p/r(pointer/ref) nom_variable 
+// permet de vite analyser la le fonctionnement de la fonction. ipquery voulait dire input pointer query ici aq devrait etre nomme
+// iraq par exemple...
+string XMLGeneration::BIToMR(AQuery& aq, int searchID) {
   ostringstream oss;
-  if(ipquery == NULL || !ipquery->hasNewResult()) return oss.str();
-  vector<AnyFile>* AQResult = ipquery->results();
+  if(ipquery == NULL || !aq.hasNewResult()) return oss.str();
+  vector<AnyFile>* AQResult = aq.results();
   AnyFile::iterator tmpIt = AQResult->begin();
   oss << "<RESULT id=" << searchID << ">";
-  for (int i(0); it != AQResult->end() && i < AQResult->size(); it++, ++i) {
-    AnyFile f = *it;
-    oss << "<FILE>";
-    oss << "<NAME>" << f.getName() << "</NAME>";
-    oss << "<PATH>" << f.getPath() << "</PATH>";
-    oss << "<PERM>" << f.getMime() << "</PERM">;
-    oss << "<SIZE>" << f.getDiskSize() << "</SIZE>";
-    if (f.getLastModif() != NULL) {
-      oss << "<LASTMODIF>" << f.getLastModif() << "</LASTMODIF>";
+  if(AQResult.hasNewResult()) {
+    for (int i(0); i < AQResult.size(); ++i) {
+      oss << "<FILE>";
+      oss << "<NAME>" << aq.AQResult[i].getName() << "</NAME>";
+      oss << "<PATH>" << aq.AQResult[i].getPath() << "</PATH>";
+      oss << "<PERM>" << aq.AQResult[i].getMime() << "</PERM">;
+      oss << "<SIZE>" << aq.AQResult[i].getDiskSize() << "</SIZE>";
+      if (aq.AQResult[i].getLastModif() != NULL) {
+	oss << "<LASTMODIF>" << aq.AQResult[i].getLastModif() << "</LASTMODIF>";
+      }
+      oss << "<PROPRIO>" << aq.AQResult[i].getUserID() << "</PROPRIO>";
+      oss << "</FILE>";
     }
-    oss << "<PROPRIO>" << f.getUserID() << "</PROPRIO>";
-    oss << "</FILE>";
   }
   oss << "</RESULT>";
   return oss.str();

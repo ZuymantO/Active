@@ -62,24 +62,28 @@ class File {
 };
 
 // Classe representant la modification
-class Modification : public File {
+class Modification {
  private :
+  File* file;
   string newpath;
  public :
   Modification(string pa, string d, int t, string pr, string g, string p, list<Indexage> i, string n);
   ~Modification();
 
+  File* GetFile() const;
   string GetNewpath() const;
 };
 
 // Classe representant la creation
-class Creation : public File {
+class Creation {
  private :
+  File* file;
   string format;
  public :
   Creation(string pa, string d, int t, string pr, string g, string p, list<Indexage> i, string f);
   ~Creation();
 
+  File* GetFile() const;
   string GetFormat() const;
 };
 

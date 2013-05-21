@@ -24,7 +24,8 @@ class XMLGeneration {
    * Envoie d'informations de la base d'indexation au moteur de recherche
    * (donc, normalement le resultat de la recherche)
    */
-  std::string BIToMR(AQuery* ipquery, int searchID);
+
+  std::string BIToMR(AQuery& iraquery, int searchID);
   /*
    * Envoie d'informations du moteur de recherche vers la base d'indexation
    * (donc, normalement une recherche)

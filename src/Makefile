@@ -1,7 +1,6 @@
 
 #Les regles de construction pour chaque executable
 all:
-	cd tinyxml_test && make all
 	cd daemon && make all && cd ..
 	cd bdd && make all && cd ..
 	cd ui && make all && cd ..

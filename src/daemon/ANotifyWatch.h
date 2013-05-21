@@ -46,12 +46,12 @@ private:
   
 public:
   ANotifyWatch(const std::string& iPath, ANotifyEvent* ipAEvt, bool iisDir = false, bool iwEnabled = true) throw (ANotifyException)
-  : m_path(iPath), m_pAEvent(ipAEvt), m_wDescr((ANMask) -1), m_wEnabled(iwEnabled), m_pANotify(NULL), m_isDir(iisDir)  {
+  : m_path(iPath), m_pAEvent(ipAEvt), m_wDescr((FD) -1), m_wEnabled(iwEnabled), m_pANotify(NULL), m_isDir(iisDir)  {
     IN_LOCK_INIT
     initWatch();
   }
   ANotifyWatch(const std::string& iPath, ANotifyEvent* ipAEvt, ANotify* ipANotify = NULL, bool iisDir = false, bool iwEnabled = true)  throw (ANotifyException)
-  : m_path(iPath), m_pAEvent(ipAEvt), m_wDescr((ANMask) -1), m_wEnabled(iwEnabled), m_pANotify(ipANotify), m_isDir(iisDir) {
+  : m_path(iPath), m_pAEvent(ipAEvt), m_wDescr((FD) -1), m_wEnabled(iwEnabled), m_pANotify(ipANotify), m_isDir(iisDir) {
     IN_LOCK_INIT
     initWatch();
   }  
@@ -146,7 +146,7 @@ public:
     setMonitor(&irANot);
   }
   void setDescriptor(FD iFD){
-    m_wDescr =  iFD;
+    m_wDescr = iFD;
   }
   void setPath(std::string *str){
     m_path = std::string(str->c_str());
