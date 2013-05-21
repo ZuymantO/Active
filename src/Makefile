@@ -15,5 +15,15 @@ $(MAIN) : XMLParser.o Search.o Result.o Indexation.o MyDate.o Utils.o tinyxml.o 
 %.o : %.cpp 
 	$(CC) -o $@ -c $< $(CFLAGS)
 
+all_obj:
+	cd common/ && make && cd ..
+	cd bdd/ && make && cd ..
+	cd daemon/ && make && cd ..
+
 clean :
 	rm -rf *.o *.gch $(MAIN) *~
+
+clean_all: clean
+	cd common/ && make clean && cd ..
+	cd bdd/ && make && cd ..
+	cd daemon/ && make && cd ..

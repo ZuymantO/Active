@@ -3,7 +3,8 @@
 all:
 	mkdir -p ./bin
 	mkdir -p ./obj
-	cd src && make all && cd ..
+#	cd src && make all && cd ..
+	cd src && make all_obj && cd ..
 
 #Mettre ici toutes les regles de clean pour chaque module
 clean:
