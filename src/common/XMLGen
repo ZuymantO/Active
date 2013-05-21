@@ -11,32 +11,19 @@
 #include "AQuery.h"
 
 using namespace std;
+using namespace acommon;
 
 string XMLGeneration::MIToBI(ANotifyEvent ane) {
   ostringstream oss;
   string fileName;
   struct stat fileInfo;
   oss << EN_TETE << "<INDEXATION>";
-  if (ane.isRennomage()) {
-    oss << "<RENOMMAGES id=" << id << "><FICHIERRENOMME>";
-    /*
-     * TODO : ajouter le nom du oldpath
-     * oss << oldpath;
-     */
-    oss << "<PATH>" << "oldpath" << "</PATH>";
-    /* 
-     * TODO : ajouter le nom du newpath
-     * oss << newpath;
-     */
-    oss << "<NEWPATH>" << "new_path" << "</NEWPATH>";
-    oss << "</FICHIERRENOMME></RENOMMAGES>";
-    id++;
-  }
-  else if (ane.isModification()) {
+  
+  if (ane.isType(INOTIFY_MODIFY)) {
     fileName = ane.getName();
-    if (stat(fileName, &fileInfo) == 0) {
+    if (stat(fileName.c_str(), &fileInfo) == 0) {
       oss << "<MODIFICATIONS id=" << id << "><FICHIERMOFIFIE>";
-      oss << "<PATH>" << ane.getName() << "</PATH>";
+      oss << "<PATH>" << fileName << "</PATH>";
       oss << "<DATEMODIFICATION>" << ctime(&fileInfo.st_mtime) << "</DATEMODIFICATION>";
       oss << "<TAILLE>" << fileInfo.st_size << "</TAILLE>";
       oss << "<PROPRIETAIRE>" << fileInfo.st_uid << "</PROPRIETAIRE>";
@@ -47,7 +34,7 @@ string XMLGeneration::MIToBI(ANotifyEvent ane) {
        *        qui doit renvoyer un string
        */
       oss << "<INDEXAGE>" << "mots_a_indexer(fonction)" <<"</INDEXAGE>";
-      oss << "<NEWPATH>" << ane.getName() << "</NEWPATH>";
+      oss << "<NEWPATH>" << fileName << "</NEWPATH>";
       oss << "</FICHIERMODIFIE></MODIFICATIONS>";
       id++;
     }
@@ -56,27 +43,18 @@ string XMLGeneration::MIToBI(ANotifyEvent ane) {
       return "";
     }
   }
-  else if (ane.isSuppression()) {
+  else if (ane.isType(ANOTIFY_DELETE)) {
     oss << "<SUPPRESSIONS id=" << id << "><FICHIERSUPPRIME>";
     oss << "<FICHIERSUPPRIME>" << ane.getName() << "</FICHIERSUPPRIME>";
     oss << "</FICHIERSUPPRIME></SUPPRESSIONS>";
     id++;
   }
-  else if (ane.isCreation()) {
+  else if (ane.isType(INOTIFY_CREATE)) {
     fileName = ane.getName();
     if (stat(fileName, &fileInfo) == 0) {
       oss << "<CREATIONS id=" << id << "><FICHIERCREE>";
       oss << "<PATH>" << fileName << "</PATH>";
-      /*
-       * TODO : recuperation du format :
-       *        - soit sur ane par ane.getFormat()
-       *        - soit sur le nom du fichier
-       */
-      oss << "<format>" << ane.getFormat() << "</format>";
-      /*
-       * Liberte : la date de creation d'un fichier est identique a sa date de
-       * derniere modification au moment de sa creation
-       */
+      oss << "<format>" << GetExtension(filename) << "</format>";
       oss << "<DATECREATION>" << ctime(&fileInfo.st_mtime) << "</DATECREATION>";
       oss << "<TAILLE>" << fileInfo.st_size << "</TAILLE>";
       oss << "<PROPRIETAIRE>" << fileInfo.st_uid << "</PROPRIETAIRE>";
@@ -91,7 +69,7 @@ string XMLGeneration::MIToBI(ANotifyEvent ane) {
       id++;
     }
     else {
-      // Le fichier n'existe pas
+      // cas non pris en compte
       return "";
     }
   }

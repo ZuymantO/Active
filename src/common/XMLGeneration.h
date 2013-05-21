@@ -6,10 +6,10 @@
 #include <string>
 #include <vector>
 
+#include "../daemon/ANotifyMask.h"
 #include "../daemon/ANotifyEvent.h"
 #include "AnyFile.h"
 #include "AQuery.h"
-
 
 namespace acommon {
 
@@ -37,7 +37,6 @@ class XMLGeneration {
   std::string MRToBI(MR mr, int searchID);
   */
 };
-
 
 }
 #endif

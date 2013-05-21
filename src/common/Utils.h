@@ -10,6 +10,7 @@ class Utils {
  public :
   string IntToString(int i);
   int StringToInt(string s);
+  string GetExtension(string filename);
 };
 
 #endif
