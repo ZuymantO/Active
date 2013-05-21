@@ -11,14 +11,16 @@
 
 #include <iostream>
 #include "sqlite3.h"
-#include "SQLite3DBException.h"
 #include "common.h"
+#include "SQLite3DBException.h"
 #include "SQLite3DB.h"
 #include <map>
 #include <vector>
+#include "../common/AQuery.h"
 namespace asqlite {
 
 using namespace std;
+using namespace acommon;
 
 class SQLQuery {  
 private:
@@ -75,9 +77,20 @@ public:
     initSQLQuery();
     dataBase = ipdb;
   };
+
+  SQLQuery(acommon::AQueryType iaqtype, acommon::AQueryObject iaqobj){
+    initSQLQuery();
+    aqt = iaqtype;
+    aobj = iaqobj;
+  }
   
   ~SQLQuery(){};
 
+  void alignWith(AQuery& iraq){
+    aqt = iraq.queryType();
+    aobj = iraq.queryObject();
+  }
+  
   string getQuery(){
     return query;
   };
@@ -100,6 +113,7 @@ public:
       throw SQLite3DBException(str);
     }
     reset();
+
     if(sqlite3_prepare_v2(dataBase->getSQLDB(), query.c_str() , -1, &stmt, &rTail) != SQLITE_OK){
       string str = "Unable to prepare the query ";
       str.append(sqlite3_errmsg(dataBase->getSQLDB()));
@@ -138,7 +152,6 @@ public:
       throw SQLite3DBException(str);;
     }
     if(aqt != acommon::SELECT){
-      
     if(sqlite3_step(stmt) != SQLITE_DONE)
       fprintf(stderr, "Impossible d'effectuer la requete %s : %s \n", query.c_str(), sqlite3_errmsg(dataBase->getSQLDB()));
     if(sqlite3_finalize(stmt) != SQLITE_OK)
