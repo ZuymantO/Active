@@ -11,6 +11,8 @@
 
 unsing namespace std;
 
+namespace acommon{
+
 int AnyFile::GetIdData() const {
   return this->idData;
 }
@@ -77,4 +79,6 @@ time_t* AnyFile::GetCreatedOn() const {
 
 time_t* AnyFile::GetInsertDate() const {
   return this->insert_date;
+}
+
 }
