@@ -80,6 +80,7 @@ namespace acommon { // espace de nom des fichiers communs
   AQuery(AQueryType ietype, AQueryObject ieobj): aqt(ietype), aobj(ieobj){
       AQResult = NULL;
       hasResult = NULL;
+      id = "";
     };
     void setId(string s);
     void addFile(AnyFile* ipnewFile);
@@ -97,6 +98,8 @@ namespace acommon { // espace de nom des fichiers communs
     void sortByCreationDate(bool iasc);
     void sortByAccesDate(bool iasc);
     void sortByModificationDate(bool iasc);
+    
+    string GetId();
   
     vector<AnyFile>* results();
     AQueryObject queryObject(){ return aobj; };
