@@ -15,19 +15,24 @@
 #include <pthread.h>
 #include <sstream>
 
+
 #include "ANotifyDaemon.h"
 #include "ANotify.h"
 #include "ANotifyException.h"
+#include "../common/XMLGeneration.h"
+
+using namespace acommon;
 
 const std::string ANotifyDaemon::propsPath = "daemon.prop";
 const std::string ANotifyDaemon::logPath = "daemon.log";
 
 ANotifyDaemon::ANotifyDaemon() throw (ANotifyException) :
-  sock(-1), propsFd(-1), logFd(-1), running(false), notify(NULL), notifyEvent(NULL),
+  sock(-1), xml_sock(-1), propsFd(-1), logFd(-1), running(false), notify(NULL), notifyEvent(NULL),
   /* TODO: decommenter pour la partie finale */
   watchPath("/home/")
 {
   this->alive = true;
+  sleep(1);
   initDaemon();
 }
 
@@ -100,18 +105,59 @@ void ANotifyDaemon::initDaemon() throw (ANotifyException){
   }
   
   closePropsFile(this->propsFd);
+
+  this->xml_sock = socket(AF_INET, SOCK_STREAM, 0);
+  
+  if(this->xml_sock == -1){
+    deletePropsFile();
+    close(this->sock);
+
+    throw ANotifyException("Failed to open xml_socket", errno, this);
+  }
+
+  struct hostent* host = gethostbyname("localhost");
+    
+  if(host == NULL){
+    deletePropsFile();
+    close(this->sock);
+    close(this->xml_sock);
+
+    throw ANotifyException("No such host: localhost", errno, this);
+  }
+  
+  memcpy(&(this->xml_addr.sin_addr.s_addr), host->h_addr_list[0], host->h_length);
+  
+  port = -1;
+
+  for(i=40000; i<=40002; i++){
+
+    this->xml_addr.sin_family = AF_INET;
+    this->xml_addr.sin_port = htons(port);
+    
+    if(connect(this->xml_sock, (struct sockaddr*)(&this->xml_addr), sizeof(this->xml_addr)) != -1){
+      port = i;
+      break;
+    }
+  }
+
+  if(port == -1){
+    deletePropsFile();
+    close(this->sock);
+    close(this->xml_sock);
+    
+    throw ANotifyException("Connection failed", errno, this);
+  }
   
   this->logFd = openLogFile();
   
   if(this->logFd == -1){
-    closePropsFile(this->propsFd);
+    deletePropsFile();
     close(this->sock);
+    close(this->xml_sock);
 
     throw ANotifyException("Cannot open log file", errno, this);
   }
-  
-  //this->addr = &addr;
-  
+    
   this->notify = new ANotify();
   this->mask = ANOTIFY_RENAME | ANOTIFY_WRITE | ANOTIFY_DELETE | ANOTIFY_ATTRIBUT;
   this->notifyEvent = new ANotifyEvent(&this->sharedEvent, this->mask);
@@ -119,6 +165,7 @@ void ANotifyDaemon::initDaemon() throw (ANotifyException){
   pthread_mutex_init(&this->runningAccess, NULL);
   pthread_mutex_init(&this->logLock, NULL);  
   pthread_mutex_init(&this->aliveAccess, NULL);
+  pthread_mutex_init(&this->xmlSockLock, NULL);
 }
 
 bool ANotifyDaemon::retrieveBoolResult(void* (f)(void*), void* arg){
@@ -143,7 +190,6 @@ bool ANotifyDaemon::start(std::string& path){
   arg.second = path;
 
   return (pthread_create(&thread, NULL, startT, (void*)&arg) == 0);
-
   //return true;
   //return retrieveBoolResult(startT, (void*)(&arg));
 }
@@ -274,18 +320,45 @@ bool ANotifyDaemon::addWatch(std::string& path){
 void* ANotifyDaemon::run(void* arg){
   ANotifyDaemon* dae = (ANotifyDaemon*)arg;
   ANotifyEvent pEvt;
-  std::string str, tmp = "[EVENT] ";
+  std::string str, tmp = "[EVENT] ", xmlStr;
+  pthread_t xmlThread;
+  //XMLGeneration xmlGen;
 
   while(dae->isRunning()){
     if(dae->notify->getEvent(pEvt)){
       //traiter l'event
       pEvt.dumpTypes(str);
       str = tmp + str + pEvt.getName();
-      dae->printLog(str);
+      dae->printLog(str);      
+      
+      /* TODO: remplacer par la bonne fonction */
+      xmlStr = XMLGeneration::MIToBI(pEvt);
+      //xmlStr = xmlGen.MIToBI(pEvt);
+
+      std::pair<ANotifyDaemon*, std::string> daemon_xml;
+
+      daemon_xml.first = dae;
+      daemon_xml.second = xmlStr;
+
+      pthread_create(&xmlThread, NULL, sendXmlContent, (void*)&daemon_xml);
     }
 
     sleep(1);
   }
+}
+
+void* ANotifyDaemon::sendXmlContent(void* arg){
+  if(arg != NULL){
+    std::pair<ANotifyDaemon*, std::string>* daemon_xml = (std::pair<ANotifyDaemon*, std::string>*)arg;
+    ANotifyDaemon* dae = daemon_xml->first;
+    std::string xmlContent = daemon_xml->second;
+    
+    pthread_mutex_lock(&dae->xmlSockLock);
+
+    send(dae->xml_sock, xmlContent.c_str(), xmlContent.length(), 0);
+
+    pthread_mutex_unlock(&dae->xmlSockLock);
+  }					 
 }
 
 void* ANotifyDaemon::waitForEvents(void* arg){
@@ -433,6 +506,7 @@ bool ANotifyDaemon::kill(){
   this->closeLogFile();
   this->deleteLogFile();
   
+  close(this->xml_sock);
   close(this->sock); 
 
   if(this->notifyEvent != NULL){
@@ -452,6 +526,7 @@ bool ANotifyDaemon::kill(){
   pthread_mutex_destroy(&this->runningAccess);
   pthread_mutex_destroy(&this->logLock);
   pthread_mutex_destroy(&this->aliveAccess);
+  pthread_mutex_destroy(&this->xmlSockLock);
 
   this->setAlive(false);
 

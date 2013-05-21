@@ -5,18 +5,26 @@ FLAGS=
 OBJ=../../obj
 EXE=active
 
+CMM=../common
+BDD_PATH=../bdd
+#COMMONS=$(CMM)/AQuery.o $(CMM)/AnyFile.o $(CMM)/AudioFile.o $(CMM)/ObjectFile.o $(CMM)/ArchiveFile.o $(CMM)/VideoFile.o $(CMM)/ImageFile.o $(CMM)/TextFile.o $(CMM)
+
+#COMMONS=$(CMM)/AnyFile.o $(CMM)/ImageFile.o $(CMM)/Result.o $(CMM)/tinyxmlerror.o $(CMM)/VideoFile.o $(CMM)/AQuery.o $(CMM)/Indexation.o $(CMM)/Search.o $(CMM)/tinyxml.o $(CMM)/XMLGeneration.o $(CMM)/ArchiveFile.o $(CMM)/MyDate.o $(CMM)/TextFile.o $(CMM)/tinyxmlparser.o $(CMM)/XMLParser.o $(CMM)/AudioFile.o $(CMM)/ObjectFile.o $(CMM)/tinystr.o $(CMM)/Utils.o
+COMMONS=$(CMM)/AnyFile.o $(CMM)/ImageFile.o $(CMM)/Result.o $(CMM)/tinyxmlerror.o $(CMM)/VideoFile.o $(CMM)/AQuery.o $(CMM)/Indexation.o $(CMM)/Search.o $(CMM)/tinyxml.o $(CMM)/XMLGeneration.o $(CMM)/ArchiveFile.o $(CMM)/MyDate.o $(CMM)/TextFile.o $(CMM)/tinyxmlparser.o $(CMM)/XMLParser.o $(CMM)/AudioFile.o $(CMM)/ObjectFile.o $(CMM)/tinystr.o $(CMM)/Utils.o
+
 OBJ=active
 GOALS=active example client
 
-all: active client example	
+
+all: xml active client example	
 	cp active ../../bin
 	cp client ../../bin
 	cp example ../../bin
-active: daemon.o main.o watch.o exception.o event.o core.o mask.o
-	$(CC) $(FLAGS) -pthread $^ -o $(EXE)
-#	cp $(EXE) ../../bin/
 
-client: daemon.o watch.o exception.o event.o core.o mask.o client.o
+active: daemon.o main.o watch.o exception.o event.o core.o mask.o $(COMMONS)
+	$(CC) $(FLAGS) -pthread $^ -o $(EXE)
+
+client: daemon.o watch.o exception.o event.o core.o mask.o client.o $(COMMONS)
 	$(CC) $(FLAGS) -pthread $^ -o client
 
 client.o: ANotifyClient.cpp ANotifyDaemon.h
@@ -31,7 +39,7 @@ example.o: ANotifyExample.cpp
 main.o: Main.cpp
 	$(CC) $(FLAGS) -c Main.cpp -o main.o
 
-daemon.o: ANotifyDaemon.h ANotifyDaemon.cpp
+daemon.o: ANotifyDaemon.h ANotifyDaemon.cpp ../common/XMLGeneration.h 
 	$(CC) $(FLAGS) -c ANotifyDaemon.cpp -o daemon.o
 
 watch.o: ANotifyWatch.h ANotifyWatch.cpp
@@ -49,6 +57,11 @@ mask.o: ANotifyMask.h ANotifyMask.cpp
 core.o: ANotify.h ANotify.cpp ANotifyUtils.h
 #	$(CC) $(FLAGS) -c ANotify.cpp -D__APPLE__ -o core.o
 	$(CC) $(FLAGS) -c ANotify.cpp -o core.o
+
+xml:
+	cd $(CMM)/ && make
+#../common/XMLGeneration.h ../common/XMLGeneration.cpp
+#	$(CC) $(FLAGS) -c ../common/XMLGeneration.cpp -o xml.o
 
 clean:
 	rm -rf *.o *~ *# $(GOALS)

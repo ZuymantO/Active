@@ -9,9 +9,14 @@
 #include "XMLGeneration.h"
 #include "AnyFile.h"
 #include "AQuery.h"
+#include "../daemon/ANotifyMask.h"
+#include "../daemon/ANotifyEvent.h"
 
 using namespace std;
 using namespace acommon;
+
+const std::string XMLGeneration::EN_TETE("<?XML version=\"1.0\" encoding=\"UTF-8\"?>");
+int XMLGeneration::id = 0;
 
 string XMLGeneration::MIToBI(ANotifyEvent ane) {
   ostringstream oss;
@@ -19,7 +24,7 @@ string XMLGeneration::MIToBI(ANotifyEvent ane) {
   struct stat fileInfo;
   oss << EN_TETE << "<INDEXATION>";
   
-  if (ane.isType(INOTIFY_MODIFY)) {
+  if (ane.isType(ANOTIFY_WRITE)) {
     fileName = ane.getName();
     if (stat(fileName.c_str(), &fileInfo) == 0) {
       oss << "<MODIFICATIONS id=" << id << "><FICHIERMOFIFIE>";
@@ -49,7 +54,7 @@ string XMLGeneration::MIToBI(ANotifyEvent ane) {
     oss << "</FICHIERSUPPRIME></SUPPRESSIONS>";
     id++;
   }
-  else if (ane.isType(INOTIFY_CREATE)) {
+  /*else if (ane.isType(ANOTIFY_CREATE)) {
     fileName = ane.getName();
     if (stat(fileName.c_str(), &fileInfo) == 0) {
       oss << "<CREATIONS id=" << id << "><FICHIERCREE>";
@@ -59,20 +64,20 @@ string XMLGeneration::MIToBI(ANotifyEvent ane) {
       oss << "<TAILLE>" << fileInfo.st_size << "</TAILLE>";
       oss << "<PROPRIETAIRE>" << fileInfo.st_uid << "</PROPRIETAIRE>";
       oss << "<GROUPE>" << fileInfo.st_gid << "</GROUPE>";
-      oss << "<PERMISSIONS>" << fileInfo.st_mode << "</PERMISSIONS>";
+      oss << "<PERMISSIONS>" << fileInfo.st_mode << "</PERMISSIONS>";*/
       /*
        * TODO : ajouter les mots d'indexages par appel de fonction
        *        qui doit renvoyer un string
        */
-      oss << "<INDEXAGE>" << "mots_a_indexer(fonction)" << "</INDEXAGE>";
+      /*oss << "<INDEXAGE>" << "mots_a_indexer(fonction)" << "</INDEXAGE>";
       oss << "</FICHIERCREE></CREATIONS>";
       id++;
     }
     else {
       // cas non pris en compte
       return "";
-    }
-  }
+      }
+      }*/
   else {
     // ces cas ne sont pas pris en compte par la dtd
     return "";

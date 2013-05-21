@@ -16,8 +16,9 @@ class ANotifyDaemon {
   ANMask mask;
 
   int sock;
-  //struct sockaddr_in* addr;
+  int xml_sock;
   struct sockaddr_in addr;
+  struct sockaddr_in xml_addr;
 
   int propsFd;
   int logFd;
@@ -27,6 +28,7 @@ class ANotifyDaemon {
   mutable pthread_mutex_t runningAccess;
   mutable pthread_mutex_t logLock;
   mutable pthread_mutex_t aliveAccess;
+  mutable pthread_mutex_t xmlSockLock;
 
   /* Racine du chemin en cours de surveillance */
   std::string watchPath;
@@ -55,7 +57,6 @@ class ANotifyDaemon {
 
   /* ------- FONCTIONS D'INITIALISATION ------- */
 
-  //void forkInit() throw (ANotifyException);
   void initDaemon() throw (ANotifyException);
 
   /* ------- FONCTIONS DE CONTROLE ------- */
@@ -136,6 +137,10 @@ class ANotifyDaemon {
   static void* waitForClients(void* dae);
   /* Fonction de communication avec le client */
   static void* communicate(void* daemon_socketfd_pair);
+
+  /* Envoie un message au format XML */
+  static void* sendXmlContent(void* daemon_xml_pair);
+  
 
   /* 
      Retire la surveillance du fichier a l'emplacement path
