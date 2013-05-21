@@ -2,7 +2,7 @@
 CC=g++
 C=gcc
 #FLAGS=-W -Wall -ansi -pedantic
-FLAGS=-W -Wall -ansi -pedantic
+FLAGS=-W -Wall
 OBJ=../../obj
 EXE=activebi
 SRC=SQLite3DB.cpp SQLQuery.cpp SQLite3DBException.cpp ActiveBI.cpp
@@ -10,7 +10,7 @@ SRC=SQLite3DB.cpp SQLQuery.cpp SQLite3DBException.cpp ActiveBI.cpp
 all: make_common $(EXE)
 
 make_common: common.h
-	make ../common/Makefile
+	cd ../common/ ; make
 	cd ../bdd/
 
 activebi: sqlite3.o SQLite3DBException.o SQLite3DB.o SQLQuery.o ActiveBI.o 
