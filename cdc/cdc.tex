@@ -1,0 +1,465 @@
+\documentclass[a4paper,12pt]{report}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[francais]{babel}
+
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{caption}
+
+\usepackage{array}
+\usepackage{tabularx}
+
+\usepackage{titlesec}
+\usepackage{titletoc}
+\usepackage{fancyhdr}
+\usepackage{titling}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\usepackage{listings}
+\lstset{breaklines=true}
+\lstset{language=XML}
+
+\usepackage[pdftex=true]{hyperref}
+
+\usepackage[babel=true]{csquotes}
+
+\titleformat{\chapter}[hang]{\bf\huge}{\thechapter}{1pc}{}
+\titlespacing{\chapter}{0pt}{-20pt}{20pt}
+
+\renewcommand{\baselinestretch}{1.2}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{CDC Projet Génie logiciel 2012-2013}
+\fancyfoot[L]{Université Paris Diderot Paris 7}
+\fancyfoot[R]{\thepage}
+\renewcommand{\footrulewidth}{0pt}
+\renewcommand{\headrulewidth}{0pt}
+
+\makeatletter
+\let\ps@plain=\ps@fancy
+\makeatother
+
+\usepackage[xindy,nonumberlist,style=listgroup]{glossaries}
+\makeglossaries
+\include{glossaire}
+
+\usepackage{makeidx}
+\makeindex
+
+\begin{document}
+
+\begin{titlepage}
+
+\begin{flushright}
+\includegraphics[scale=0.75]{"images/logo_p7"}
+\end{flushright}
+
+\fontfamily{phv}\selectfont
+\vspace*{\stretch{0.5}}
+\begin{center}\Huge\fontfamily{pag}\selectfont
+Active
+\end{center}
+
+\vspace*{\stretch{2}}
+\begin{tabularx}{\linewidth}{lXr}
+Auteurs && Enseignants\\
+NDJANDA MBIADA Jacques Charles (chef de projet) && ZACCHIROLI Stefano\\
+LEBEAU Christophe && KESNER Delia\\
+JOOSSEN Matthieu && SIGHIREANU Mihaela
+\end{tabularx}
+
+\end{titlepage}
+
+\chapter*{Préface}
+\section*{Document}
+Ce document a pour but de décrire les besoins, les exigences, les contraintes et les limites que nous allons devoir respecter durant la réalisation de notre projet.
+
+Il résume les tâches que le programme doit pouvoir effectuer.
+
+Il est composé de d'une première partie ouverte à tout lecteur et d'une partie technique qui explique les spécificités du produit et est plutôt destinée à un public averti.
+
+Il sert également de planning pour délimiter le temps nécessaire à la réalisation de chaque étape du projet et ce dans le but de le terminer à temps.
+
+\section*{Versions}
+Nous souhaitons présenter ci-dessous l'intérêt de chaque version de ce présent document. Les modifications et ajouts importantes.
+
+\subsection*{Version 2}
+Finalisation de la spécification en vu du début de développement.
+
+Définition du langage de requête et liste des charges.
+
+\subsection*{Version 2 : Beta $\leftarrow$ (HEAD)}
+Définition du langage de requête et support de définition. Choix final de la structure global
+
+Des langages et technologies utilisés.
+
+\subsection*{Version 2 : Alpha}
+Restructuration du document. Avec respect du modèle donné en cours
+
+\subsection*{Version 1}
+Brouillon complet avec éléments de spécification et de la structure global du projet
+
+\glsaddall
+\printglossaries
+
+\tableofcontents
+
+\chapter{Introduction}
+
+\section{Les besoins}
+Le progrès technologique est indéniable à notre époque, notamment en termes de  capacité de stockage des ordinateurs personnels. L'un des enjeux des systèmes pour PC est la gestion des données utilisateur\index{Utilisateur}, à savoir permettre à ces derniers d'accéder rapidement à une information datant de plusieurs semaines, mois ou années sans y perdre des heures de recherche.
+
+La capacité de nos disques durs peut atteindre aujourd'hui des milliers de gigaoctets (Go) et nous pouvons donc stocker des milliards de \glspl{fichier}\index{Fichier} sur un ordinateur.
+
+Un gestionnaire de système de \glspl{fichier}\index{Fichier} est un programme permettant d'accéder à ces données, d'y naviguer et de visualiser leur relation (quel \gls{fichier}\index{Fichier} appartient à quel dossier\index{Dossier} par exemple). Ce programme n'a pas pour rôle de trier mais de rechercher les \glspl{fichier}\index{Fichier} et c'est pourquoi, en l'état, l'utilisateur\index{Utilisateur} devra trier son disque dur à la main, si c'est ce qu'il souhaite. Bien que la plupart des systèmes d'exploitation\index{Syst\`{e}me d'exploitation} répandus disposent, en plus du gestionnaire de système de \glspl{fichier}\index{Fichier}, d'un programme d'indexation\index{Indexation}, nous souhaitons écrire un programme alternatif au programme d'indexation\index{Indexation} natif de Linux\index{Linux} / Unix\index{Unix} (nous n'envisageons pas, du moins dans un premier temps, de développer notre produit pour les systèmes d'exploitation Windows\index{Windows}) et pourquoi ne pas le surpasser sur le plan technique et esthétique.
+
+La réalisation du projet ne doit nécessiter aucun fond d'investissement, user uniquement de technologies open sources ou libres d'utilisation sans contraintes particulières sur le produit final. Pour palier à tout dépense supplémentaire (notamment sur le matériel de travail), nous avons à disposition des machines sous différentes plates-formes (NT, Linux\index{Linux}, Unix\index{Unix}) connectées à internet en très haut débit. Tout module\index{Module} permettant la réalisation du projet est inexistant et devra alors être développé par l'équipe en charge du projet.
+Le but est bien entendu de rendre le programme terminé, mais également de parvenir à produire ce dernier par une démarche professionnelle et de manière coopérative sous la direction d'un chef de projet.
+
+\section{Brève description}
+On peut distinguer facilement trois modules\index{Module} dans le projet :
+\begin{itemize}
+\item un moteur de recherche\index{Moteur de rechercher} : ce module\index{Module} est en charge notamment de la communication\index{Communication} avec l'utilisateur\index{Utilisateur}
+\item une base d'indexation\index{Base d'indexation} : ce module\index{Module} est en charge de la sauvegarde des données
+\item un moteur d'indexation\index{Moteur d'indexation} : ce module\index{Module} est en charge de la surveillance\index{Surveillance} des \glspl{fichier}\index{Fichier} sur une \gls{arborescence}\index{Arborescence} donnée.
+\end{itemize}
+
+\begin{center}
+\includegraphics[scale=0.45]{"images/fonctionnement_global_d'active"}
+\captionof{figure}{Fonctionnement global d'Active}
+\label{fonctionnement-global}
+\end{center}
+
+\section{Objectifs du produit}
+Le produit que nous souhaitons développer devra répondre à certaines normes de communications\index{Communication} définies avec d'autres projets afin d'établir une inter-opérabilité\index{Inter-op\'{e}rabilit\'{e}} au niveau des trois modules\index{Module} principaux, définis brièvement dans la section précédente.
+
+Il devra être opérationnel sur plusieurs architectures matériels afin qu'un utilisateur\index{Utilisateur} puisse l'utiliser sur plusieurs systèmes d'exploitation, sans avoir à changer ses habitudes.
+
+Le module\index{Module} \enquote{moteur d'indexation}\index{Moteur d'indexation} sera chargé d'analyser les modifications\index{Modification} sur l'\gls{arborescence}\index{Arborescence} surveillée et d'en informer le module\index{Module} \enquote{base d'indexation}\index{Base d'indexation} afin que celui-ci mette à jour les informations dans la base de données\index{Base de donn\'{e}es}, qui stocke les informations sur tous les \glspl{fichier}\index{Fichier} sauvegardés.
+
+L'\gls{arborescence}\index{Arborescence} surveillée doit être modifiable par l'utilisateur\index{Utilisateur}, ce qui entraîne, à chaque changement, une nouvelle indexation\index{Indexation} de la nouvelle \gls{arborescence}\index{Arborescence} à surveiller.
+
+Notre produit devra permettre à l'utilisateur\index{Utilisateur} de relancer une indexation\index{Indexation} complète à tout
+moment afin de s'assurer du bon contenu de la base de données\index{Base de donn\'{e}es}. Bien évidement, si le
+produit est utilisé sur un appareil portable, lors d'une telle demande le moteur d'indexation\index{Moteur d'indexation} devra prendre en compte l'autonomie restante afin de ne pas empêcher l'utilisateur\index{Utilisateur} de pouvoir utiliser son appareil. Dans ce cas un message de confirmation d'indexation\index{Indexation} immédiate devra être donné à l'utilisateur\index{Utilisateur}.
+
+Nous souhaitons que l'utilisateur\index{Utilisateur} puisse faire une recherche avec un maximum d'arguments
+afin de limiter au maximum les résultats, ce qui permet de retrouver plus facilement un \gls{fichier}\index{Fichier}.
+
+L'affichage des résultats devra offrir la possibilité d'être triés.
+
+Nous envisageons d'ajouter aux informations stockées les \glspl{metadonnee} propres aux fichiers\index{Fichier}, réguliers, audio et vidéo afin que l'utilisateur\index{Utilisateur} puisse faire une recherche sur celles-ci (par exemple sur l'auteur d'une chanson).
+
+\chapter{Charges d'utilisation}
+
+\section{Généralité}
+
+\subsection{Public visé}
+Nous visons toute personne utilisant un ordinateur sur lequel notre programme est compatible. Notre programme a pour but de permettre la recherche d'un \gls{fichier}\index{Fichier} à l'aide de mots clés. Des options de recherche sont également disponible tels qu'une fourchette de date, le type de \gls{fichier}\index{Fichier}. Les mots clé peuvent concerné le nom de \gls{fichier}\index{Fichier} et/ou le contenu. Ainsi, si l'utilisateur\index{Utilisateur} ne se souvient que de quelques informations sur un de ses \glspl{fichier}\index{Fichier}, dont un minimum de mots il peut utiliser notre programme afin de tenter de retrouver son \gls{fichier}\index{Fichier}. Dans le cas où notre programme trouve un résultat (un ou plusieurs \glspl{fichier}\index{Fichier}) ceux-ci seront affichés à l'utilisateur\index{Utilisateur}.
+
+\subsection{Pré-requis}
+Au niveau système, il sera demandé à l'utilisateur\index{Utilisateur} d'avoir une machine tournant sous Linux\index{Linux}, GNU\index{GNU} ou Unix\index{Unix}, d'avoir installer au préalable les librairies\index{Librairie} pour \enquote{sqlite3}\index{sqlite3} ainsi que celles de \enquote{tinyxml}\index{tinyxml} afin de pouvoir utiliser notre programme correctement.
+
+Une interface fonctionnant via \gls{console}\index{Console} sera proposée. Cette interface nécessite un minimum de notion d'utilisation des lignes de commandes. Toutefois, pour les autres utilisateurs\index{Utilisateur} l'utilisation avec interface graphique est équivalente en terme de recherche.
+
+\section{Spécifications système des utilisateurs}
+
+\subsection{Cas d'utilisation en recherche}
+Lorsque l'utilisateur\index{Utilisateur} lance le programme, il lui est demandé de donner un ou des mots clés et, si il le désire, de remplir des informations complémentaires (intervalles de temps pour la création\index{Cr\'{e}ation} et la modification\index{Modification}, type de \gls{fichier}\index{Fichier}).
+
+Le requête utilisateur\index{Utilisateur} est alors analysée afin de vérifier si elle est correcte. Si c'est le cas, elle est alors transformée en une ou plusieurs requête \gls{xml}\index{XML} (conformément à la \gls{dtd}\index{DTD}, p.~\pageref{dtd_bi_mr_search}) en fonction de la recherche demandée. Par exemple, la recherche sur un mot contenu dans le fichier\index{Fichier}, régulier, et sur un autre correspondant au nom du \gls{fichier}\index{Fichier} impliquera deux requêtes \gls{xml}\index{XML}. Il en va de même en cas de conjonction (\enquote{et}) et de disjonction (\enquote{ou}).
+
+Les requêtes \gls{xml}\index{XML}, contenant chacune un identifiant différent, sont alors envoyées à la base d'indexation\index{Base d'indexation} qui va les traiter et envoyer , pour chacune d'elle, une réponse sous forme \gls{xml}\index{XML} (conformément à la \gls{dtd}\index{DTD}, p.~\pageref{dtd_bi_mr_result}) contenant l'identifiant correspondant à la requête de recherche.
+
+Ces résultats vont être alors analysés et concaténés en fonction de la recherche initiale (par exemple, pour les conjonctions une intersection des résultats sera faite) puis affichés à l'utilisateur\index{Utilisateur}.
+
+Voir cas d'utilisation p.~\pageref{utilisation-recherche} et diagramme de séquence p.~\pageref{sequence-recherche}.
+
+\subsection{Cas d'utilisation en indexation}
+L'utilisateur\index{Utilisateur} peut à tout moment interagir avec le moteur d'indexation\index{Moteur d'indexation}. Les opérations permises sont :
+\begin{itemize}
+\item démarrer le \gls{daemon}\index{Daemon} (sur un répertoire précis ou non)
+\item redémarrer le \gls{daemon}\index{Daemon} (sur un répertoire précis ou non)
+\item arrêter le \gls{daemon}\index{Daemon}
+\item lister les \glspl{fichier}\index{Fichier} surveillés
+\item supprimer la surveillance\index{Surveillance} sur un \gls{fichier}\index{Fichier} (récursivement ou non)
+\item tuer le \gls{daemon}\index{Daemon}
+\end{itemize}
+
+La communication\index{Communication} s'effectue via \gls{socket}.
+
+Voir le diagramme de décision p.~\pageref{decision-mi}.
+
+\chapter{Architecture du système}
+
+\section{Vue d'ensemble}
+Le projet que nous développons a pour but d'être compatible avec des machines équipée d'un système d'exploitation Linux\index{Linux}, GNU\index{GNU} ou Unix\index{Unix} sur lequel les librairies\index{Librairie} \enquote{sqlite3}\index{sqlite3} et \enquote{tinyxml} auront été installée au préalable (car nécessaires pour le bon fonctionnement du programme).
+
+L'exécutable que nous produisons est issus de code C++.
+Pour son fonctionnement, notre programme crée un base de données\index{Base de donn\'{e}es} et vérifie l'existence de celle-ci à chaque lancement. Cette base de données\index{Base de donn\'{e}es} sert à stocker les informations sur les \glspl{fichier}\index{Fichier} surveillés.
+
+\section{Modularité}
+Le programme regroupe trois principaux modules\index{Module}, à savoir la base d'indexation\index{Base d'indexation} (voir diagramme de le classes p.~\pageref{diagramme_classes_bdd}), le moteur de recherche \index{Moteur de recherche} et le moteur d'indexation\index{Moteur d'indexation} (voir le diagramme de classes p.~\pageref{diagramme_classes_daemon}). Ces trois modules\index{Module} peuvent être remplacés par d'autres modules\index{Module} fonctionnant avec le même mode de fonctionnement (voir l'inter-opérabilité\index{Inter-op\'{e}rabilit\'{e}} p.~\pageref{inter_operabilite}). Un quatrième module\index{Module} vient se rajouter à ces derniers, le module\index{Module} \enquote{common} comportant les outils nécessaires à plusieurs des trois modules\index{Module} précédemment cités (voir les diagrammes de classes p.~\pageref{common}).
+
+\subsection{Moteur de recherche}
+Ce module\index{Module} est celui qui est lancé par l'utilisateur\index{Utilisateur} que ce soit avec un interaction avec la \gls{console}\index{Console} ou via l'interface graphique que nous proposons.
+
+Ce module\index{Module} est celui qui s'occupe de la partie recherche. Il gère l'interaction avec l'utilisateur\index{Utilisateur}. Il doit se connecter à la base d'indexation\index{Base d'indexation} à chaque nouvelle requête et fermer cette connexion lors de la réception des résultats. Il doit transformer la requête utilisateur\index{Utilisateur} en flux \gls{xml}\index{XML} afin de communiquer correctement avec la base d'indexation\index{Base d'indexation} et doit \enquote{\gls{parser}} le flux \gls{xml}\index{XML} donné  en retour par la base d'indexation\index{Base d'indexation}.
+
+Pour un requête utilisateur\index{Utilisateur} plusieurs requêtes \gls{xml}\index{XML} peuvent être crées. En effet, la \gls{dtd}\index{DTD} ne prend en compte ni la recherche simultanée d'un contenu et d'un nom de \gls{fichier}\index{Fichier} pour les mots clés ni les opérations sur les expressions (tel que les conjonctions, disjonction et plus généralement les \glspl{regexp}). Chacune des requêtes envoyées à la base d'indexation\index{Base d'indexation} le sera avec un identifiant qui sera réutilisé pour la réponde afin de pour analyser correctement les résultats.
+
+En fonction de la demande initiale de l'utilisateur\index{Utilisateur} les requêtes seront alors combinées afin que le résultat corresponde à la requête de l'utilisateur\index{Utilisateur}. Dans la fenêtre d'affichage des résultats, les données pourront être triées en fonction d'un critère (nom du \gls{fichier}\index{Fichier}, date de création\index{Cr\'{e}ation}, date de dernière modification\index{Modification}, type de \gls{fichier}\index{Fichier}, propriétaire, groupe).
+
+\subsection{Moteur d'indexation}
+Il s'agit là d'un programme qui doit être lancé lors du démarrage de la session de l'utilisateur\index{Utilisateur}, autrement dit un \gls{daemon}\index{Daemon}. Une connexion avec la base d'indexation\index{Base d'indexation} va alors être ouverte afin de permettre l'envoie de message.
+
+Via des outils de surveillance\index{Surveillance} du système il va être attentif à toutes les modifications\index{Modification} intervenant sur l'\gls{arborescence}\index{Arborescence} surveillée et en informer la base d'indexation\index{Base d'indexation}. Ces modifications\index{Modification} peuvent être une création\index{Cr\'{e}ation}, une suppression\index{Suppression} ou encore la modification\index{Modification} d'un \gls{fichier}\index{Fichier} (voir diagramme de décision p.~\pageref{decision-daemon}).
+
+Pour chaque modification\index{Modification}, un flux \gls{xml}\index{XML} (respectant la \gls{dtd}\index{DTD} correspondante, p.~\pageref{dtd_bi_mi}) va alors être envoyé à la base d'indexation\index{Base d'indexation}.
+
+L'utilisateur\index{Utilisateur} peut à tout moment entrer en contact avec le moteur d'indexation\index{Moteur d'indexation} pour lui demander de changer l'\gls{arborescence}\index{Arborescence} à surveiller, lancer une indexation\index{Indexation} sur l'\gls{arborescence}\index{Arborescence} actuellement sous surveillance\index{Surveillance}.
+
+En cas de changement d'\gls{arborescence}\index{Arborescence}, une demande de suppression\index{Suppression} de tous les \glspl{fichier}\index{Fichier} actuellement surveillés est alors demandée.
+Ce module\index{Module} doit prendre en compte l'autonomie restante lors d'une utilisation sur un ordinateur n'étant pas branché sur le secteur afin de ne pas vider l'autonomie de celui-ci. Le programme doit pouvoir alors se mettre en veille et signaler à l'utilisateur\index{Utilisateur} de relancer une indexation\index{Indexation} lorsque l'autonomie aura atteint un seuil raisonnable d'utilisation.
+
+\subsection{Base d'indexation}
+La base d'indexation\index{Base d'indexation} doit être lancée comme serveur\index{Serveur} de manière à pouvoir accepter deux clients\index{Client} : un moteur de recherche\index{Moteur de rechercher} et un moteur d'indexation\index{Moteur d'indexation}. Ces communications\index{Communication} doivent s'établir de la façon définie par l'inter-opérabilité\index{Inter-op\'{e}rabilit\'{e}} (voir p.~\pageref{inter_operabilite}).
+
+La base d'indexation\index{Base d'indexation} doit être capable de \gls{parser} le \gls{xml}\index{XML} de la \gls{dtd}\index{DTD}, définie p.~\pageref{dtd} et de générer les réponses de requêtes utilisateur\index{Utilisateur} en respectant scrupuleusement la \gls{dtd}\index{DTD}. L'opération a effectuer sur la base de données\index{Base de donn\'{e}es} est un \verb"SELECT" en fonction des arguments reçus.
+
+Les opérations possibles a effectuer lors de la réception d'un requête venant du moteur d'indexation\index{Moteur d'indexation} sont :
+\begin{itemize}
+\item nouvelle entrée lors de la création\index{Cr\'{e}ation} d'un \gls{fichier}\index{Fichier}, avec toutes les dépendances nécessaires, à l'aide de \verb"INSERT"
+\item mise à jours d'un champ pour une modification\index{Modification}, en utilisant \verb"UPDATE"
+\item suppression\index{Suppression} d'un champ pour une suppression\index{Suppression}, avec \verb"DELETE"
+\end{itemize}
+Pour ces trois cas, la modification\index{Modification} sur la base de donnée\index{Base de donn\'{e}es} doit se faire de manière complète, c'est à dire sur toutes les entrées correspondantes dans chacune des bases concernées. Par exemple, la transformation d'un fichier\index{Fichier}, régulier, audio en fichier\index{Fichier} texte, doit non seulement mettre à jour les informations dans la table \enquote{AnyFile} mais également la ligne correspondant au fichier\index{Fichier} dans la table Audio.
+
+Nous avons décidé de pouvoir insérer dans cette base de données\index{Base de donn\'{e}es} le maximum d'informations sur les \gls{fichier}\index{Fichier} afin que la recherche utilisateur\index{Utilisateur} puisse être la plus sélective possible. Un schéma de la base de donnée\index{Base de donn\'{e}es} est disponible en annexe p.~\pageref{bdd}.
+
+Là encore, il faut que les informations reçues respectent la \gls{dtd}\index{DTD}.
+
+En revanche, la \gls{dtd}\index{DTD} ne prévoit pas de réponse du moteur de recherche\index{Moteur de recherche} lors de la communication\index{Communication} avec le moteur d'indexation\index{Moteur d'indexation}.
+
+\subsection{Inter-opérabilité}\label{inter_operabilite}
+Notre projet a pour but d'être inter-opérable avec tous les autres projets ayant le même but et utilisant le même protocole de communication\index{Communication} entre les modules\index{Module} et la même \gls{dtd}\index{DTD} (voir annexe p.~\pageref{dtd}) pour le contenu de la communication\index{Communication}.
+
+Pour chacune des deux communication\index{Communication} la base d'indexation\index{Base d'indexation} sert de serveur\index{Serveur} et les moteurs de recherche\index{Moteur de recherche} et d'indexation\index{Moteur d'indexation} sont les clients\index{Client}.
+
+Pour chacune des communications\index{Communication} trois ports\index{Port} ont été choisis dans l'idée que si le premier est utilisé on passe au deuxième et si celui-ci aussi est occupé, on se connecte au troisième. Si les trois ports\index{Port} sont occupés, la communication\index{Communication} ne pourra alors pas s'établir. Les ports\index{Port} choisis pour la communication\index{Communication} sont :
+\begin{itemize}
+\item 40000, 40001 et 40002 pour la communication\index{Communication} entre la base d'indexation\index{Base d'indexation} et le moteur d'indexation\index{Moteur d'indexation}
+\item 30000, 30001 et 30002 pour la communication\index{Communication} entre la base d'indexation\index{Base d'indexation} et le moteur de recherche\index{Moteur de recherche}
+\end{itemize}
+Dans les deux cas les communications\index{Communication} se font en \gls{tcp}\index{TCP}.
+Cette inter-opérabilité\index{Inter-op\'{e}rabilit\'{e}} a pour avantage de pouvoir faire évoluer les trois modules\index{Module} de manière indépendante tout en gardant l'intégrité du produit à partir du moment où les normes sont respectées.
+
+\chapter{Spécifications du système}
+
+\section{Au niveau du moteur d'indexation}
+Il doit pouvoir scanner à tout moment le système (ou du moins la partie de l'\gls{arborescence}\index{Arborescence} surveillée) et ce de manière intelligente pour faire une mise à jour de la base de données\index{Base de donn\'{e}es}.\\
+Il doit pouvoir afficher les \glspl{fichier}\index{Fichier} surveillés ainsi que sa capacité maximale de surveillance\index{Surveillance}, mais également ajouter ou enlever des \gls{fichier}\index{Fichier} de la surveillance\index{Surveillance}.\\
+En attente d'événement (modification\index{Modification}, création\index{Cr\'{e}ation}, suppression\index{Suppression}) il doit attendre sans bloquer. Il doit stocker tous les événement en attendant de les stocker et les supprimer de sa liste une fois la requête envoyée à la base d'indexation\index{Base d'indexation} (afin de ne pas répéter l'événement).\\
+Il doit accepter qu'un utilisateur\index{Utilisateur} se connecte pour communiquer avec lui.
+
+Afin de fonctionner correctement sous toutes les architectures que nous visons, nous le munissons d'un sous module\index{Module} \enquote{ANotify} qui s'occupe d'utiliser les fonctions système de surveillance\index{Surveillance} sur les \glspl{fichier}\index{Fichier} propre au système d'exploitation.\\
+Il doit pouvoir gérer les cas de déconnexion (brutales ou non), en se remémorant de toutes les informations à envoyer.\\
+Il doit pouvoir gérer les mauvaises requêtes utilisateur\index{Utilisateur} (non conforme à la \gls{dtd}\index{DTD}). Toutes les requêtes crées par le moteur d'indexation\index{Moteur d'indexation} doivent être conforment à la \gls{dtd}\index{DTD}.
+
+\section{Au niveau du moteur de recherche}
+Le moteur de recherche\index{Moteur de recherche} ne doit pas s'arrêter brutalement. Toutes les composants de l'interface graphique doivent s'afficher correctement et cela à tout moment (notamment lors de l'affichage des résultats).\\
+Il doit pouvoir gérer les mauvaises requêtes utilisateur\index{Utilisateur} et les réponses des la base d'indexation\index{Base d'indexation} mal formées (non conforme à la \gls{dtd}\index{DTD}). Toutes les requêtes crées par le moteur de recherche\index{Moteur de recherche} doivent être conforment à la \gls{dtd}\index{DTD}.
+
+Les coupures de connexions avec la base d'indexation\index{Base d'indexation} doivent être gérées de manière correcte. L'utilisateur\index{Utilisateur} doit être averti de la coupure de connexion et le choix doit lui être laissé d'arrêter ou non la recherche (qui reste en attente de connexion jusqu'à nouvelle connexion).\\
+En cas de problème de connexion il faut empêcher l'utilisateur\index{Utilisateur} de faire une nouvelle recherche afin de ne pas bloquer toute l'application et à prendre de l'espace mémoire inutilement.
+
+\section{Au niveau de la base d'indexation}
+La base d'indexation\index{Base d'indexation} ne doit pas recréer la base de données\index{Base de donn\'{e}es} à chaque lancement.\\
+Le base d'indexation\index{Base d'indexation} ne doit en aucun cas se déconnecter sans avoir répondu à toutes les requêtes qu'elle a reçu.\\
+Il doit pouvoir gérer les requêtes des moteur de recherche\index{Moteur de recherche} et d'indexation\index{Moteur d'indexation} ne respectant pas la \gls{dtd}\index{DTD}. Toutes les requêtes crées par le moteur de recherche\index{Moteur de recherche} doivent être conforment à la \gls{dtd}\index{DTD}.
+
+En cas de coupure de connexion avec un (ou plusieurs) des moteurs, toutes les réponses à envoyer doivent être stockées pendant une certaine durée dans l'attente que la connexion se refasse.
+
+\chapter{Annexes}
+
+\section{DTD}\label{dtd}
+
+\subsection{Base d'indexation $\leftrightarrow$ Moteur d'indexation}\label{dtd_bi_mi}
+\begin{lstlisting}[frame=single]
+<!-- REGLE GENERALE Chaque fichier Xml doit contenir la ligne suivante :
+     <?xml version="1.0" encoding="UTF-8"?>
+-->
+
+<!ELEMENT INDEXATION (RENOMMAGES?, MODIFICATIONS?, SUPPRESSIONS?, CREATIONS?)>
+<!-- comme convenue toutes les balises de l'indexation sont facultatives -->
+
+<!ELEMENT RENOMMAGES (FICHIERRENOMME)*>
+<!ELEMENT MODIFICATIONS (FICHIERMODIFIE)*>
+<!ELEMENT SUPPRESSIONS (FICHIERSUPPRIME)*>
+<!ELEMENT CREATIONS (FICHIERCREE)*>
+
+<!-- un fichier renomme n'est pas necessairement un fichier modifie -->
+<!ELEMENT FICHIERRENOMME (PATH, NEWPATH)>
+<!-- un fichier modife necessite une re-indexation -->
+<!ELEMENT FICHIERMODIFIE (PATH, DATEMODIFICATION, TAILLE, PROPRIETAIRE, GROUPE, PERMISSIONS, INDEXAGE, NEWPATH?)>
+<!ELEMENT FICHIERSUPPRIME (PATH)>
+<!ELEMENT FICHIERCREE (PATH, format, DATECREATION, TAILLE, PROPRIETAIRE, GROUPE, PERMISSIONS, INDEXAGE)>
+
+<!-- les meta-donnees -->
+<!ELEMENT PATH (#PCDATA)>
+<!ELEMENT format (#PCDATA)>
+<!ELEMENT DATECREATION (#PCDATA)>
+<!ELEMENT DATEMODIFICATION (#PCDATA)>
+<!ELEMENT TAILLE (#PCDATA)>
+<!ELEMENT PROPRIETAIRE (#PCDATA)>
+<!ELEMENT GROUPE (#PCDATA)>
+<!ELEMENT PERMISSIONS (#PCDATA)>
+<!ELEMENT INDEXAGE (MOT*)>
+<!ELEMENT MOT (#PCDATA)>
+	<!ATTLIST MOT frequence CDATA #REQUIRED>
+<!ELEMENT NEWPATH (#PCDATA)>
+
+<!-- les id's seront utlises pour la tracabilitee et la detection d'eventuel erreurs, elle sont tout de meme facultatives -->
+
+<!ATTLIST RENOMMAGES id CDATA #IMPLIED>
+<!ATTLIST MODIFICATIONS id CDATA #IMPLIED>
+<!ATTLIST SUPPRESSIONS id CDATA #IMPLIED>
+<!ATTLIST CREATIONS id CDATA #IMPLIED>
+\end{lstlisting}
+
+\newpage
+\subsection{Base d'indexation $\leftrightarrow$ Moteur de recherche}
+
+\subsubsection{Rechercher}\label{dtd_bi_mr_search}
+\begin{lstlisting}[frame=single]
+<!-- Description de la requete de recherche -->
+<!ELEMENT SEARCH (WORD, CONTENT?, PATHDIR?, PERM?, EXTENSION?, TIMESLOT?)>
+	<!ATTLIST SEARCH id CDATA #REQUIRED>
+<!-- Le mot a rechercher -->
+<!ELEMENT WORD (#PCDATA)>
+<!-- Un booleen qui dit si l'on fait une recherche de contenu (true) ou une recherche sur les nom de fichier (false) -->
+<!ELEMENT CONTENT (#PCDATA)>
+<!-- Le nom du fichier a partir duquel
+     on recherche -->
+<!ELEMENT PATHDIR (#PCDATA)>
+<!-- Les permissions du fichier a chercher -->
+<!ELEMENT PERM (#PCDATA)>
+<!-- L'extension des fichiers a chercher -->
+<!ELEMENT EXTENSION (#PCDATA)>
+<!-- Intervalle de temps -->
+<!ELEMENT TIMESLOT (BEGIN, END)>
+<!-- Debut de l'intervalle -->
+<!ELEMENT BEGIN (DAY, MONTH, YEAR)>
+<!-- Fin de l'intervalle -->
+<!ELEMENT END (DAY, MONTH, YEAR)>
+<!-- Le jour -->
+<!ELEMENT DAY (#PCDATA)>
+<!-- Le mois -->
+<!ELEMENT MONTH (#PCDATA)>
+<!-- L'annee -->
+<!ELEMENT YEAR (#PCDATA)>
+\end{lstlisting}
+
+\subsubsection{Résultat}\label{dtd_bi_mr_result}
+\begin{lstlisting}[frame=single]
+<!-- Balise contenant les resultats de la requete search -->
+<!ELEMENT RESULT (FILE*)>
+	<!ATTLIST RESULT id CDATA #REQUIRED>
+<!-- Balise file correspond a un fichier resultat donc n balises files = n resultats -->
+<!ELEMENT FILE (NAME, PATH, PERM, SIZE, LASTMODIF?, PROPRIO?)>
+<!-- Le nom du fichier -->
+<!ELEMENT NAME (#PCDATA)>
+<!-- Le chemin complet du fichier -->
+<!ELEMENT PATH (#PCDATA)>
+<!-- Les permissions du fichier -->
+<!ELEMENT PERM (#PCDATA)>
+<!-- La taille du fichier -->
+<!ELEMENT SIZE (#PCDATA)>
+<!-- La date de derniere modification du fichier -->
+<!ELEMENT LASTMODIF (#PCDATA)>
+<!-- Le proprietaire du fichier -->
+<!ELEMENT PROPRIO (#PCDATA)>
+\end{lstlisting}
+
+\section{Moteur de recherche}
+
+\subsection{Cas d'utilisation}\label{utilisation-recherche}
+\begin{center}
+\includegraphics[scale=0.5]{"images/cas_utilisation_recherche"}
+\captionof{figure}{Cas d'utilisation en recherche}
+\end{center}
+
+\subsection{Diagramme de séquence}\label{sequence-recherche}
+\begin{center}
+\includegraphics[scale=0.41]{"images/sequence_util"}
+\captionof{figure}{Diagramme de séquence en recherche}
+\end{center}
+
+\section{Moteur d'indexation}
+
+\subsection{Diagramme de classes}\label{diagramme_classes_daemon}
+\begin{center}
+\includegraphics[scale=0.4]{"images/diagramme_classes_daemon"}
+\captionof{figure}{Diagramme de classes du moteur d'indexation}
+\end{center}
+
+\newpage
+\subsection{Côté daemon}\label{decision-daemon}
+\begin{center}
+\includegraphics[scale=0.37]{"images/decision_mi"}
+\captionof{figure}{Diagramme de décision du moteur d’indexation au niveau du daemon}
+\end{center}
+
+\newpage
+\subsection{Côté utilisateur}\label{decision-mi}
+\begin{center}
+\includegraphics[scale=0.45]{"images/decision_util_mi"}
+\captionof{figure}{Diagramme de décision du moteur d’indexation en interaction avec l'utilisateur}
+\end{center}
+
+\section{Base d'indexation}
+
+\subsection{Schéma de la base de données}\label{bdd}
+\begin{center}
+\includegraphics[scale=0.37]{"images/bdd"}
+\captionof{figure}{Schéma de la base de données}
+\end{center}
+
+\subsection{Diagramme de classes}\label{diagramme_classes_bdd}
+\begin{center}
+\includegraphics[scale=0.4]{"images/diagramme_classes_bdd"}
+\captionof{figure}{Diagramme de classes de la base d'indexation}
+\end{center}
+
+\section{Common}\label{common}
+
+\subsection{Diagramme de classes pour \enquote{AQuery}}
+\begin{center}
+\includegraphics[scale=0.35]{"images/diagramme_classes_aquery"}
+\captionof{figure}{Diagramme de classes de la partie relative à \enquote{AQuery}}
+\end{center}
+
+\subsection{Diagramme de classes pour la génération du XML}
+\begin{center}
+\includegraphics[scale=0.4]{"images/diagramme_classes_xmlgeneration"}
+\captionof{figure}{Diagramme de classes de la partie relative à la génération XML}
+\end{center}
+
+\newpage
+\subsection{Diagramme de classes pour le parser XML}
+\begin{center}
+\includegraphics[scale=0.3]{"images/diagramme_classes_xmlparser"}
+\captionof{figure}{Diagramme de classes de la partie relative au parser XML}
+\end{center}
+
+\clearpage
+\addcontentsline{toc}{chapter}{Index}
+\printindex
+
+\end{document}
