@@ -35,4 +35,4 @@ ActiveBI.o: ActiveBI.cpp
 
 clean:
 	rm -rf *.o *~ *# *.gch $(GOALS)
-	rm $(EXE)
+	rm -rf $(EXE)

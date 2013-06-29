@@ -130,7 +130,6 @@ void ANotifyDaemon::initDaemon() throw (ANotifyException){
   port = -1;
 
   for(i=40000; i<=40002; i++){
-
     this->xml_addr.sin_family = AF_INET;
     this->xml_addr.sin_port = htons(port);
     
@@ -190,8 +189,6 @@ bool ANotifyDaemon::start(std::string& path){
   arg.second = path;
 
   return (pthread_create(&thread, NULL, startT, (void*)&arg) == 0);
-  //return true;
-  //return retrieveBoolResult(startT, (void*)(&arg));
 }
 
 void* ANotifyDaemon::startT(void* arg){
