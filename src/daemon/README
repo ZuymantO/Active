@@ -2,7 +2,7 @@ Utilisation:
 
 - ./active  pour lancer le daemon
 
-- ./client pour lancer un client, appeler la commande 'start' une premiere fois pour lancer la surveillance. (Remarque: le client ne se lancera pas si aucun daemon n'est en cours)
+- ./client pour lancer un client (Remarque: le client ne se lancera pas si aucun daemon n'est en cours).
 
 
 
