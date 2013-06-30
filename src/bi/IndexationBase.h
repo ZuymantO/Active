@@ -4,6 +4,7 @@
 #include "BaseException.h"
 #include "SearchCom.h"
 #include "IndexationCom.h"
+#include "BaseCom.h"
 
 class IndexationBase {
  private:
@@ -11,7 +12,9 @@ class IndexationBase {
   SearchCom sCom;
   /* Communication avec le moteur d'indexation */
   IndexationCom iCom;
-  
+  /* Interaction avec la base de donnees */
+  BaseCom bCom;
+
  public:
   IndexationBase() throw (BaseException);
 
