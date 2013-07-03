@@ -223,7 +223,7 @@ Pour son fonctionnement, notre programme crée un base de données\index{Base de
 Le programme regroupe trois principaux modules\index{Module}, à savoir la base d'indexation\index{Base d'indexation}, le moteur de recherche \index{Moteur de recherche} et le moteur d'indexation\index{Moteur d'indexation}. Ces trois modules\index{Module} peuvent être remplacés par d'autres modules\index{Module} fonctionnant avec le même mode de fonctionnement (voir l'inter-opérabilité\index{Inter-op\'{e}rabilit\'{e}} p.~\pageref{inter_operabilite}). Un quatrième module\index{Module} vient se rajouter à ces derniers, le module\index{Module} \enquote{common} comportant les outils nécessaires à plusieurs des trois modules\index{Module} précédemment cités (voir les diagrammes de classes p.~\pageref{common}).
 
 \subsection{Moteur de recherche}
-Mot(s) du glossaire utilisés : \gls{console}, \gls{dtd}, \glspl{regexp}, \gls{fichier}, \gls{parser}, \gls{xml}.
+Mot(s) du glossaire utilisés : \gls{console}, \gls{dtd}, \glspl{regexp}, \gls{fichier}, \gls{xml}.
 
 Ce module\index{Module} est celui qui est lancé par l'utilisateur\index{Utilisateur} que ce soit avec un interaction avec la console\index{Console} ou via l'interface graphique que nous proposons.
 
@@ -254,7 +254,7 @@ La base d'indexation\index{Base d'indexation} doit être lancée comme serveur\i
 
 La base d'indexation\index{Base d'indexation} doit être capable de parser le XML\index{XML} de la DTD\index{DTD}, définie p.~\pageref{dtd} et de générer les réponses de requêtes utilisateur\index{Utilisateur} en respectant scrupuleusement la DTD\index{DTD}.
 
-Nous avons décidé de pouvoir insérer dans cette base de données\index{Base de donn\'{e}es} le maximum d'informations sur les fichier\index{Fichier} afin que la recherche utilisateur\index{Utilisateur} puisse être la plus sélective possible. Un schéma de la base de donnée\index{Base de donn\'{e}es} est disponible en annexe p.~\pageref{bdd}, dans lequel on peut voir les informations stockées.
+Nous avons décidé de pouvoir insérer dans cette base de données\index{Base de donn\'{e}es} le maximum d'informations sur les fichiers\index{Fichier} afin que la recherche utilisateur\index{Utilisateur} puisse être la plus sélective possible. Un schéma de la base de donnée\index{Base de donn\'{e}es} est disponible en annexe p.~\pageref{bdd}, dans lequel on peut voir les informations stockées.
 
 Là encore, il faut que les informations reçues respectent la DTD\index{DTD}.
 
@@ -292,7 +292,7 @@ Il doit pouvoir gérer les mauvaises requêtes utilisateur\index{Utilisateur} (n
 Un diagramme de classes du moteur d'indexation est fourni p.~\pageref{diagramme_classes_mi}.
 
 \section{Au niveau du moteur de recherche}
-Mot(s) du glossaire utilisés : \gls{dtd}.
+Mot(s) du glossaire utilisés : \gls{dtd}, \gls{parser}, \gls{xml}.
 
 Le moteur de recherche\index{Moteur de recherche} ne doit pas s'arrêter brutalement. Toutes les composants de l'interface graphique doivent s'afficher correctement et cela à tout moment (notamment lors de l'affichage des résultats).\\
 Il doit se connecter à la base d'indexation\index{Base d'indexation} à chaque nouvelle requête et fermer cette connexion lors de la réception des résultats. Il doit transformer la requête utilisateur\index{Utilisateur} en flux XML\index{XML} afin de communiquer correctement avec la base d'indexation\index{Base d'indexation} et doit \enquote{parser} le flux XML\index{XML} donné  en retour par la base d'indexation\index{Base d'indexation}.\\
@@ -304,11 +304,11 @@ En cas de problème de connexion il faut empêcher l'utilisateur\index{Utilisate
 Un diagramme de classes du moteur de recherche est fourni p.~\pageref{diagramme_classes_mr}.
 
 \section{Au niveau de la base d'indexation}
-Mot(s) du glossaire utilisés :  \gls{dtd}.
+Mot(s) du glossaire utilisés : \gls{dtd}, \gls{fichier}.
 
 La base d'indexation\index{Base d'indexation} ne doit pas recréer la base de données\index{Base de donn\'{e}es} à chaque lancement.\\
 La base d'indexation\index{Base d'indexation} ne doit en aucun cas se déconnecter d'elle même, qui plus est sans avoir répondu à toutes les requêtes qu'elle a reçu.\\
-Elle doit pouvoir gérer les requêtes des moteur de recherche\index{Moteur de recherche} et d'indexation\index{Moteur d'indexation} ne respectant pas la DTD\index{DTD}. Toutes les requêtes crées par le moteur de recherche\index{Moteur de recherche} doivent être conforment à la DTD\index{DTD}.\\
+Elle doit pouvoir gérer les requêtes des moteur de recherche\index{Moteur de recherche} et d'indexation\index{Moteur d'indexation} ne respectant pas la DTD\index{DTD}. Toutes les flux crées par la base d'indexation\index{Base d'indexation} doivent être conforment à la DTD\index{DTD}.\\
 A la réception d'une requête utilisateur, l'opération à effectuer sur la base de données\index{Base de donn\'{e}es} est un \verb"SELECT", en fonction des arguments reçus.\\
 Les opérations possibles a effectuer lors de la réception d'un requête venant du moteur d'indexation\index{Moteur d'indexation} sont :
 \begin{itemize}
@@ -318,7 +318,7 @@ Les opérations possibles a effectuer lors de la réception d'un requête venant
 \end{itemize}
 Pour ces trois cas, la modification\index{Modification} sur la base de donnée\index{Base de donn\'{e}es} doit se faire de manière complète, c'est à dire sur toutes les entrées correspondantes dans chacune des bases concernées. Par exemple, la transformation d'un fichier\index{Fichier} de type texte en fichier\index{Fichier} autre doit impliquer la suppression du contenu de ce fichier dans la base d'indexation.
 
-En cas de coupure de connexion avec un (ou plusieurs) des moteurs, toutes les réponses à envoyer doivent être stockées pendant une certaine durée dans l'attente que la connexion se refasse.
+En cas de coupure de connexion avec un (ou plusieurs) des moteurs, toutes les réponses à envoyer doivent être stockées pendant une certaine durée (10 minutes) dans l'attente que la connexion se refasse.
 
 Un diagramme de classes de la base d'indexation est fourni p.~\pageref{diagramme_classes_bi}.
 
