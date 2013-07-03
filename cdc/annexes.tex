@@ -37,7 +37,7 @@
 	<!ATTLIST MOT frequence CDATA #REQUIRED>
 <!ELEMENT NEWPATH (#PCDATA)>
 
-<!-- les id's seront utlises pour la tracabilitee et la detection d'eventuel erreurs, elle sont tout de meme facultatives -->
+<!-- les id_s seront utlises pour la tracabilitee et la detection d_eventuel erreurs, elle sont tout de meme facultatives -->
 
 <!ATTLIST RENOMMAGES id CDATA #IMPLIED>
 <!ATTLIST MODIFICATIONS id CDATA #IMPLIED>
@@ -52,29 +52,28 @@
 \begin{lstlisting}[frame=single]
 <!-- Description de la requete de recherche -->
 <!ELEMENT SEARCH (WORD, CONTENT?, PATHDIR?, PERM?, EXTENSION?, TIMESLOT?)>
-	<!ATTLIST SEARCH id CDATA #REQUIRED>
-<!-- Le mot a rechercher -->
+<!ATTLIST SEARCH id CDATA #REQUIRED>
+<!-- Le mot a chercher -->
 <!ELEMENT WORD (#PCDATA)>
-<!-- Un booleen qui dit si l'on fait une recherche de contenu (true) ou une recherche sur les nom de fichier (false) -->
-<!ELEMENT CONTENT (#PCDATA)>
-<!-- Le nom du fichier a partir duquel
-     on recherche -->
-<!ELEMENT PATHDIR (#PCDATA)>
+<!-- Un boolean qui dit si l_on fait une recherche de contenu (tru) ou une recherche sur les noms de fichier (false) -->
+<!ELEMENT CONTENT #PCDATA)>
+<!-- Le nom du fichier a partir duquel on recherche -->
+<!ELEMENT PATHDIR (#PATHDATA)>
 <!-- Les permissions du fichier a chercher -->
-<!ELEMENT PERM (#PCDATA)>
-<!-- L'extension des fichiers a chercher -->
+<!ELEMENT PERM (#PATHDIR)>
+<!-- L_extension des fichiers a chercher -->
 <!ELEMENT EXTENSION (#PCDATA)>
 <!-- Intervalle de temps -->
 <!ELEMENT TIMESLOT (BEGIN, END)>
-<!-- Debut de l'intervalle -->
+<!-- Debut de l_intervalle -->
 <!ELEMENT BEGIN (DAY, MONTH, YEAR)>
-<!-- Fin de l'intervalle -->
+<!-- Fin de l_intervalle -->
 <!ELEMENT END (DAY, MONTH, YEAR)>
 <!-- Le jour -->
 <!ELEMENT DAY (#PCDATA)>
 <!-- Le mois -->
 <!ELEMENT MONTH (#PCDATA)>
-<!-- L'annee -->
+<!-- L_annee -->
 <!ELEMENT YEAR (#PCDATA)>
 \end{lstlisting}
 
@@ -112,6 +111,26 @@
 \includegraphics[scale=0.44]{"images/sequence_util"}
 \captionof{figure}{Diagramme de séquence en recherche}
 \end{center}
+
+\subsection{Langage de communication avec le moteur de recherche}\label{langage_req}
+Mis à part \verb"word" aucune des arguments n'est obligatoire. Les arguments peuvent être mis dans un ordre quelconque.\\
+\verb"word" prend en valeur une suite de lettre. Si la recherche doit être faite sur plusieurs mots il faut alors placer entre ces mots soit \verb"|" (en cas de disjonction) ou \verb"&" (en cas de conjonction). Pour \verb"extension" la règle est la m\^{e}me si ce n'est que les chiffres sont autorisés.\\
+\verb"content" doit avoir comme valeur soit \verb"true" soit \verb"false". La valeur par défaut est \verb"false".\\
+\verb"permission" doit \^{e}tre une suite de trois chiffres compris entre 0 et 7.\\
+\verb"pathdir" correspond à l'arborescence à partir de laquelle faire la recherche. La valeur de cette option commence soit par une lettre, soit par un chiffre soit par le caractère \enquote{.} soit par un underscore. Ce premier caractère peut être suivi par une suite des caractères du même ensemble auquel on ajoute l'espace.\\
+\verb"begin" et \verb"end" sont une suite de 8 chiffres. L'analyse vérifiera que la date est une date existante. Elle est a fournir sous le format \enquote{jjmmaaaa}. 
+\begin{lstlisting}[frame=single]
+content=true|false
+permission=[0-7]{3}
+path=[a-zA-Z0-9\._][a-zA-Z0-9\.\\_ ]*
+extension=[a-zA-Z0-9]+([\||&][a-zA-Z0-9]+)*
+begin=[0-9]{8}
+end=[0-9]{8}
+word=[a-zA-Z]+([\||&][a-zA-Z]+)*
+\end{lstlisting}
+
+% pour une meilleure mise en page
+\newpage
 
 \subsection{Diagramme de classes}\label{diagramme_classes_mr}
 \begin{center}
@@ -181,8 +200,6 @@
 \captionof{figure}{Diagramme de classes de la partie relative au parser XML}
 \end{center}
 
-% pour une meilleure mise en page
-\newpage
 
 \section{Stop list}\label{stop_list}
 \input{./stoplist_fr}

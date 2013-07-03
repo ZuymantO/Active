@@ -19,14 +19,18 @@ Un diagramme de classes du moteur d'indexation est fourni p.~\pageref{diagramme_
 Mot(s) du glossaire utilisés : \gls{console}, \gls{dtd}, \gls{parser}, \gls{xml}.
 
 Le moteur de recherche\index{Moteur de recherche} ne doit pas s'arrêter brutalement. Toutes les composants de l'interface graphique doivent s'afficher correctement et cela à tout moment (notamment lors de l'affichage des résultats).\\
-Il doit se connecter à la base d'indexation\index{Base d'indexation} à chaque nouvelle requête et fermer cette connexion lors de la réception des résultats. Il doit transformer la requête utilisateur\index{Utilisateur} en flux XML\index{XML} afin de communiquer correctement avec la base d'indexation\index{Base d'indexation} et doit \enquote{parser} le flux XML\index{XML} donné  en retour par la base d'indexation\index{Base d'indexation}.\\
+Il doit se connecter à la base d'indexation\index{Base d'indexation} à chaque nouvelle requête et fermer cette connexion lors de la réception des résultats. Il doit transformer la requête utilisateur\index{Utilisateur} en flux XML\index{XML}, ce qui peut correspondre à plusieurs flux, afin de communiquer correctement avec la base d'indexation\index{Base d'indexation} et doit \enquote{parser} le flux XML\index{XML} donné  en retour par la base d'indexation\index{Base d'indexation}.\\
 Il doit pouvoir gérer les mauvaises requêtes utilisateur\index{Utilisateur} et les réponses des la base d'indexation\index{Base d'indexation} mal formées (non conforme à la DTD\index{DTD}). Toutes les requêtes crées par le moteur de recherche\index{Moteur de recherche} doivent être conforment à la DTD\index{DTD}.\\
-Le client doit pouvoir se connecter directement avec la moteur de recherche via console\index{Console} ou via l'interface graphique fournie. L'interface graphique doit être au maximum indépendante du système.
+Le client doit pouvoir se connecter directement avec la moteur de recherche via console\index{Console} ou via l'interface graphique fournie. L'interface graphique doit être au maximum indépendante du système.\\
+L'utilisation de l'interface graphique fait appel au même programme que l'utilisateur doit utiliser afin de faire une requête. L'interface graphique doit donc pouvoir exécuter un programme externe et récupérer la sortie de celui-ci. L'interface graphique et l'utilisateur doivent respecter le langage définit p.~\pageref{langage_req} afin que la requête soit valide.
 
 Les coupures de connexions avec la base d'indexation\index{Base d'indexation} doivent être gérées de manière correcte. L'utilisateur\index{Utilisateur} doit être averti de la coupure de connexion et le choix doit lui être laissé d'arrêter ou non la recherche (qui reste en attente de connexion jusqu'à nouvelle connexion).\\
 En cas de problème de connexion il faut empêcher l'utilisateur\index{Utilisateur} de faire une nouvelle recherche afin de ne pas bloquer toute l'application et à prendre de l'espace mémoire inutilement.
 
 Un diagramme de classes du moteur de recherche est fourni p.~\pageref{diagramme_classes_mr}.
+
+% pour une meilleure mise en page
+\newpage
 
 \section{Au niveau de la base d'indexation}
 Mot(s) du glossaire utilisés : \gls{dtd}, \gls{fichier}.
