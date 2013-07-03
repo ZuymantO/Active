@@ -70,9 +70,10 @@ Active
 \vspace*{\stretch{2}}
 \begin{tabularx}{\linewidth}{lXr}
 Auteurs && Enseignants\\
-NDJANDA MBIADA Jacques Charles (chef de projet) && ZACCHIROLI Stefano\\
-LEBEAU Christophe && KESNER Delia\\
-JOOSSEN Matthieu && SIGHIREANU Mihaela
+NDJANDA MBIADA Jacques Charles && ZACCHIROLI Stefano\\
+(chef de projet) && KESNER Delia\\
+LEBEAU Christophe && SIGHIREANU Mihaela\\
+JOOSSEN Matthieu &&
 \end{tabularx}
 
 \end{titlepage}
@@ -195,7 +196,7 @@ Voir cas d'utilisation p.~\pageref{utilisation-recherche} et diagramme de séque
 \subsection{Cas d'utilisation en indexation}
 Mot(s) du glossaire utilisés : \gls{daemon}, \gls{fichier}, \gls{socket}.
 
-L'utilisateur\index{Utilisateur} peut à tout moment interagir avec le moteur d'indexation\index{Moteur d'indexation}. Les opérations permises sont :
+L'utilisateur\index{Utilisateur} peut à tout moment interagir avec le moteur d'indexation\index{Moteur d'indexation}, via une communication\index{Communication} utilisant des sockets. Les opérations permises sont :
 \begin{itemize}
 \item démarrer le daemon\index{Daemon} (sur un répertoire précis ou non)
 \item redémarrer le daemon\index{Daemon} (sur un répertoire précis ou non)
@@ -205,7 +206,7 @@ L'utilisateur\index{Utilisateur} peut à tout moment interagir avec le moteur d'
 \item tuer le daemon\index{Daemon}
 \end{itemize}
 
-La communication\index{Communication} s'effectue via socket.
+Dans le cas de création, modification de fichier texte ou renommage vers un format textuel le moteur d'indexation\index{Moteur d'indexation} doit lancer l'indexation sur ce fichier. Il s'agit là de lire tous les mots contenus dans le fichiers avec leur occurrence afin de calculer leur taux d'apparition dans le fichier. Les mots apparaissant avec un taux d'au moins 5\% seront alors indexés. A cette règles échappent les mots usuels (voir les \textit{stop list} française et anglaise p.~\pageref{stop_list}.
 
 Voir le diagramme de décision p.~\pageref{decision-mi}.
 
@@ -283,7 +284,8 @@ Mot(s) du glossaire utilisés : \gls{arborescence}, \gls{dtd}, \gls{fichier}.
 Il doit pouvoir scanner à tout moment le système (ou du moins la partie de l'arborescence\index{Arborescence} surveillée) et ce de manière intelligente pour faire une mise à jour de la base de données\index{Base de donn\'{e}es}.\\
 Il doit pouvoir afficher les fichiers\index{Fichier} surveillés ainsi que sa capacité maximale de surveillance\index{Surveillance}, mais également ajouter ou enlever des fichier\index{Fichier} de la surveillance\index{Surveillance}.\\
 En attente d'événement (modification\index{Modification}, création\index{Cr\'{e}ation}, suppression\index{Suppression}) il doit attendre sans bloquer. Il doit stocker tous les événement en attendant de les stocker et les supprimer de sa liste une fois la requête envoyée à la base d'indexation\index{Base d'indexation} (afin de ne pas répéter l'événement).\\
-Il doit accepter qu'un utilisateur\index{Utilisateur} se connecte pour communiquer avec lui.
+Il doit accepter qu'un utilisateur\index{Utilisateur} se connecte pour communiquer avec lui.\\
+A la détection d'une création de fichier ou de modification de fichier texte ou de renommage d'un fichier vers un format textuel, le moteur d'indexation doit lancer l'indexation du fichier afin de stocker un certain nombre de mots dans la base de données\index{Base de donn\'{e}es}.
 
 Afin de fonctionner correctement sous toutes les architectures que nous visons, nous le munissons d'un sous module\index{Module} \enquote{ANotify} qui s'occupe d'utiliser les fonctions système de surveillance\index{Surveillance} sur les fichiers\index{Fichier} propre au système d'exploitation.\\
 Il doit pouvoir gérer les cas de déconnexion (brutales ou non), en se remémorant de toutes les informations à envoyer.\\
@@ -463,7 +465,7 @@ Un diagramme de classes de la base d'indexation est fourni p.~\pageref{diagramme
 
 \subsection{Schéma de la base de données}\label{bdd}
 \begin{center}
-\includegraphics[scale=0.37]{"images/bdd"}
+\includegraphics[scale=0.6]{"images/bdd"}
 \captionof{figure}{Schéma de la base de données}
 \end{center}
 
@@ -493,6 +495,10 @@ Un diagramme de classes de la base d'indexation est fourni p.~\pageref{diagramme
 \includegraphics[scale=0.3]{"images/diagramme_classes_xmlparser"}
 \captionof{figure}{Diagramme de classes de la partie relative au parser XML}
 \end{center}
+
+\section{Stop list}\label{stop_list}
+\input{./stoplist_fr}
+\input{./stoplist_en}
 
 \clearpage
 \addcontentsline{toc}{chapter}{Index}
