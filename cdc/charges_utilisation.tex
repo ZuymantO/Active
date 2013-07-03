@@ -1,0 +1,47 @@
+\chapter{Charges d'utilisation}
+
+\section{Généralité}
+
+\subsection{Public visé}
+Mot(s) du glossaire utilisés : \gls{fichier}.
+
+Nous visons toute personne utilisant un ordinateur sur lequel notre programme est compatible. Notre programme a pour but de permettre la recherche d'un fichier\index{Fichier} à l'aide de mots clés. Des options de recherche sont également disponible tels qu'une fourchette de date, le type de fichier\index{Fichier}. Les mots clé peuvent concerné le nom de fichier\index{Fichier} et/ou le contenu. Ainsi, si l'utilisateur\index{Utilisateur} ne se souvient que de quelques informations sur un de ses fichiers\index{Fichier}, dont un minimum de mots il peut utiliser notre programme afin de tenter de retrouver son fichier\index{Fichier}. Dans le cas où notre programme trouve un résultat (un ou plusieurs fichiers\index{Fichier}) ceux-ci seront affichés à l'utilisateur\index{Utilisateur}.
+
+\subsection{Pré-requis}
+Mot(s) du glossaire utilisés : \gls{console}.
+
+Au niveau système, il sera demandé à l'utilisateur\index{Utilisateur} d'avoir une machine tournant sous Linux\index{Linux}, GNU\index{GNU} ou Unix\index{Unix}, d'avoir installer au préalable les librairies\index{Librairie} pour \enquote{sqlite3}\index{sqlite3} ainsi que celles de \enquote{tinyxml}\index{tinyxml} afin de pouvoir utiliser notre programme correctement.
+
+Une interface fonctionnant via console\index{Console} sera proposée. Cette interface nécessite un minimum de notion d'utilisation des lignes de commandes. Toutefois, pour les autres utilisateurs\index{Utilisateur}, l'utilisation avec interface graphique est équivalente en terme de recherche.
+
+% pour une meilleure mise en page
+\newpage
+
+\section{Spécifications système des utilisateurs}
+
+\subsection{Cas d'utilisation en recherche}
+Mot(s) du glossaire utilisés : \gls{dtd}, \gls{fichier}, \gls{xml}.
+
+Lorsque l'utilisateur\index{Utilisateur} lance le programme, il lui est demandé de donner un ou des mots clés et, si il le désire, de remplir des informations complémentaires (intervalles de temps pour la création\index{Cr\'{e}ation} et la modification\index{Modification}, type de fichier\index{Fichier}).
+
+La requête utilisateur\index{Utilisateur} est alors analysée afin de vérifier si elle est correcte. Si c'est le cas, elle est alors transformée en une ou plusieurs requête XML\index{XML} (conformément à la DTD\index{DTD}, p.~\pageref{dtd_bi_mr_search}) en fonction de la recherche demandée. Par exemple, la recherche sur un mot contenu dans le fichier\index{Fichier}, régulier, et sur un autre correspondant au nom du fichier\index{Fichier} impliquera deux requêtes XML\index{XML}. Il en va de même en cas de conjonction (\enquote{et}) et de disjonction (\enquote{ou}).
+
+Les requêtes XML\index{XML}, contenant chacune un identifiant différent, sont alors envoyées à la base d'indexation\index{Base d'indexation} qui va les traiter et envoyer , pour chacune d'elle, une réponse sous forme XML\index{XML} (conformément à la DTD\index{DTD}, p.~\pageref{dtd_bi_mr_result}) contenant l'identifiant correspondant à la requête de recherche.
+
+Ces résultats vont être alors analysés et concaténés en fonction de la recherche initiale (par exemple, pour les conjonctions une intersection des résultats sera faite) puis affichés à l'utilisateur\index{Utilisateur}.
+
+Voir cas d'utilisation p.~\pageref{utilisation-recherche} et diagramme de séquence p.~\pageref{sequence-recherche}.
+
+\subsection{Cas d'utilisation en indexation}
+Mot(s) du glossaire utilisés : \gls{daemon}, \gls{fichier}, \gls{socket}.
+
+L'utilisateur\index{Utilisateur} peut à tout moment interagir avec le moteur d'indexation\index{Moteur d'indexation}, via une communication\index{Communication} utilisant des sockets. Les opérations permises sont :
+\begin{itemize}
+\item démarrer le daemon\index{Daemon} (sur un répertoire précis ou non)
+\item arrêter et redémarrer le daemon\index{Daemon} (sur un répertoire précis ou non)
+\item lister les fichiers\index{Fichier} surveillés
+\item supprimer la surveillance\index{Surveillance} sur un fichier\index{Fichier} (récursivement ou non)
+\item tuer le daemon\index{Daemon}
+\end{itemize}
+
+Voir le diagramme de décision p.~\pageref{decision-mi}.

@@ -1,0 +1,191 @@
+\chapter{Annexes}
+
+\section{DTD}\label{dtd}
+
+\subsection{Base d'indexation $\leftrightarrow$ Moteur d'indexation}\label{dtd_bi_mi}
+\begin{lstlisting}[frame=single]
+<!-- REGLE GENERALE Chaque fichier Xml doit contenir la ligne suivante :
+     <?xml version="1.0" encoding="UTF-8"?>
+-->
+
+<!ELEMENT INDEXATION (RENOMMAGES?, MODIFICATIONS?, SUPPRESSIONS?, CREATIONS?)>
+<!-- comme convenue toutes les balises de l'indexation sont facultatives -->
+
+<!ELEMENT RENOMMAGES (FICHIERRENOMME)*>
+<!ELEMENT MODIFICATIONS (FICHIERMODIFIE)*>
+<!ELEMENT SUPPRESSIONS (FICHIERSUPPRIME)*>
+<!ELEMENT CREATIONS (FICHIERCREE)*>
+
+<!-- un fichier renomme n'est pas necessairement un fichier modifie -->
+<!ELEMENT FICHIERRENOMME (PATH, NEWPATH)>
+<!-- un fichier modife necessite une re-indexation -->
+<!ELEMENT FICHIERMODIFIE (PATH, DATEMODIFICATION, TAILLE, PROPRIETAIRE, GROUPE, PERMISSIONS, INDEXAGE, NEWPATH?)>
+<!ELEMENT FICHIERSUPPRIME (PATH)>
+<!ELEMENT FICHIERCREE (PATH, format, DATECREATION, TAILLE, PROPRIETAIRE, GROUPE, PERMISSIONS, INDEXAGE)>
+
+<!-- les meta-donnees -->
+<!ELEMENT PATH (#PCDATA)>
+<!ELEMENT format (#PCDATA)>
+<!ELEMENT DATECREATION (#PCDATA)>
+<!ELEMENT DATEMODIFICATION (#PCDATA)>
+<!ELEMENT TAILLE (#PCDATA)>
+<!ELEMENT PROPRIETAIRE (#PCDATA)>
+<!ELEMENT GROUPE (#PCDATA)>
+<!ELEMENT PERMISSIONS (#PCDATA)>
+<!ELEMENT INDEXAGE (MOT*)>
+<!ELEMENT MOT (#PCDATA)>
+	<!ATTLIST MOT frequence CDATA #REQUIRED>
+<!ELEMENT NEWPATH (#PCDATA)>
+
+<!-- les id's seront utlises pour la tracabilitee et la detection d'eventuel erreurs, elle sont tout de meme facultatives -->
+
+<!ATTLIST RENOMMAGES id CDATA #IMPLIED>
+<!ATTLIST MODIFICATIONS id CDATA #IMPLIED>
+<!ATTLIST SUPPRESSIONS id CDATA #IMPLIED>
+<!ATTLIST CREATIONS id CDATA #IMPLIED>
+\end{lstlisting}
+
+\newpage
+\subsection{Base d'indexation $\leftrightarrow$ Moteur de recherche}
+
+\subsubsection{Recherche}\label{dtd_bi_mr_search}
+\begin{lstlisting}[frame=single]
+<!-- Description de la requete de recherche -->
+<!ELEMENT SEARCH (WORD, CONTENT?, PATHDIR?, PERM?, EXTENSION?, TIMESLOT?)>
+	<!ATTLIST SEARCH id CDATA #REQUIRED>
+<!-- Le mot a rechercher -->
+<!ELEMENT WORD (#PCDATA)>
+<!-- Un booleen qui dit si l'on fait une recherche de contenu (true) ou une recherche sur les nom de fichier (false) -->
+<!ELEMENT CONTENT (#PCDATA)>
+<!-- Le nom du fichier a partir duquel
+     on recherche -->
+<!ELEMENT PATHDIR (#PCDATA)>
+<!-- Les permissions du fichier a chercher -->
+<!ELEMENT PERM (#PCDATA)>
+<!-- L'extension des fichiers a chercher -->
+<!ELEMENT EXTENSION (#PCDATA)>
+<!-- Intervalle de temps -->
+<!ELEMENT TIMESLOT (BEGIN, END)>
+<!-- Debut de l'intervalle -->
+<!ELEMENT BEGIN (DAY, MONTH, YEAR)>
+<!-- Fin de l'intervalle -->
+<!ELEMENT END (DAY, MONTH, YEAR)>
+<!-- Le jour -->
+<!ELEMENT DAY (#PCDATA)>
+<!-- Le mois -->
+<!ELEMENT MONTH (#PCDATA)>
+<!-- L'annee -->
+<!ELEMENT YEAR (#PCDATA)>
+\end{lstlisting}
+
+\subsubsection{Résultat}\label{dtd_bi_mr_result}
+\begin{lstlisting}[frame=single]
+<!-- Balise contenant les resultats de la requete search -->
+<!ELEMENT RESULT (FILE*)>
+	<!ATTLIST RESULT id CDATA #REQUIRED>
+<!-- Balise file correspond a un fichier resultat donc n balises files = n resultats -->
+<!ELEMENT FILE (NAME, PATH, PERM, SIZE, LASTMODIF?, PROPRIO?)>
+<!-- Le nom du fichier -->
+<!ELEMENT NAME (#PCDATA)>
+<!-- Le chemin complet du fichier -->
+<!ELEMENT PATH (#PCDATA)>
+<!-- Les permissions du fichier -->
+<!ELEMENT PERM (#PCDATA)>
+<!-- La taille du fichier -->
+<!ELEMENT SIZE (#PCDATA)>
+<!-- La date de derniere modification du fichier -->
+<!ELEMENT LASTMODIF (#PCDATA)>
+<!-- Le proprietaire du fichier -->
+<!ELEMENT PROPRIO (#PCDATA)>
+\end{lstlisting}
+
+\section{Moteur de recherche}
+
+\subsection{Cas d'utilisation}\label{utilisation-recherche}
+\begin{center}
+\includegraphics[scale=0.55]{"images/cas_utilisation_recherche"}
+\captionof{figure}{Cas d'utilisation en recherche}
+\end{center}
+
+\subsection{Diagramme de séquence}\label{sequence-recherche}
+\begin{center}
+\includegraphics[scale=0.44]{"images/sequence_util"}
+\captionof{figure}{Diagramme de séquence en recherche}
+\end{center}
+
+\subsection{Diagramme de classes}\label{diagramme_classes_mr}
+\begin{center}
+\includegraphics[scale=0.6]{"images/diagramme_classes_mr"}
+\captionof{figure}{Diagramme de classes du moteur de recherche}
+\end{center}
+
+% pour une meilleure mise en page
+\newpage
+
+\section{Moteur d'indexation}
+
+\subsection{Côté daemon}\label{decision-daemon}
+\begin{center}
+\includegraphics[scale=0.37]{"images/decision_mi"}
+\captionof{figure}{Diagramme de décision du moteur d’indexation au niveau du daemon}
+\end{center}
+
+\newpage
+\subsection{Côté utilisateur}\label{decision-mi}
+\begin{center}
+\includegraphics[scale=0.45]{"images/decision_util_mi"}
+\captionof{figure}{Diagramme de décision du moteur d’indexation en interaction avec l'utilisateur}
+\end{center}
+
+% pour une meilleure mise en page
+\newpage
+
+\subsection{Diagramme de classes}\label{diagramme_classes_mi}
+\begin{center}
+\includegraphics[scale=0.4]{"images/diagramme_classes_mi"}
+\captionof{figure}{Diagramme de classes du moteur d'indexation}
+\end{center}
+
+\section{Base d'indexation}
+
+\subsection{Modélisation de la base de données}\label{bdd}
+\begin{center}
+\includegraphics[scale=0.6]{"images/modelisation_bdd"}
+\captionof{figure}{Modélisation de la base de données}
+\end{center}
+
+\subsection{Diagramme de classes}\label{diagramme_classes_bi}
+\begin{center}
+\includegraphics[scale=0.46]{"images/diagramme_classes_bi"}
+\captionof{figure}{Diagramme de classes de la base d'indexation}
+\end{center}
+
+\section{Common}\label{common}
+
+\subsection{Diagramme de classes pour \enquote{AQuery}}
+\begin{center}
+\includegraphics[scale=0.6]{"images/diagramme_classes_aquery"}
+\captionof{figure}{Diagramme de classes de la partie relative à \enquote{AQuery}}
+\end{center}
+
+\subsection{Diagramme de classes pour la génération du XML}
+\begin{center}
+\includegraphics[scale=0.6]{"images/diagramme_classes_xmlgeneration"}
+\captionof{figure}{Diagramme de classes de la partie relative à la génération XML}
+\end{center}
+
+\newpage
+\subsection{Diagramme de classes pour le parser XML}
+\begin{center}
+\includegraphics[scale=0.6]{"images/diagramme_classes_xmlparser"}
+\captionof{figure}{Diagramme de classes de la partie relative au parser XML}
+\end{center}
+
+% pour une meilleure mise en page
+\newpage
+
+\section{Stop list}\label{stop_list}
+\input{./stoplist_fr}
+% pour une meilleure mise en page
+\newpage
+\input{./stoplist_en}

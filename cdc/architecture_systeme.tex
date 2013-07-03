@@ -1,0 +1,65 @@
+\chapter{Architecture du système}
+
+\section{Vue d'ensemble}
+Mot(s) du glossaire utilisés : \gls{fichier}.
+
+Le projet que nous développons a pour but d'être compatible avec des machines équipée d'un système d'exploitation Linux\index{Linux}, GNU\index{GNU} ou Unix\index{Unix} sur lequel les librairies\index{Librairie} \enquote{sqlite3}\index{sqlite3} et \enquote{tinyxml} auront été installée au préalable (car nécessaires pour le bon fonctionnement du programme).
+
+Les exécutables que nous produisons est issus de code C++ et Java.
+Pour son fonctionnement, notre programme crée un base de données\index{Base de donn\'{e}es} et vérifie l'existence de celle-ci à chaque lancement. Cette base de données\index{Base de donn\'{e}es} sert à stocker les informations sur les fichiers\index{Fichier} surveillés.
+
+\section{Modularité}
+Le programme regroupe trois principaux modules\index{Module}, à savoir la base d'indexation\index{Base d'indexation}, le moteur de recherche \index{Moteur de recherche} et le moteur d'indexation\index{Moteur d'indexation}. Ces trois modules\index{Module} peuvent être remplacés par d'autres modules\index{Module} fonctionnant avec le même mode de fonctionnement (voir l'inter-opérabilité\index{Inter-op\'{e}rabilit\'{e}} p.~\pageref{inter_operabilite}). Un quatrième module\index{Module} vient se rajouter à ces derniers, le module\index{Module} \enquote{common} comportant les outils nécessaires à plusieurs des trois modules\index{Module} précédemment cités (voir les diagrammes de classes p.~\pageref{common}).
+
+\subsection{Moteur de recherche}
+Mot(s) du glossaire utilisés : \gls{console}, \gls{dtd}, \glspl{regexp}, \gls{fichier}, \gls{xml}.
+
+Ce module\index{Module} est celui qui est lancé par l'utilisateur\index{Utilisateur} que ce soit avec un interaction avec la console\index{Console} ou via l'interface graphique que nous proposons.
+
+Ce module\index{Module} est celui qui s'occupe de la partie recherche. Il gère l'interaction avec l'utilisateur\index{Utilisateur}.
+
+Pour un requête utilisateur\index{Utilisateur} plusieurs requêtes XML\index{XML} peuvent être crées. En effet, la DTD\index{DTD} ne prend en compte ni la recherche simultanée d'un contenu et d'un nom de fichier\index{Fichier} pour les mots clés ni les opérations sur les expressions (tel que les conjonctions, disjonction et plus généralement les expressions régulières). Chacune des requêtes envoyées à la base d'indexation\index{Base d'indexation} le sera avec un identifiant qui sera réutilisé pour la réponse afin de pour analyser correctement les résultats.
+
+En fonction de la demande initiale de l'utilisateur\index{Utilisateur} les requêtes seront alors combinées afin que le résultat corresponde à la requête de l'utilisateur\index{Utilisateur}. Dans la fenêtre d'affichage des résultats, les données pourront être triées en fonction d'un critère (nom du fichier\index{Fichier}, date de création\index{Cr\'{e}ation}, date de dernière modification\index{Modification}, type de fichier\index{Fichier}, propriétaire, groupe).
+
+\subsection{Moteur d'indexation}
+Mot(s) du glossaire utilisés : \gls{arborescence}, \gls{daemon}, \gls{dtd}, \gls{fichier}, \gls{xml}.
+
+Il s'agit là d'un programme qui doit être lancé lors du démarrage de la session de l'utilisateur\index{Utilisateur}, autrement dit un daemon\index{Daemon}. Une connexion avec la base d'indexation\index{Base d'indexation}, qui doit avoir été lancée au préalable, va alors être ouverte afin de permettre l'envoie de message.
+
+Via des outils de surveillance\index{Surveillance} du système, il va être attentif à toutes les modifications\index{Modification} intervenant sur l'arborescence\index{Arborescence} surveillée et en informer la base d'indexation\index{Base d'indexation}. Ces modifications\index{Modification} peuvent être une création\index{Cr\'{e}ation}, une suppression\index{Suppression} ou encore la modification\index{Modification} d'un fichier\index{Fichier} (voir diagramme de décision p.~\pageref{decision-daemon}).
+
+Pour chaque modification\index{Modification}, un flux XMLX\index{XML} (respectant la DTD\index{DTD} correspondante, voir p.~\pageref{dtd_bi_mi}) va alors être envoyé à la base d'indexation\index{Base d'indexation}.
+
+L'utilisateur\index{Utilisateur} peut, à tout moment, entrer en contact avec le moteur d'indexation\index{Moteur d'indexation} pour lui demander de changer l'arborescence\index{Arborescence} à surveiller, lancer une indexation\index{Indexation} sur l'arborescence\index{Arborescence} actuellement sous surveillance\index{Surveillance}.
+
+En cas de changement d'arborescence\index{Arborescence}, une demande de suppression\index{Suppression} (de la base de données) de tous les fichier\index{Fichier} actuellement surveillés est alors demandée.
+Ce module\index{Module} doit prendre en compte l'autonomie restante lors d'une utilisation sur un ordinateur n'étant pas branché sur le secteur afin de ne pas vider l'autonomie de celui-ci. Le programme doit pouvoir alors se mettre en veille et signaler à l'utilisateur\index{Utilisateur} de relancer une indexation\index{Indexation} lorsque l'autonomie aura atteint un seuil raisonnable d'utilisation.
+
+\subsection{Base d'indexation}
+Mot(s) du glossaire utilisés : \gls{daemon}, \gls{dtd}, \gls{fichier}, \gls{parser}, \gls{xml}.
+
+La base d'indexation\index{Base d'indexation} doit être lancée comme serveur\index{Serveur} de manière à pouvoir accepter deux clients\index{Client} : un moteur de recherche\index{Moteur de rechercher} et un moteur d'indexation\index{Moteur d'indexation}. Ces communications\index{Communication} doivent s'établir de la façon définie par l'inter-opérabilité\index{Inter-op\'{e}rabilit\'{e}} (voir p.~\pageref{inter_operabilite}). De ce fait, la base d'indexation doit être lancée au démarrage de la session afin que les clients puissent se connecter. La base d'indexation peut donc être considérée comme un daemon\index{Daemon}
+
+La base d'indexation\index{Base d'indexation} doit être capable de parser le XML\index{XML} de la DTD\index{DTD}, définie p.~\pageref{dtd} et de générer les réponses de requêtes utilisateur\index{Utilisateur} en respectant scrupuleusement la DTD\index{DTD}.
+
+Nous avons décidé de pouvoir insérer dans cette base de données\index{Base de donn\'{e}es} le maximum d'informations sur les fichiers\index{Fichier} afin que la recherche utilisateur\index{Utilisateur} puisse être la plus sélective possible. Un schéma de la base de donnée\index{Base de donn\'{e}es} est disponible en annexe p.~\pageref{bdd}, dans lequel on peut voir les informations stockées.
+
+Là encore, il faut que les informations reçues respectent la DTD\index{DTD}.
+
+En revanche, la DTD\index{DTD} ne prévoit pas de réponse du moteur de recherche\index{Moteur de recherche} lors de la communication\index{Communication} avec le moteur d'indexation\index{Moteur d'indexation}.
+
+\subsection{Inter-opérabilité}\label{inter_operabilite}
+Mot(s) du glossaire utilisés : \gls{dtd}, \gls{tcp}.
+
+Notre projet a pour but d'être inter-opérable avec tous les autres projets ayant le même but et utilisant le même protocole de communication\index{Communication} entre les modules\index{Module} et la même DTD\index{DTD} (voir annexe p.~\pageref{dtd}) pour le contenu de la communication\index{Communication}.
+
+Pour chacune des deux communication\index{Communication} la base d'indexation\index{Base d'indexation} sert de serveur\index{Serveur} et les moteurs de recherche\index{Moteur de recherche} et d'indexation\index{Moteur d'indexation} sont les clients\index{Client}.
+
+Pour chacune des communications\index{Communication} trois ports\index{Port} ont été choisis dans l'idée que si le premier est utilisé on passe au deuxième et si celui-ci aussi est occupé, on se connecte au troisième. Si les trois ports\index{Port} sont occupés, la communication\index{Communication} ne pourra alors pas s'établir. Les ports\index{Port} choisis pour la communication\index{Communication} sont :
+\begin{itemize}
+\item 40000, 40001 et 40002 pour la communication\index{Communication} entre la base d'indexation\index{Base d'indexation} et le moteur d'indexation\index{Moteur d'indexation}
+\item 30000, 30001 et 30002 pour la communication\index{Communication} entre la base d'indexation\index{Base d'indexation} et le moteur de recherche\index{Moteur de recherche}
+\end{itemize}
+Dans les deux cas les communications\index{Communication} se font en TCP\index{TCP}.
+Cette inter-opérabilité\index{Inter-op\'{e}rabilit\'{e}} a pour avantage de pouvoir faire évoluer les trois modules\index{Module} de manière indépendante tout en gardant l'intégrité du produit à partir du moment où les normes sont respectées.

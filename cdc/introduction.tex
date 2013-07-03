@@ -1,0 +1,49 @@
+\chapter{Introduction}
+
+\section{Les besoins}
+Mot(s) du glossaire utilisés : \gls{fichier}.
+
+Le progrès technologique est indéniable à notre époque, notamment en termes de  capacité de stockage des ordinateurs personnels. L'un des enjeux des systèmes pour PC est la gestion des données utilisateur\index{Utilisateur}, à savoir permettre à ces derniers d'accéder rapidement à une information datant de plusieurs semaines, mois ou années sans y perdre des heures de recherche.
+
+La capacité de nos disques durs peut atteindre aujourd'hui des milliers de gigaoctets (Go) et nous pouvons donc stocker des milliards de fichiers\index{Fichier} sur un ordinateur.
+
+Un gestionnaire de système de fichiers\index{Fichier} est un programme permettant d'accéder à ces données, d'y naviguer et de visualiser leur relation (quel fichiers\index{Fichier} appartient à quel dossier\index{Dossier} par exemple). Ce programme n'a pas pour rôle de trier mais de rechercher les fichiers\index{Fichier} et c'est pourquoi, en l'état, l'utilisateur\index{Utilisateur} devra trier son disque dur à la main, si c'est ce qu'il souhaite. Bien que la plupart des systèmes d'exploitation\index{Syst\`{e}me d'exploitation} répandus disposent, en plus du gestionnaire de système de fichiers\index{Fichier}, d'un programme d'indexation\index{Indexation}, nous souhaitons écrire un programme alternatif au programme d'indexation\index{Indexation} natif de Linux\index{Linux} / Unix\index{Unix} (nous n'envisageons pas, du moins dans un premier temps, de développer notre produit pour les systèmes d'exploitation Windows\index{Windows}) et pourquoi ne pas le surpasser sur le plan technique et esthétique.
+
+La réalisation du projet ne doit nécessiter aucun fond d'investissement, user uniquement de technologies open sources ou libres d'utilisation sans contraintes particulières sur le produit final. Pour palier à tout dépense supplémentaire (notamment sur le matériel de travail), nous avons à disposition des machines sous différentes plates-formes (NT, Linux\index{Linux}, Unix\index{Unix}) connectées à internet. Tout module\index{Module} permettant la réalisation du projet est inexistant et devra alors être développé par l'équipe en charge du projet.
+Le but est bien entendu de rendre le programme terminé, mais également de parvenir à produire ce dernier par une démarche professionnelle et de manière coopérative sous la direction d'un chef de projet.
+
+\section{Brève description}
+Mot(s) du glossaire utilisés : \gls{arborescence}, \gls{fichier}.
+
+On peut distinguer facilement trois modules\index{Module} dans le projet :
+\begin{itemize}
+\item un moteur de recherche\index{Moteur de rechercher} : ce module\index{Module} est en charge notamment de la communication\index{Communication} avec l'utilisateur\index{Utilisateur}
+\item une base d'indexation\index{Base d'indexation} : ce module\index{Module} est en charge de la sauvegarde des données
+\item un moteur d'indexation\index{Moteur d'indexation} : ce module\index{Module} est en charge de la surveillance\index{Surveillance} des fichiers\index{Fichier} sur une arborescence\index{Arborescence} donnée.
+\end{itemize}
+
+\begin{center}
+\includegraphics[scale=0.45]{"images/fonctionnement_global_d'active"}
+\captionof{figure}{Fonctionnement global d'Active}
+\label{fonctionnement-global}
+\end{center}
+
+\section{Objectifs du produit}
+Mot(s) du glossaire utilisés : \gls{arborescence}, \gls{fichier}.
+
+Le produit que nous souhaitons développer devra répondre à certaines normes de communications\index{Communication} définies avec d'autres projets afin d'établir une inter-opérabilité\index{Inter-op\'{e}rabilit\'{e}} au niveau des trois modules\index{Module} principaux, définis brièvement dans la section précédente.
+
+Il devra être opérationnel sur plusieurs architectures matériels afin qu'un utilisateur\index{Utilisateur} puisse l'utiliser sur plusieurs systèmes d'exploitation, sans avoir à changer ses habitudes.
+
+Le module\index{Module} \enquote{moteur d'indexation}\index{Moteur d'indexation} sera chargé d'analyser les modifications\index{Modification} sur l'arborescence\index{Arborescence} surveillée et d'en informer le module\index{Module} \enquote{base d'indexation}\index{Base d'indexation} afin que celui-ci mette à jour les informations dans la base de données\index{Base de donn\'{e}es}, qui stocke les informations sur tous les fichiers\index{Fichier} sauvegardés.
+
+L'arborescence\index{Arborescence} surveillée doit être modifiable par l'utilisateur\index{Utilisateur}, ce qui entraîne, à chaque changement, une nouvelle indexation\index{Indexation} de la nouvelle arborescence\index{Arborescence} à surveiller.
+
+Notre produit devra permettre à l'utilisateur\index{Utilisateur} de relancer une indexation\index{Indexation} complète à tout
+moment afin de s'assurer du bon contenu de la base de données\index{Base de donn\'{e}es}. Bien évidement, si le
+produit est utilisé sur un appareil portable, lors d'une telle demande le moteur d'indexation\index{Moteur d'indexation} devra prendre en compte l'autonomie restante afin de ne pas empêcher l'utilisateur\index{Utilisateur} de pouvoir utiliser son appareil. Dans ce cas un message de confirmation d'indexation\index{Indexation} immédiate devra être donné à l'utilisateur\index{Utilisateur}.
+
+Nous souhaitons que l'utilisateur\index{Utilisateur} puisse faire une recherche avec un maximum d'arguments
+afin de limiter au maximum les résultats, ce qui permet de retrouver plus facilement un fichier\index{Fichier}.
+
+L'affichage des résultats devra offrir la possibilité d'être triés.
