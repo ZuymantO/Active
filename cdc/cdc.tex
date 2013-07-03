@@ -155,8 +155,6 @@ afin de limiter au maximum les résultats, ce qui permet de retrouver plus facil
 
 L'affichage des résultats devra offrir la possibilité d'être triés.
 
-Nous envisageons d'ajouter aux informations stockées les \glspl{metadonnee} propres aux fichiers\index{Fichier}, réguliers, audio et vidéo afin que l'utilisateur\index{Utilisateur} puisse faire une recherche sur celles-ci (par exemple sur l'auteur d'une chanson).
-
 \chapter{Charges d'utilisation}
 
 \section{Généralité}
@@ -167,7 +165,7 @@ Nous visons toute personne utilisant un ordinateur sur lequel notre programme es
 \subsection{Pré-requis}
 Au niveau système, il sera demandé à l'utilisateur\index{Utilisateur} d'avoir une machine tournant sous Linux\index{Linux}, GNU\index{GNU} ou Unix\index{Unix}, d'avoir installer au préalable les librairies\index{Librairie} pour \enquote{sqlite3}\index{sqlite3} ainsi que celles de \enquote{tinyxml}\index{tinyxml} afin de pouvoir utiliser notre programme correctement.
 
-Une interface fonctionnant via \gls{console}\index{Console} sera proposée. Cette interface nécessite un minimum de notion d'utilisation des lignes de commandes. Toutefois, pour les autres utilisateurs\index{Utilisateur} l'utilisation avec interface graphique est équivalente en terme de recherche.
+Une interface fonctionnant via \gls{console}\index{Console} sera proposée. Cette interface nécessite un minimum de notion d'utilisation des lignes de commandes. Toutefois, pour les autres utilisateurs\index{Utilisateur}, l'utilisation avec interface graphique est équivalente en terme de recherche.
 
 \section{Spécifications système des utilisateurs}
 
@@ -202,7 +200,7 @@ Voir le diagramme de décision p.~\pageref{decision-mi}.
 \section{Vue d'ensemble}
 Le projet que nous développons a pour but d'être compatible avec des machines équipée d'un système d'exploitation Linux\index{Linux}, GNU\index{GNU} ou Unix\index{Unix} sur lequel les librairies\index{Librairie} \enquote{sqlite3}\index{sqlite3} et \enquote{tinyxml} auront été installée au préalable (car nécessaires pour le bon fonctionnement du programme).
 
-L'exécutable que nous produisons est issus de code C++.
+Les exécutables que nous produisons est issus de code C++ et Java.
 Pour son fonctionnement, notre programme crée un base de données\index{Base de donn\'{e}es} et vérifie l'existence de celle-ci à chaque lancement. Cette base de données\index{Base de donn\'{e}es} sert à stocker les informations sur les \glspl{fichier}\index{Fichier} surveillés.
 
 \section{Modularité}
@@ -213,20 +211,20 @@ Ce module\index{Module} est celui qui est lancé par l'utilisateur\index{Utilisa
 
 Ce module\index{Module} est celui qui s'occupe de la partie recherche. Il gère l'interaction avec l'utilisateur\index{Utilisateur}. Il doit se connecter à la base d'indexation\index{Base d'indexation} à chaque nouvelle requête et fermer cette connexion lors de la réception des résultats. Il doit transformer la requête utilisateur\index{Utilisateur} en flux \gls{xml}\index{XML} afin de communiquer correctement avec la base d'indexation\index{Base d'indexation} et doit \enquote{\gls{parser}} le flux \gls{xml}\index{XML} donné  en retour par la base d'indexation\index{Base d'indexation}.
 
-Pour un requête utilisateur\index{Utilisateur} plusieurs requêtes \gls{xml}\index{XML} peuvent être crées. En effet, la \gls{dtd}\index{DTD} ne prend en compte ni la recherche simultanée d'un contenu et d'un nom de \gls{fichier}\index{Fichier} pour les mots clés ni les opérations sur les expressions (tel que les conjonctions, disjonction et plus généralement les \glspl{regexp}). Chacune des requêtes envoyées à la base d'indexation\index{Base d'indexation} le sera avec un identifiant qui sera réutilisé pour la réponde afin de pour analyser correctement les résultats.
+Pour un requête utilisateur\index{Utilisateur} plusieurs requêtes \gls{xml}\index{XML} peuvent être crées. En effet, la \gls{dtd}\index{DTD} ne prend en compte ni la recherche simultanée d'un contenu et d'un nom de \gls{fichier}\index{Fichier} pour les mots clés ni les opérations sur les expressions (tel que les conjonctions, disjonction et plus généralement les \glspl{regexp}). Chacune des requêtes envoyées à la base d'indexation\index{Base d'indexation} le sera avec un identifiant qui sera réutilisé pour la réponse afin de pour analyser correctement les résultats.
 
 En fonction de la demande initiale de l'utilisateur\index{Utilisateur} les requêtes seront alors combinées afin que le résultat corresponde à la requête de l'utilisateur\index{Utilisateur}. Dans la fenêtre d'affichage des résultats, les données pourront être triées en fonction d'un critère (nom du \gls{fichier}\index{Fichier}, date de création\index{Cr\'{e}ation}, date de dernière modification\index{Modification}, type de \gls{fichier}\index{Fichier}, propriétaire, groupe).
 
 \subsection{Moteur d'indexation}
-Il s'agit là d'un programme qui doit être lancé lors du démarrage de la session de l'utilisateur\index{Utilisateur}, autrement dit un \gls{daemon}\index{Daemon}. Une connexion avec la base d'indexation\index{Base d'indexation} va alors être ouverte afin de permettre l'envoie de message.
+Il s'agit là d'un programme qui doit être lancé lors du démarrage de la session de l'utilisateur\index{Utilisateur}, autrement dit un \gls{daemon}\index{Daemon}. Une connexion avec la base d'indexation\index{Base d'indexation}, qui doit avoir été lancée au préalable, va alors être ouverte afin de permettre l'envoie de message.
 
-Via des outils de surveillance\index{Surveillance} du système il va être attentif à toutes les modifications\index{Modification} intervenant sur l'\gls{arborescence}\index{Arborescence} surveillée et en informer la base d'indexation\index{Base d'indexation}. Ces modifications\index{Modification} peuvent être une création\index{Cr\'{e}ation}, une suppression\index{Suppression} ou encore la modification\index{Modification} d'un \gls{fichier}\index{Fichier} (voir diagramme de décision p.~\pageref{decision-daemon}).
+Via des outils de surveillance\index{Surveillance} du système, il va être attentif à toutes les modifications\index{Modification} intervenant sur l'\gls{arborescence}\index{Arborescence} surveillée et en informer la base d'indexation\index{Base d'indexation}. Ces modifications\index{Modification} peuvent être une création\index{Cr\'{e}ation}, une suppression\index{Suppression} ou encore la modification\index{Modification} d'un \gls{fichier}\index{Fichier} (voir diagramme de décision p.~\pageref{decision-daemon}).
 
-Pour chaque modification\index{Modification}, un flux \gls{xml}\index{XML} (respectant la \gls{dtd}\index{DTD} correspondante, p.~\pageref{dtd_bi_mi}) va alors être envoyé à la base d'indexation\index{Base d'indexation}.
+Pour chaque modification\index{Modification}, un flux \gls{xml}\index{XML} (respectant la \gls{dtd}\index{DTD} correspondante, voir p.~\pageref{dtd_bi_mi}) va alors être envoyé à la base d'indexation\index{Base d'indexation}.
 
-L'utilisateur\index{Utilisateur} peut à tout moment entrer en contact avec le moteur d'indexation\index{Moteur d'indexation} pour lui demander de changer l'\gls{arborescence}\index{Arborescence} à surveiller, lancer une indexation\index{Indexation} sur l'\gls{arborescence}\index{Arborescence} actuellement sous surveillance\index{Surveillance}.
+L'utilisateur\index{Utilisateur} peut, à tout moment, entrer en contact avec le moteur d'indexation\index{Moteur d'indexation} pour lui demander de changer l'\gls{arborescence}\index{Arborescence} à surveiller, lancer une indexation\index{Indexation} sur l'\gls{arborescence}\index{Arborescence} actuellement sous surveillance\index{Surveillance}.
 
-En cas de changement d'\gls{arborescence}\index{Arborescence}, une demande de suppression\index{Suppression} de tous les \glspl{fichier}\index{Fichier} actuellement surveillés est alors demandée.
+En cas de changement d'\gls{arborescence}\index{Arborescence}, une demande de suppression\index{Suppression} (de la base de données) de tous les \glspl{fichier}\index{Fichier} actuellement surveillés est alors demandée.
 Ce module\index{Module} doit prendre en compte l'autonomie restante lors d'une utilisation sur un ordinateur n'étant pas branché sur le secteur afin de ne pas vider l'autonomie de celui-ci. Le programme doit pouvoir alors se mettre en veille et signaler à l'utilisateur\index{Utilisateur} de relancer une indexation\index{Indexation} lorsque l'autonomie aura atteint un seuil raisonnable d'utilisation.
 
 \subsection{Base d'indexation}
@@ -242,7 +240,7 @@ Les opérations possibles a effectuer lors de la réception d'un requête venant
 \end{itemize}
 Pour ces trois cas, la modification\index{Modification} sur la base de donnée\index{Base de donn\'{e}es} doit se faire de manière complète, c'est à dire sur toutes les entrées correspondantes dans chacune des bases concernées. Par exemple, la transformation d'un fichier\index{Fichier}, régulier, audio en fichier\index{Fichier} texte, doit non seulement mettre à jour les informations dans la table \enquote{AnyFile} mais également la ligne correspondant au fichier\index{Fichier} dans la table Audio.
 
-Nous avons décidé de pouvoir insérer dans cette base de données\index{Base de donn\'{e}es} le maximum d'informations sur les \gls{fichier}\index{Fichier} afin que la recherche utilisateur\index{Utilisateur} puisse être la plus sélective possible. Un schéma de la base de donnée\index{Base de donn\'{e}es} est disponible en annexe p.~\pageref{bdd}.
+Nous avons décidé de pouvoir insérer dans cette base de données\index{Base de donn\'{e}es} le maximum d'informations sur les \gls{fichier}\index{Fichier} afin que la recherche utilisateur\index{Utilisateur} puisse être la plus sélective possible. Un schéma de la base de donnée\index{Base de donn\'{e}es} est disponible en annexe p.~\pageref{bdd}, dans lequel on peut voir les informations stockées.
 
 Là encore, il faut que les informations reçues respectent la \gls{dtd}\index{DTD}.
 
