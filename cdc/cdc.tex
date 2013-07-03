@@ -204,7 +204,7 @@ Les exécutables que nous produisons est issus de code C++ et Java.
 Pour son fonctionnement, notre programme crée un base de données\index{Base de donn\'{e}es} et vérifie l'existence de celle-ci à chaque lancement. Cette base de données\index{Base de donn\'{e}es} sert à stocker les informations sur les \glspl{fichier}\index{Fichier} surveillés.
 
 \section{Modularité}
-Le programme regroupe trois principaux modules\index{Module}, à savoir la base d'indexation\index{Base d'indexation} (voir diagramme de le classes p.~\pageref{diagramme_classes_bdd}), le moteur de recherche \index{Moteur de recherche} et le moteur d'indexation\index{Moteur d'indexation} (voir le diagramme de classes p.~\pageref{diagramme_classes_daemon}). Ces trois modules\index{Module} peuvent être remplacés par d'autres modules\index{Module} fonctionnant avec le même mode de fonctionnement (voir l'inter-opérabilité\index{Inter-op\'{e}rabilit\'{e}} p.~\pageref{inter_operabilite}). Un quatrième module\index{Module} vient se rajouter à ces derniers, le module\index{Module} \enquote{common} comportant les outils nécessaires à plusieurs des trois modules\index{Module} précédemment cités (voir les diagrammes de classes p.~\pageref{common}).
+Le programme regroupe trois principaux modules\index{Module}, à savoir la base d'indexation\index{Base d'indexation} (voir diagramme de le classes p.~\pageref{diagramme_classes_bi}), le moteur de recherche \index{Moteur de recherche} et le moteur d'indexation\index{Moteur d'indexation} (voir le diagramme de classes p.~\pageref{diagramme_classes_bi}). Ces trois modules\index{Module} peuvent être remplacés par d'autres modules\index{Module} fonctionnant avec le même mode de fonctionnement (voir l'inter-opérabilité\index{Inter-op\'{e}rabilit\'{e}} p.~\pageref{inter_operabilite}). Un quatrième module\index{Module} vient se rajouter à ces derniers, le module\index{Module} \enquote{common} comportant les outils nécessaires à plusieurs des trois modules\index{Module} précédemment cités (voir les diagrammes de classes p.~\pageref{common}).
 
 \subsection{Moteur de recherche}
 Ce module\index{Module} est celui qui est lancé par l'utilisateur\index{Utilisateur} que ce soit avec un interaction avec la \gls{console}\index{Console} ou via l'interface graphique que nous proposons.
@@ -228,7 +228,7 @@ En cas de changement d'\gls{arborescence}\index{Arborescence}, une demande de su
 Ce module\index{Module} doit prendre en compte l'autonomie restante lors d'une utilisation sur un ordinateur n'étant pas branché sur le secteur afin de ne pas vider l'autonomie de celui-ci. Le programme doit pouvoir alors se mettre en veille et signaler à l'utilisateur\index{Utilisateur} de relancer une indexation\index{Indexation} lorsque l'autonomie aura atteint un seuil raisonnable d'utilisation.
 
 \subsection{Base d'indexation}
-La base d'indexation\index{Base d'indexation} doit être lancée comme serveur\index{Serveur} de manière à pouvoir accepter deux clients\index{Client} : un moteur de recherche\index{Moteur de rechercher} et un moteur d'indexation\index{Moteur d'indexation}. Ces communications\index{Communication} doivent s'établir de la façon définie par l'inter-opérabilité\index{Inter-op\'{e}rabilit\'{e}} (voir p.~\pageref{inter_operabilite}).
+La base d'indexation\index{Base d'indexation} doit être lancée comme serveur\index{Serveur} de manière à pouvoir accepter deux clients\index{Client} : un moteur de recherche\index{Moteur de rechercher} et un moteur d'indexation\index{Moteur d'indexation}. Ces communications\index{Communication} doivent s'établir de la façon définie par l'inter-opérabilité\index{Inter-op\'{e}rabilit\'{e}} (voir p.~\pageref{inter_operabilite}). De ce fait, la base d'indexation doit être lancée au démarrage de la session afin que les clients puissent se connecter. La base d'indexation peut donc être considérée comme un \gls{daemon}\index{Daemon}
 
 La base d'indexation\index{Base d'indexation} doit être capable de \gls{parser} le \gls{xml}\index{XML} de la \gls{dtd}\index{DTD}, définie p.~\pageref{dtd} et de générer les réponses de requêtes utilisateur\index{Utilisateur} en respectant scrupuleusement la \gls{dtd}\index{DTD}. L'opération a effectuer sur la base de données\index{Base de donn\'{e}es} est un \verb"SELECT" en fonction des arguments reçus.
 
@@ -238,7 +238,7 @@ Les opérations possibles a effectuer lors de la réception d'un requête venant
 \item mise à jours d'un champ pour une modification\index{Modification}, en utilisant \verb"UPDATE"
 \item suppression\index{Suppression} d'un champ pour une suppression\index{Suppression}, avec \verb"DELETE"
 \end{itemize}
-Pour ces trois cas, la modification\index{Modification} sur la base de donnée\index{Base de donn\'{e}es} doit se faire de manière complète, c'est à dire sur toutes les entrées correspondantes dans chacune des bases concernées. Par exemple, la transformation d'un fichier\index{Fichier}, régulier, audio en fichier\index{Fichier} texte, doit non seulement mettre à jour les informations dans la table \enquote{AnyFile} mais également la ligne correspondant au fichier\index{Fichier} dans la table Audio.
+Pour ces trois cas, la modification\index{Modification} sur la base de donnée\index{Base de donn\'{e}es} doit se faire de manière complète, c'est à dire sur toutes les entrées correspondantes dans chacune des bases concernées. Par exemple, la transformation d'un fichier\index{Fichier} de type texte en fichier\index{Fichier} autre doit impliquer la suppression du contenu de ce fichier dans la base d'indexation.
 
 Nous avons décidé de pouvoir insérer dans cette base de données\index{Base de donn\'{e}es} le maximum d'informations sur les \gls{fichier}\index{Fichier} afin que la recherche utilisateur\index{Utilisateur} puisse être la plus sélective possible. Un schéma de la base de donnée\index{Base de donn\'{e}es} est disponible en annexe p.~\pageref{bdd}, dans lequel on peut voir les informations stockées.
 
@@ -271,6 +271,8 @@ Afin de fonctionner correctement sous toutes les architectures que nous visons, 
 Il doit pouvoir gérer les cas de déconnexion (brutales ou non), en se remémorant de toutes les informations à envoyer.\\
 Il doit pouvoir gérer les mauvaises requêtes utilisateur\index{Utilisateur} (non conforme à la \gls{dtd}\index{DTD}). Toutes les requêtes crées par le moteur d'indexation\index{Moteur d'indexation} doivent être conforment à la \gls{dtd}\index{DTD}.
 
+Un diagramme de classes du moteur d'indexation est fourni p.~\pageref{diagramme_classes_mi}.
+
 \section{Au niveau du moteur de recherche}
 Le moteur de recherche\index{Moteur de recherche} ne doit pas s'arrêter brutalement. Toutes les composants de l'interface graphique doivent s'afficher correctement et cela à tout moment (notamment lors de l'affichage des résultats).\\
 Il doit pouvoir gérer les mauvaises requêtes utilisateur\index{Utilisateur} et les réponses des la base d'indexation\index{Base d'indexation} mal formées (non conforme à la \gls{dtd}\index{DTD}). Toutes les requêtes crées par le moteur de recherche\index{Moteur de recherche} doivent être conforment à la \gls{dtd}\index{DTD}.
@@ -278,12 +280,16 @@ Il doit pouvoir gérer les mauvaises requêtes utilisateur\index{Utilisateur} et
 Les coupures de connexions avec la base d'indexation\index{Base d'indexation} doivent être gérées de manière correcte. L'utilisateur\index{Utilisateur} doit être averti de la coupure de connexion et le choix doit lui être laissé d'arrêter ou non la recherche (qui reste en attente de connexion jusqu'à nouvelle connexion).\\
 En cas de problème de connexion il faut empêcher l'utilisateur\index{Utilisateur} de faire une nouvelle recherche afin de ne pas bloquer toute l'application et à prendre de l'espace mémoire inutilement.
 
+Un diagramme de classes du moteur de recherche est fourni p.~\pageref{diagramme_classes_mr}.
+
 \section{Au niveau de la base d'indexation}
 La base d'indexation\index{Base d'indexation} ne doit pas recréer la base de données\index{Base de donn\'{e}es} à chaque lancement.\\
-Le base d'indexation\index{Base d'indexation} ne doit en aucun cas se déconnecter sans avoir répondu à toutes les requêtes qu'elle a reçu.\\
-Il doit pouvoir gérer les requêtes des moteur de recherche\index{Moteur de recherche} et d'indexation\index{Moteur d'indexation} ne respectant pas la \gls{dtd}\index{DTD}. Toutes les requêtes crées par le moteur de recherche\index{Moteur de recherche} doivent être conforment à la \gls{dtd}\index{DTD}.
+La base d'indexation\index{Base d'indexation} ne doit en aucun cas se déconnecter sans avoir répondu à toutes les requêtes qu'elle a reçu.\\
+Elle doit pouvoir gérer les requêtes des moteur de recherche\index{Moteur de recherche} et d'indexation\index{Moteur d'indexation} ne respectant pas la \gls{dtd}\index{DTD}. Toutes les requêtes crées par le moteur de recherche\index{Moteur de recherche} doivent être conforment à la \gls{dtd}\index{DTD}.
 
 En cas de coupure de connexion avec un (ou plusieurs) des moteurs, toutes les réponses à envoyer doivent être stockées pendant une certaine durée dans l'attente que la connexion se refasse.
+
+Un diagramme de classes de la base d'indexation est fourni p.~\pageref{diagramme_classes_bi}.
 
 \chapter{Annexes}
 
@@ -402,9 +408,9 @@ En cas de coupure de connexion avec un (ou plusieurs) des moteurs, toutes les r�
 
 \section{Moteur d'indexation}
 
-\subsection{Diagramme de classes}\label{diagramme_classes_daemon}
+\subsection{Diagramme de classes}\label{diagramme_classes_mi}
 \begin{center}
-\includegraphics[scale=0.4]{"images/diagramme_classes_daemon"}
+\includegraphics[scale=0.4]{"images/diagramme_classes_mi"}
 \captionof{figure}{Diagramme de classes du moteur d'indexation}
 \end{center}
 
@@ -430,9 +436,9 @@ En cas de coupure de connexion avec un (ou plusieurs) des moteurs, toutes les r�
 \captionof{figure}{Schéma de la base de données}
 \end{center}
 
-\subsection{Diagramme de classes}\label{diagramme_classes_bdd}
+\subsection{Diagramme de classes}\label{diagramme_classes_bi}
 \begin{center}
-\includegraphics[scale=0.4]{"images/diagramme_classes_bdd"}
+\includegraphics[scale=0.4]{"images/diagramme_classes_bi"}
 \captionof{figure}{Diagramme de classes de la base d'indexation}
 \end{center}
 
