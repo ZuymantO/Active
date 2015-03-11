@@ -8,3 +8,8 @@ Le plan de tests est dans le fichier Plan_de_test-Active.pdf
 
 Dans ce projet chacune des 3 parties principales (mr, bi, daemon) doivent pouvoir se lancer.
 Le module mr et le module daemon necessitent que la partie bi soit lancee pour fonctionner correctement.
+
+
+Depends:
+
+tinyxml

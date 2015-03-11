@@ -27,7 +27,7 @@
 
 class ANotifyEvent
 {
-  
+
  private:
   //  ANotifyWatch* m_pANWatch;       // Contient le FD de inotify sous linux kq de kqueu sous unix
   ANOTIFY_EVENT*  m_pEvent;
@@ -37,11 +37,11 @@ class ANotifyEvent
   //ANotifyWatch* m_pWatch;
   std::string m_basename; //Nom du repertoire parent
   std::string m_filename; //Nom du fichier
-  
+
  public:
 
- ANotifyEvent() : m_evtDescr((FD)0), m_pEvent(NULL), m_name(""), m_basename(""), m_filename(""){ }
-  
+ ANotifyEvent() : m_pEvent(NULL), m_evtDescr((FD)0), m_name(""), m_filename(""), m_basename(""){ }
+
  ANotifyEvent(ANOTIFY_EVENT* ipEvt, ANMask imask, std::string basename = "")
    : m_pEvent(ipEvt),  m_name(""), m_basename(basename), m_filename(""), m_evtDescr((FD)-1), m_mask(imask){
     m_pEvent = ipEvt;
@@ -67,28 +67,28 @@ class ANotifyEvent
       }
 #else
       /* TODO: Verifier l'affectation */
-      m_basename = name;
+      m_basename = basename;
       /* TODO: ne manque-t-il pas la valeur de m_name ? */
       m_evtDescr =  (FD) ipEvt->ident;
 #endif // __ENVIREONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
     }
   }
-  
+
   ~ANotifyEvent() {}
-  
+
   FD getDescriptor() const {
     return  m_evtDescr;
   }
-  
+
   inline ANOTIFY_EVENT* getEvent() const{
     return m_pEvent ;
   }
-  
+
   inline ANMASK getMask() const{
     return m_mask;
   }
-  
-  
+
+
   inline ANMASK getEventMask() const{
 #ifndef __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
     return (ANMASK) m_pEvent->mask;
@@ -96,11 +96,11 @@ class ANotifyEvent
     return (ANMASK) m_pEvent->fflags;
 #endif
   }
-  
+
   inline  void setMask(ANMask imask){
     m_mask = imask;
   }
-  
+
   inline ANEVENTID getIdent() const{
 #ifndef __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
     //return m_pEvent->ident;
@@ -109,7 +109,7 @@ class ANotifyEvent
     return (ANEVENTID)0;
 #endif
   }
-  
+
   inline ANFILTER getFilter() const{
 #ifndef __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
     //return m_pEvent->filter;
@@ -118,7 +118,7 @@ class ANotifyEvent
     return (ANFILTER)0;
 #endif
   }
-  
+
   inline ANMask getFlags() const{
 #ifndef __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
     return (ANMASK) 0;
@@ -126,7 +126,7 @@ class ANotifyEvent
     return (ANMASK) m_pEvent->flags;
 #endif
   }
-  
+
   inline ANMask getFFlags() const{
 #ifndef __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
     return (ANMASK)0;
@@ -134,7 +134,7 @@ class ANotifyEvent
     return (ANMASK) m_pEvent->fflags;
 #endif
   }
-  
+
   inline ANDATA getData() const{
 #ifndef __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
     return (ANDATA) 0;
@@ -142,7 +142,7 @@ class ANotifyEvent
     return (ANDATA) m_pEvent->data;
 #endif
   }
-  
+
   inline void* getUData() const{
 #ifndef __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
     return NULL;
@@ -162,7 +162,7 @@ class ANotifyEvent
     return (ANMask)0;
 #endif
   }
-  
+
   inline int getLength() const{
 #ifndef __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
     return (int) m_name.length();
@@ -170,7 +170,7 @@ class ANotifyEvent
     return (ANMask)0;
 #endif
   }
-  
+
   inline const std::string& getName() const {
     return m_name;
   }
@@ -194,7 +194,7 @@ class ANotifyEvent
     ANotifyMask::dumpTypes(m_pEvent->fflags, &orStr);
 #endif
   }
-  
+
 };
 
 #endif /* defined(__ANotify__ANotifyEvent__) */
